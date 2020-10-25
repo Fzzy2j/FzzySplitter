@@ -72,7 +72,6 @@ namespace LiveSplit.UI.Components
             this.tasTools.TabIndex = 1;
             this.tasTools.Text = "Enable TAS Tools";
             this.tasTools.UseVisualStyleBackColor = true;
-            this.tasTools.Visible = false;
             // 
             // autoLoader
             // 
@@ -84,8 +83,7 @@ namespace LiveSplit.UI.Components
             this.autoLoader.Name = "autoLoader";
             this.autoLoader.Size = new System.Drawing.Size(121, 21);
             this.autoLoader.TabIndex = 4;
-            this.autoLoader.Text = "None";
-            this.autoLoader.Visible = false;
+            this.autoLoader.Text = "Dont Autoload";
             // 
             // treeContextMenu
             // 
@@ -232,7 +230,6 @@ namespace LiveSplit.UI.Components
             this.installMenuModButton.TabIndex = 18;
             this.installMenuModButton.Text = "Install Menu Mod";
             this.installMenuModButton.UseVisualStyleBackColor = true;
-            this.installMenuModButton.Visible = false;
             this.installMenuModButton.Click += new System.EventHandler(this.installMenuModButton_Click);
             // 
             // installMenuModProgress
