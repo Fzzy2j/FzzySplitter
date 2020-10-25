@@ -22,7 +22,7 @@ namespace LiveSplit.UI.Components
     class FzzyComponent : LogicComponent
     {
 
-        public const string MENU_MOD_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzyLoader/releases/download/1.0/Enhanced.Menu.exe";
+        public const string MENU_MOD_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/Enhanced.Menu.exe";
 
         public FzzySettings Settings { get; set; }
 
