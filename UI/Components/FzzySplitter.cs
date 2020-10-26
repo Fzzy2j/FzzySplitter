@@ -105,7 +105,7 @@ namespace FzzyTools.UI.Components
             if (settings["enc3pause"])
             {
                 if (fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 &&
-                    fzzy.values["level"].Current == "sp_hub_timeshift" && fzzy.values["z"].Current > 4000) enc3IlPause = true;
+                    fzzy.values["level"].Current == "sp_hub_timeshift" && fzzy.values["y"].Current > 4000) enc3IlPause = true;
                 if (enc3IlPause) return true;
             }
             return isLoading;

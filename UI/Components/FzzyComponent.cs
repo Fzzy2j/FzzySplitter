@@ -58,16 +58,18 @@ namespace LiveSplit.UI.Components
             aslSettings.AddSetting("endSplit", true, "Split at the end of escape (end of run)", null);
             aslSettings.AddSetting("removeLoads", true, "Remove Loads", null);
 
-            aslSettings.AddSetting("btSplits", false, "BT-7274", null);
-            aslSettings.AddSetting("bnrSplits", false, "Blood and Rust", null);
-            aslSettings.AddSetting("ita3Splits", false, "Into the Abyss 3", null);
-            aslSettings.AddSetting("enc1Splits", false, "Effect and Cause 1", null);
-            aslSettings.AddSetting("enc2Splits", false, "Effect and Cause 2", null);
-            aslSettings.AddSetting("b2Splits", false, "The Beacon 2", null);
-            aslSettings.AddSetting("b3Splits", false, "The Beacon 3", null);
-            aslSettings.AddSetting("tbfSplits", false, "Trial by Fire", null);
-            aslSettings.AddSetting("arkSplits", false, "The Ark", null);
-            aslSettings.AddSetting("foldSplits", false, "The Fold Weapon", null);
+            aslSettings.AddSetting("subSplits", false, "Subsplits", null);
+
+            aslSettings.AddSetting("btSplits", true, "BT-7274", "subSplits");
+            aslSettings.AddSetting("bnrSplits", true, "Blood and Rust", "subSplits");
+            aslSettings.AddSetting("ita3Splits", true, "Into the Abyss 3", "subSplits");
+            aslSettings.AddSetting("enc1Splits", true, "Effect and Cause 1", "subSplits");
+            aslSettings.AddSetting("enc2Splits", true, "Effect and Cause 2", "subSplits");
+            aslSettings.AddSetting("b2Splits", true, "The Beacon 2", "subSplits");
+            aslSettings.AddSetting("b3Splits", true, "The Beacon 3", "subSplits");
+            aslSettings.AddSetting("tbfSplits", true, "Trial by Fire", "subSplits");
+            aslSettings.AddSetting("arkSplits", true, "The Ark", "subSplits");
+            aslSettings.AddSetting("foldSplits", true, "The Fold Weapon", "subSplits");
 
             aslSettings.AddSetting("ilSettings", false, "IL Settings", null);
             aslSettings.AddSetting("BnRpause", false, "Blood and Rust IL pause", "ilSettings");

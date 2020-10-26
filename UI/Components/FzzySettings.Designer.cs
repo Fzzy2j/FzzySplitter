@@ -224,7 +224,7 @@ namespace LiveSplit.UI.Components
             // 
             // installMenuModButton
             // 
-            this.installMenuModButton.Location = new System.Drawing.Point(333, 10);
+            this.installMenuModButton.Location = new System.Drawing.Point(322, 10);
             this.installMenuModButton.Name = "installMenuModButton";
             this.installMenuModButton.Size = new System.Drawing.Size(133, 23);
             this.installMenuModButton.TabIndex = 18;
@@ -234,7 +234,7 @@ namespace LiveSplit.UI.Components
             // 
             // installMenuModProgress
             // 
-            this.installMenuModProgress.Location = new System.Drawing.Point(194, 10);
+            this.installMenuModProgress.Location = new System.Drawing.Point(183, 10);
             this.installMenuModProgress.Name = "installMenuModProgress";
             this.installMenuModProgress.Size = new System.Drawing.Size(133, 23);
             this.installMenuModProgress.TabIndex = 19;
@@ -249,7 +249,7 @@ namespace LiveSplit.UI.Components
             this.settingsTree.Location = new System.Drawing.Point(10, 69);
             this.settingsTree.Name = "settingsTree";
             this.settingsTree.ShowNodeToolTips = true;
-            this.settingsTree.Size = new System.Drawing.Size(456, 470);
+            this.settingsTree.Size = new System.Drawing.Size(445, 411);
             this.settingsTree.TabIndex = 15;
             this.settingsTree.BeforeCheck += new System.Windows.Forms.TreeViewCancelEventHandler(this.settingsTree_BeforeCheck);
             this.settingsTree.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.settingsTree_AfterCheck);
@@ -266,7 +266,7 @@ namespace LiveSplit.UI.Components
             this.Controls.Add(this.tasTools);
             this.Name = "FzzySettings";
             this.Padding = new System.Windows.Forms.Padding(7);
-            this.Size = new System.Drawing.Size(476, 549);
+            this.Size = new System.Drawing.Size(465, 490);
             this.Load += new System.EventHandler(this.FzzySettings_Load);
             this.treeContextMenu.ResumeLayout(false);
             this.treeContextMenu2.ResumeLayout(false);
