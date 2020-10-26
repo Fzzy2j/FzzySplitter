@@ -268,18 +268,6 @@ namespace FzzyTools.UI.Components
             if (fzzy.values["level"].Current == "sp_timeshift_spoke02" && settings["enc2Splits"])
             {
 
-                // Dialogue
-                if (X > 8755 && X < 9655 && Y < -4528 && Z > 5000)
-                {
-                    if (!enc2Dialogue)
-                    {
-                        splitTimer = 3000;
-                        enc2Dialogue = true;
-                    }
-                }
-                else if (isLoading)
-                    enc2Dialogue = false;
-
                 // Button 2
                 if (DistanceSquared(2805, -3363) < Math.Pow(200, 2) && fzzy.values["enc2button1"].Old + 8 == fzzy.values["enc2button1"].Current && !isLoading)
                 {
