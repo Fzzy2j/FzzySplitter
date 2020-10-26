@@ -26,7 +26,7 @@ namespace LiveSplit.UI.Components
             InitializeComponent();
 
             TASToolsEnabled = false;
-            AutoLoader = "None";
+            AutoLoader = "Dont Autosplit";
 
             _state = new Dictionary<string, bool>();
         }

@@ -145,8 +145,6 @@ namespace LiveSplit.UI.Components
 
         private void UpdateScript()
         {
-            state.CurrentTimingMethod = TimingMethod.GameTime;
-
             process = Process.GetProcessesByName("Titanfall2").OrderByDescending(x => x.StartTime).FirstOrDefault(x => !x.HasExited);
             if (process == null) return;
 
