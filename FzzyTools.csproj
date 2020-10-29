@@ -72,7 +72,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="UI\Components\Keyboard.cs" />
-    <Compile Include="UI\Components\SpeedmodAutoLoader.cs" />
+    <Compile Include="UI\Components\Speedmod.cs" />
     <Compile Include="UI\Components\FzzySplitter.cs" />
     <Compile Include="UI\Components\ZLurchMacro.cs" />
   </ItemGroup>

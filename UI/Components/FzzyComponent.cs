@@ -3,6 +3,7 @@ using LiveSplit.ASL;
 using LiveSplit.ComponentUtil;
 using LiveSplit.Model;
 using LiveSplit.Options;
+using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace LiveSplit.UI.Components
         public TimerModel timer;
 
         private NCSAutoLoader _ncsAutoLoader;
-        private SpeedmodAutoLoader _speedmodAutoLoader;
+        private Speedmod _speedmod;
 
         private FzzySplitter _splitter;
 
@@ -47,8 +48,18 @@ namespace LiveSplit.UI.Components
 
         private ASLSettings aslSettings;
 
+        private string cfg;
+
+        public bool isLoading;
+        public bool wasLoading;
+
         public FzzyComponent(LiveSplitState state)
         {
+            this.cfg = Path.Combine(GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
+
+            //string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
+            //File.AppendAllText(settingscfg, "\nbind \"F12\" \"exec autosplitter.cfg\"");
+
             Settings = new FzzySettings();
             this.state = state;
             aslSettings = new ASLSettings();
@@ -95,6 +106,8 @@ namespace LiveSplit.UI.Components
             values["viper"] = new MemoryValue("int", new DeepPointer("client.dll", 0xC0916C));
             values["embarkCount"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E18D8));
 
+            values["f12Bind"] = new MemoryValue("string30", new DeepPointer("engine.dll", 0x1396CC30, new int[] { 0x0 }));
+
             values["x"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2172FF8, new int[] { 0xDEC }));
             values["y"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2173B48, new int[] { 0x2A0 }));
             values["z"] = new MemoryValue("float", new DeepPointer("client.dll", 0x216F9C0, new int[] { 0xF4 }));
@@ -128,7 +141,7 @@ namespace LiveSplit.UI.Components
             values["velZ"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C34, new int[] { }));
 
             _ncsAutoLoader = new NCSAutoLoader(this);
-            _speedmodAutoLoader = new SpeedmodAutoLoader(this);
+            _speedmod = new Speedmod(this);
 
             _autoStrafer = new AutoStrafer(this);
             _zLurchMacro = new ZLurchMacro(this);
@@ -149,6 +162,9 @@ namespace LiveSplit.UI.Components
             if (process == null) return;
 
             if (timer == null) timer = new TimerModel() { CurrentState = state };
+
+            wasLoading = isLoading;
+            isLoading = values["clFrames"].Current <= 0 || values["thing"].Current == 0;
 
             try
             {
@@ -175,7 +191,7 @@ namespace LiveSplit.UI.Components
 
             try
             {
-                if (Settings.AutoLoader == "Autoload Speedmod") _speedmodAutoLoader.Tick();
+                _speedmod.Tick();
             }
             catch (Exception e)
             {
@@ -197,6 +213,66 @@ namespace LiveSplit.UI.Components
             }
         }
 
+        public void RunCommand(string cmd)
+        {
+            File.WriteAllText(cfg, cmd);
+            Log.Info("running command: " + cmd);
+            board.Send(Keyboard.ScanCodeShort.F12);
+        }
+
+        public static string GetTitanfallInstallDirectory()
+        {
+
+            string titanfallInstallDirectory = "";
+
+            string originInstall = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Origin Games\\Installation Folders", "1039093", null);
+            if (originInstall == null)
+            {
+                string steamInstall = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", null);
+                if (steamInstall == null)
+                {
+                    return null;
+                }
+
+                string steamTitanfallDefault = Path.Combine(steamInstall.Replace("/", "\\"), "steamapps\\common\\Titanfall2");
+                if (Directory.Exists(steamTitanfallDefault))
+                {
+                    titanfallInstallDirectory = steamTitanfallDefault;
+                }
+                else
+                {
+                    string config = Path.Combine(steamInstall, "config\\config.vdf");
+                    string[] lines = File.ReadAllLines(config);
+                    foreach (string line in lines)
+                    {
+                        if (line.Contains("BaseInstallFolder"))
+                        {
+                            int lastQuote = line.LastIndexOf('"');
+                            int secondToLastQuote = line.Substring(0, lastQuote).LastIndexOf('"');
+                            string gameDirectory = line.Substring(secondToLastQuote + 1, lastQuote - secondToLastQuote - 1);
+                            string externalTitanfallDirectory = Path.Combine(gameDirectory, "Titanfall2");
+                            if (Directory.Exists(externalTitanfallDirectory))
+                            {
+                                titanfallInstallDirectory = externalTitanfallDirectory;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                titanfallInstallDirectory = originInstall;
+            }
+            if (titanfallInstallDirectory.Length == 0) return null;
+
+            return titanfallInstallDirectory;
+        }
+
+        public override void Dispose()
+        {
+            updateTimer.Dispose();
+        }
+
         public override string ComponentName => "FzzyTools";
 
         public override XmlNode GetSettings(XmlDocument document)
@@ -215,10 +291,6 @@ namespace LiveSplit.UI.Components
         }
 
         public override void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
-        {
-        }
-
-        public override void Dispose()
         {
         }
     }

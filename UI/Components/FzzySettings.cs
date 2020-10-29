@@ -335,47 +335,7 @@ namespace LiveSplit.UI.Components
                 return;
             }
 
-            string titanfallInstallDirectory = "";
-
-            string originInstall = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Origin Games\\Installation Folders", "1039093", null);
-            if (originInstall == null)
-            {
-                string steamInstall = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", null);
-                if (steamInstall == null)
-                {
-                    MessageBox.Show("Couldn't find Titanfall 2 install location!");
-                    return;
-                }
-
-                string steamTitanfallDefault = Path.Combine(steamInstall.Replace("/", "\\"), "steamapps\\common\\Titanfall2");
-                if (Directory.Exists(steamTitanfallDefault))
-                {
-                    titanfallInstallDirectory = steamTitanfallDefault;
-                }
-                else
-                {
-                    string config = Path.Combine(steamInstall, "config\\config.vdf");
-                    string[] lines = File.ReadAllLines(config);
-                    foreach (string line in lines)
-                    {
-                        if (line.Contains("BaseInstallFolder"))
-                        {
-                            int lastQuote = line.LastIndexOf('"');
-                            int secondToLastQuote = line.Substring(0, lastQuote).LastIndexOf('"');
-                            string gameDirectory = line.Substring(secondToLastQuote + 1, lastQuote - secondToLastQuote - 1);
-                            string externalTitanfallDirectory = Path.Combine(gameDirectory, "Titanfall2");
-                            if (Directory.Exists(externalTitanfallDirectory))
-                            {
-                                titanfallInstallDirectory = externalTitanfallDirectory;
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                titanfallInstallDirectory = originInstall;
-            }
+            string titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory();
 
             if (titanfallInstallDirectory.Length == 0)
             {

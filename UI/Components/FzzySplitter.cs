@@ -1,5 +1,6 @@
 ﻿using LiveSplit.ASL;
 using LiveSplit.ComponentUtil;
+using LiveSplit.Options;
 using LiveSplit.UI.Components;
 using System;
 using System.Collections.Generic;
@@ -19,8 +20,6 @@ namespace FzzyTools.UI.Components
         {
             this.fzzy = fzzy;
         }
-
-        private bool isLoading;
         private bool bnrIlPause;
         private bool enc3IlPause;
 
@@ -74,7 +73,7 @@ namespace FzzyTools.UI.Components
 
         private bool Reset(ASLSettingsReader settings)
         {
-            if (settings["loadReset"] && isLoadingOld && !isLoading)
+            if (settings["loadReset"] && fzzy.wasLoading && !fzzy.isLoading)
             {
                 return true;
             }
@@ -90,7 +89,7 @@ namespace FzzyTools.UI.Components
                 else
                     return false;
             }
-            if (isLoading)
+            if (fzzy.isLoading)
             {
                 bnrIlPause = false;
                 enc3IlPause = false;
@@ -108,7 +107,7 @@ namespace FzzyTools.UI.Components
                     fzzy.values["level"].Current == "sp_hub_timeshift" && fzzy.values["y"].Current > 4000) enc3IlPause = true;
                 if (enc3IlPause) return true;
             }
-            return isLoading;
+            return fzzy.isLoading;
         }
 
         private void RemoveAltTabPause()
@@ -135,7 +134,7 @@ namespace FzzyTools.UI.Components
 
         private void Update(ASLSettingsReader settings)
         {
-            if (isLoading)
+            if (fzzy.isLoading)
             {
                 splitTimer = 0;
 
@@ -148,12 +147,8 @@ namespace FzzyTools.UI.Components
                 arkElevatorSplit = false;
                 arkKnifeSplit = false;
             }
-
-            isLoadingOld = isLoading;
-            isLoading = fzzy.values["clFrames"].Current <= 0 || fzzy.values["thing"].Current == 0;
         }
 
-        private bool isLoadingOld;
         private int splitTimerTimestamp;
         private int splitTimer;
         private int b2buttonTimestamp;
@@ -188,7 +183,7 @@ namespace FzzyTools.UI.Components
             }
 
             // End of game
-            if (fzzy.values["level"].Current == "sp_skyway_v1" && X < -10000 && Z > 0 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 && settings["endSplit"])
+            if (fzzy.values["level"].Current == "sp_skyway_v1" && X < -10000 && Y > 0 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 && settings["endSplit"])
             {
                 return true;
             }
@@ -221,20 +216,20 @@ namespace FzzyTools.UI.Components
             {
 
                 // Button 1
-                if (fzzy.values["bnrbutton1"].Old == 0 && fzzy.values["bnrbutton1"].Current > 0 && !isLoading)
+                if (fzzy.values["bnrbutton1"].Old == 0 && fzzy.values["bnrbutton1"].Current > 0 && !fzzy.isLoading)
                 {
                     return true;
                 }
 
                 // Door trigger
-                if (Y <= -226 && X <= -827 && Z > 450 && !bnrdoorsplit && !isLoading)
+                if (Y <= -226 && X <= -827 && Z > 450 && !bnrdoorsplit && !fzzy.isLoading)
                 {
                     bnrdoorsplit = true;
                     return true;
                 }
 
                 // Button 2
-                if (fzzy.values["bnrbutton2"].Old + 8 == fzzy.values["bnrbutton2"].Current && !isLoading)
+                if (fzzy.values["bnrbutton2"].Old + 8 == fzzy.values["bnrbutton2"].Current && !fzzy.isLoading)
                 {
                     return true;
                 }
@@ -269,19 +264,19 @@ namespace FzzyTools.UI.Components
             {
 
                 // Button 2
-                if (DistanceSquared(2805, -3363) < Math.Pow(200, 2) && fzzy.values["enc2button1"].Old + 8 == fzzy.values["enc2button1"].Current && !isLoading)
+                if (DistanceSquared(2805, -3363) < Math.Pow(200, 2) && fzzy.values["enc2button1"].Old + 8 == fzzy.values["enc2button1"].Current && !fzzy.isLoading)
                 {
                     return true;
                 }
 
                 // Button 3
-                if (DistanceSquared(6271, -3552) < Math.Pow(200, 2) && fzzy.values["enc2button2"].Old + 8 == fzzy.values["enc2button2"].Current && !isLoading)
+                if (DistanceSquared(6271, -3552) < Math.Pow(200, 2) && fzzy.values["enc2button2"].Old + 8 == fzzy.values["enc2button2"].Current && !fzzy.isLoading)
                 {
                     return true;
                 }
 
                 // Hellroom
-                if (DistanceSquared(10708, -2263) < 15000 && !hellroomsplit && !isLoading)
+                if (DistanceSquared(10708, -2263) < 15000 && !hellroomsplit && !fzzy.isLoading)
                 {
                     hellroomsplit = true;
                     return true;
@@ -296,7 +291,7 @@ namespace FzzyTools.UI.Components
                 var warpX = fzzy.values["x"].Old - X;
                 var warpY = fzzy.values["y"].Old - Y;
                 var warpDistanceSquared = warpX * warpX + warpY * warpY;
-                if (DistanceSquared(4019, 4233) < 500 && warpDistanceSquared > 20000 && !isLoadingOld)
+                if (DistanceSquared(4019, 4233) < 500 && warpDistanceSquared > 20000 && !fzzy.wasLoading)
                 {
                     return true;
                 }

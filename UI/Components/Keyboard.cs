@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace LiveSplit.UI.Components
 {
@@ -13,13 +14,16 @@ namespace LiveSplit.UI.Components
 
         public void Press(ScanCodeShort a)
         {
-            INPUT[] Inputs = new INPUT[1];
-            INPUT Input = new INPUT();
-            Input.type = 1; // 1 = Keyboard Input
-            Input.U.ki.wScan = a;
-            Input.U.ki.dwFlags = KEYEVENTF.SCANCODE;
-            Inputs[0] = Input;
-            SendInput(1, Inputs, INPUT.Size);
+            if (GetWindowInFocus().StartsWith("Titanfall 2"))
+            {
+                INPUT[] Inputs = new INPUT[1];
+                INPUT Input = new INPUT();
+                Input.type = 1; // 1 = Keyboard Input
+                Input.U.ki.wScan = a;
+                Input.U.ki.dwFlags = KEYEVENTF.SCANCODE;
+                Inputs[0] = Input;
+                SendInput(1, Inputs, INPUT.Size);
+            }
         }
 
         public void Unpress(ScanCodeShort a)
@@ -33,6 +37,26 @@ namespace LiveSplit.UI.Components
             Inputs[0] = Input;
             SendInput(1, Inputs, INPUT.Size);
         }
+
+        public string GetWindowInFocus()
+        {
+            const int nChars = 256;
+            StringBuilder Buff = new StringBuilder(nChars);
+            IntPtr handle = GetForegroundWindow();
+
+            if (GetWindowText(handle, Buff, nChars) > 0)
+            {
+                return Buff.ToString();
+            }
+            return "";
+        }
+
+
+        [DllImport("user32.dll")]
+        static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
 
         /// <summary>
         /// Declaration of external SendInput method

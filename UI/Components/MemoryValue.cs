@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using LiveSplit.ComponentUtil;
 using LiveSplit.UI.Components;
 
@@ -37,6 +38,10 @@ namespace FzzyTools.UI.Components
             if (value is byte[] b)
             {
                 FzzyComponent.process.WriteBytes(ptr, b);
+            }
+            if (value is string s)
+            {
+                FzzyComponent.process.WriteBytes(ptr, Encoding.ASCII.GetBytes(s));
             }
         }
 
