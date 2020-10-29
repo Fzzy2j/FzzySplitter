@@ -55,7 +55,7 @@ namespace LiveSplit.UI.Components
 
         public FzzyComponent(LiveSplitState state)
         {
-            this.cfg = Path.Combine(GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
+            //this.cfg = Path.Combine(GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
 
             //string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
             //File.AppendAllText(settingscfg, "\nbind \"F12\" \"exec autosplitter.cfg\"");
@@ -225,7 +225,7 @@ namespace LiveSplit.UI.Components
 
             string titanfallInstallDirectory = "";
 
-            string originInstall = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Origin Games\\Installation Folders", "1039093", null);
+            string originInstall = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Respawn\\Titanfall2", "Install Dir", null);
             if (originInstall == null)
             {
                 string steamInstall = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", null);

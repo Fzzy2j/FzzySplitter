@@ -3,8 +3,10 @@ using LiveSplit.Options;
 using LiveSplit.UI.Components;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,6 +14,12 @@ namespace FzzyTools.UI.Components
 {
     class Speedmod
     {
+
+        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        public static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
+        
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out UIntPtr lpNumberOfBytesWritten);
 
         private FzzyComponent fzzy;
 
@@ -51,8 +59,10 @@ namespace FzzyTools.UI.Components
                         fzzy.values["maxHealth"].Current = 100;
                         RestoreWallFriction();
 
+                        
                         //server.dll+43373A 89 3B
                         //offset 110
+                        //move [rbx],edi
 
                         fzzy.RunCommand("jump_keyboardgrace_max 0.7\nslide_step_velocity_reduction 10\nwallrun_repelEnable 1\nslide_boost_cooldown 2");
                     }

@@ -10,6 +10,9 @@ using System.Net;
 using System.ComponentModel;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
+using FzzyTools.UI.Components;
+using LiveSplit.Options;
+using LiveSplit.ComponentUtil;
 
 namespace LiveSplit.UI.Components
 {
@@ -331,7 +334,29 @@ namespace LiveSplit.UI.Components
         {
             if (FzzyComponent.process != null)
             {
-                MessageBox.Show("Please close Titanfall 2 to install enhanced menu");
+
+                Process p = FzzyComponent.process;
+                foreach (ProcessModule m in p.Modules)
+                {
+                    if (m.ModuleName == "server.dll")
+                    {
+                        
+                        //var alloc = p.AllocateMemory(2048);
+                        var code = new byte[] { 0xFF, 0x90, 0xF0, 0x06, 0x00, 0x00, 0x83, 0xBB, 0x10, 0x01, 0x00, 0x00, 0x03, 0x0F, 0x84, 0x29, 0x37, 0x44, 0x00, 0xE9, 0x22, 0x37, 0x44, 0x00 };
+                        var alloc = Speedmod.VirtualAllocEx(p.Handle, m.BaseAddress + 0x433734, (uint)code.Length, (uint)MemPageState.MEM_COMMIT, (uint)MemPageProtect.PAGE_EXECUTE_READWRITE);
+                        var complete = p.WriteBytes(alloc, code);
+                        //p.WriteBytes(m.BaseAddress + 0x433734, new byte[] { });
+                        //p.WriteJumpInstruction(m.BaseAddress + 0x433734, alloc);
+                        
+                        //p.WriteBytes(m.BaseAddress + 0x433739, new byte[] { 0x90 });
+
+                        Log.Info(alloc.ToString("X8"));
+
+
+                    }
+                }
+                
+                //MessageBox.Show("Please close Titanfall 2 to install enhanced menu");
                 return;
             }
 
