@@ -57,8 +57,8 @@ namespace LiveSplit.UI.Components
         {
             this.cfg = Path.Combine(GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
 
-            //string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
-            //File.AppendAllText(settingscfg, "\nbind \"F12\" \"exec autosplitter.cfg\"");
+            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
+            File.AppendAllText(settingscfg, "\nbind \"F12\" \"exec autosplitter.cfg\"");
 
             Settings = new FzzySettings();
             this.state = state;
