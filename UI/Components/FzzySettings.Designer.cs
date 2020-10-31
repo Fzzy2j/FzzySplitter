@@ -78,7 +78,8 @@ namespace LiveSplit.UI.Components
             this.autoLoader.FormattingEnabled = true;
             this.autoLoader.Items.AddRange(new object[] {
             "Dont Autoload",
-            "Autoload NCS"});
+            "Autoload NCS",
+            "Autoload Speedmod"});
             this.autoLoader.Location = new System.Drawing.Point(10, 42);
             this.autoLoader.Name = "autoLoader";
             this.autoLoader.Size = new System.Drawing.Size(121, 21);
