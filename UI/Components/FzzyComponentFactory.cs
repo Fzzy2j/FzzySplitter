@@ -3,6 +3,7 @@ using LiveSplit.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,11 +22,11 @@ namespace LiveSplit.UI.Components
 
         public string UpdateName => ComponentName;
 
-        public string XMLURL => "https://raw.githubusercontent.com/Fzzy2j/FzzySplitter/master/updates.xml";
+        public string XMLURL => UpdateURL + "update.LiveSplit.Titanfall2.xml";
 
-        public string UpdateURL => "https://raw.githubusercontent.com/Fzzy2j/FzzySplitter/master/LiveSplit.Titanfall.dll";
+        public string UpdateURL => "https://raw.githubusercontent.com/Fzzy2j/FzzySplitter/master/";
 
-        public Version Version => Version.Parse("1.0");
+        public Version Version => Assembly.GetExecutingAssembly().GetName().Version;
 
         public IComponent Create(LiveSplitState state)
         {

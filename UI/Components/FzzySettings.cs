@@ -329,6 +329,7 @@ namespace LiveSplit.UI.Components
         }
 
         private string menumod = Path.Combine(Path.GetTempPath(), "menumod.exe");
+        private string saves = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installsaves.exe");
 
         private void installMenuModButton_Click(object sender, EventArgs e)
         {
@@ -353,6 +354,7 @@ namespace LiveSplit.UI.Components
                 if (settingscontent.Contains("\"load fastany" + i + "\"")) continue;
                 File.AppendAllText(settingscfg, "\nbind \"F" + i + "\" \"load fastany" + i + "\"");
             }
+            File.AppendAllText(settingscfg, "\nbind \"F12\" \"exec autosplitter.cfg\"");
 
             using (WebClient webClient = new WebClient())
             {
@@ -363,6 +365,22 @@ namespace LiveSplit.UI.Components
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(MenuModProgressChanged);
                 installMenuModProgress.Visible = true;
             }
+
+            using (WebClient webClient = new WebClient())
+            {
+                webClient.DownloadFileAsync(new Uri(FzzyComponent.SAVES_INSTALLER_LINK), saves);
+                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(SavesDownloadCompleted);
+            }
+        }
+
+        private void SavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                WorkingDirectory = Directory.GetParent(saves).FullName,
+                FileName = saves
+            };
+            Process.Start(startInfo);
         }
 
         private void MenuModProgressChanged(object sender, DownloadProgressChangedEventArgs e)

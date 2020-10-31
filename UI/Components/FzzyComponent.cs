@@ -24,6 +24,7 @@ namespace LiveSplit.UI.Components
     {
 
         public const string MENU_MOD_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/Enhanced.Menu.exe";
+        public const string SAVES_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installsaves.exe";
 
         public FzzySettings Settings { get; set; }
 
@@ -56,9 +57,6 @@ namespace LiveSplit.UI.Components
         public FzzyComponent(LiveSplitState state)
         {
             this.cfg = Path.Combine(GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
-
-            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
-            File.AppendAllText(settingscfg, "\nbind \"F12\" \"exec autosplitter.cfg\"");
 
             Settings = new FzzySettings();
             this.state = state;
