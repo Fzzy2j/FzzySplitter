@@ -1,0 +1,10 @@
+<updates>
+    <update version="1.0">
+        <files>
+            <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+        </files>
+        <changelog>
+            <change>start</change>
+        </changelog>
+    </update>
+</updates>
