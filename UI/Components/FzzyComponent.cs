@@ -55,7 +55,7 @@ namespace LiveSplit.UI.Components
 
         public FzzyComponent(LiveSplitState state)
         {
-            //this.cfg = Path.Combine(GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
+            this.cfg = Path.Combine(GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
 
             //string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
             //File.AppendAllText(settingscfg, "\nbind \"F12\" \"exec autosplitter.cfg\"");
@@ -139,6 +139,8 @@ namespace LiveSplit.UI.Components
             values["velX"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C2C, new int[] { }));
             values["velY"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C30, new int[] { }));
             values["velZ"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C34, new int[] { }));
+            values["speedmodLoading"] = new MemoryValue("bool", new DeepPointer("client.dll", 0x23E8738, new int[] { }));
+            values["speedmodLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x13977A70, new int[] { }));
 
             _ncsAutoLoader = new NCSAutoLoader(this);
             _speedmod = new Speedmod(this);
@@ -191,7 +193,7 @@ namespace LiveSplit.UI.Components
 
             try
             {
-                _speedmod.Tick();
+                //_speedmod.Tick();
             }
             catch (Exception e)
             {

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace FzzyTools.UI.Components
 
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
         public static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
-        
+
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out UIntPtr lpNumberOfBytesWritten);
 
@@ -37,7 +38,7 @@ namespace FzzyTools.UI.Components
 
         private void Load(string save)
         {
-            if (Environment.TickCount - loadTimestamp > 2000)
+            if (Environment.TickCount - loadTimestamp > 5000)
             {
                 loadTimestamp = Environment.TickCount;
                 Log.Info("Load into " + save);
@@ -45,24 +46,20 @@ namespace FzzyTools.UI.Components
             }
         }
 
+        private int loadingTimestamp = -1;
+
         public void Tick()
         {
             if (fzzy.Settings.AutoLoader != "Autoload Speedmod")
             {
-
                 if (!fzzy.isLoading)
                 {
                     if (fzzy.values["airAcceleration"].Current != 500f && fzzy.board.GetWindowInFocus().StartsWith("Titanfall 2"))
                     {
                         fzzy.values["airAcceleration"].Current = 500f;
                         fzzy.values["airSpeed"].Current = 60f;
-                        fzzy.values["maxHealth"].Current = 100;
                         RestoreWallFriction();
-
-                        
-                        //server.dll+43373A 89 3B
-                        //offset 110
-                        //move [rbx],edi
+                        MakeAlliesDeadable();
 
                         fzzy.RunCommand("jump_keyboardgrace_max 0.7\nslide_step_velocity_reduction 10\nwallrun_repelEnable 1\nslide_boost_cooldown 2");
                     }
@@ -70,19 +67,33 @@ namespace FzzyTools.UI.Components
             }
             else
             {
-
                 if (!fzzy.isLoading)
                 {
                     if (fzzy.values["airAcceleration"].Current != 10000f && fzzy.board.GetWindowInFocus().StartsWith("Titanfall 2"))
                     {
                         fzzy.values["airAcceleration"].Current = 10000f;
                         fzzy.values["airSpeed"].Current = 40f;
-                        fzzy.values["maxHealth"].Current = 9000;
                         RemoveWallFriction();
+                        MakeAlliesInvincible();
 
                         fzzy.RunCommand("jump_keyboardgrace_max 0\nslide_step_velocity_reduction 0\nwallrun_repelEnable 0\nslide_boost_cooldown 0");
                     }
-                    fzzy.values["currentHealth"].Current = 9000;
+                }
+
+                if (fzzy.values["speedmodLevel"].Current == "sp_training")
+                {
+                    if (!fzzy.values["speedmodLoading"].Current)
+                    {
+                        loadingTimestamp = -1;
+                    }
+                    else if (loadingTimestamp == -1)
+                    {
+                        loadingTimestamp = Environment.TickCount;
+                    }
+                    if (fzzy.values["speedmodLoading"].Current && Environment.TickCount - loadingTimestamp > 1000)
+                    {
+                        Load("speedmod1");
+                    }
                 }
 
                 if (fzzy.values["clFrames"].Current <= 0)
@@ -91,6 +102,7 @@ namespace FzzyTools.UI.Components
                 }
                 if (fzzy.values["level"].Current == "sp_training")
                 {
+
                     if (DistanceSquared(880, 6770, 466) < 1000 * 1000) _allowGauntletLoad = true;
 
                     float projection = 0.866049f * fzzy.values["x"].Current + 0.499959f * fzzy.values["y"].Current;
@@ -133,7 +145,7 @@ namespace FzzyTools.UI.Components
                 {
                     if (DistanceSquared(8644, 1097, -2621) < 7000 * 7000 && fzzy.values["inCutscene"].Current == 1)
                     {
-                        Load("speedmod6");
+                        Load("speedmod7");
                     }
                 }
 
@@ -210,6 +222,36 @@ namespace FzzyTools.UI.Components
         {
             pointer.DerefOffsets(FzzyComponent.process, out var ptr);
             FzzyComponent.process.WriteBytes(ptr, b);
+        }
+
+        private void MakeAlliesInvincible()
+        {
+            foreach (ProcessModule m in FzzyComponent.process.Modules)
+            {
+                if (m.ModuleName == "server.dll")
+                {
+                    var code = new byte[] { 0x83, 0xBB, 0x10, 0x01, 0x00, 0x00, 0x03, 0x74, 0x02, 0x89, 0x3B, 0x48, 0x8B, 0x5C, 0x24, 0x30, 0x48, 0x83, 0xC4, 0x20, 0x5F, 0xC3 };
+                    FzzyComponent.process.WriteBytes(m.BaseAddress + 0x43373A, code);
+                    var jmp = new byte[] { 0x74, 0x1E };
+                    FzzyComponent.process.WriteBytes(m.BaseAddress + 0x433725, jmp);
+                    break;
+                }
+            }
+        }
+
+        private void MakeAlliesDeadable()
+        {
+            foreach (ProcessModule m in FzzyComponent.process.Modules)
+            {
+                if (m.ModuleName == "server.dll")
+                {
+                    var code = new byte[] { 0x89, 0x3B, 0x48, 0x8B, 0x5C, 0x24, 0x30, 0x48, 0x83, 0xC4, 0x20, 0x5F, 0xC3, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC };
+                    FzzyComponent.process.WriteBytes(m.BaseAddress + 0x43373A, code);
+                    var jmp = new byte[] { 0x74, 0x15 };
+                    FzzyComponent.process.WriteBytes(m.BaseAddress + 0x433725, jmp);
+                    break;
+                }
+            }
         }
 
         private void RemoveWallFriction()
