@@ -23,9 +23,9 @@ namespace LiveSplit.UI.Components
 
         public string XMLURL => "XMLURL";
 
-        public string UpdateURL => "UpdateURL";
+        public string UpdateURL => "https://raw.githubusercontent.com/Fzzy2j/FzzySplitter/master/LiveSplit.Titanfall.dll";
 
-        public Version Version => Version.Parse("1.0");
+        public Version Version => Version.Parse("1.1");
 
         public IComponent Create(LiveSplitState state)
         {

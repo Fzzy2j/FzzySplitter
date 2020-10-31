@@ -200,7 +200,7 @@ namespace LiveSplit.UI.Components
 
             try
             {
-                //_speedmod.Tick();
+                _speedmod.Tick();
             }
             catch (Exception e)
             {
