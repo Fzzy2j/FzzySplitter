@@ -165,8 +165,15 @@ namespace LiveSplit.UI.Components
 
             if (timer == null) timer = new TimerModel() { CurrentState = state };
 
-            wasLoading = isLoading;
-            isLoading = values["clFrames"].Current <= 0 || values["thing"].Current == 0;
+            try
+            {
+                wasLoading = isLoading;
+                isLoading = values["clFrames"].Current <= 0 || values["thing"].Current == 0;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
 
             try
             {
