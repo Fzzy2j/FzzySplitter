@@ -15,4 +15,12 @@
             <change>bindings pog</change>
         </changelog>
     </update>
+  <update version="1.2.0">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>trying to make auto updates work</change>
+    </changelog>
+  </update>
 </updates>

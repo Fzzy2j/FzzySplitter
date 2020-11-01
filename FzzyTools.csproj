@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CustomFontDialog, Version=0.2.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="LiveSplit.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -90,6 +93,9 @@
       <Project>{56E9D96B-5944-4C2E-876B-CBA44B1465AC}</Project>
       <Name>LiveSplit.ScriptableAutoSplit</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="update.LiveSplit.Titanfall2.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
