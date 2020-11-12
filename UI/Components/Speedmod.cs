@@ -37,7 +37,8 @@ namespace FzzyTools.UI.Components
             try
             {
                 this.cfg = Path.Combine(FzzyComponent.GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
-            } catch (Exception)
+            }
+            catch (Exception)
             {
             }
         }
@@ -224,26 +225,40 @@ namespace FzzyTools.UI.Components
 
         public void EnableSpeedmod()
         {
-            fzzy.values["airAcceleration"].Current = 10000f;
-            fzzy.values["airSpeed"].Current = 40f;
-            fzzy.values["lurchMax"].Current = 0f;
-            fzzy.values["slideStepVelocityReduction"].Current = 0f;
-            fzzy.values["repelEnable"].Current = false;
-            fzzy.values["slideBoostCooldown"].Current = 0f;
-            RemoveWallFriction();
-            MakeAlliesInvincible();
+            if (FzzyComponent.process == null) return;
+            try
+            {
+                fzzy.values["airAcceleration"].Current = 10000f;
+                fzzy.values["airSpeed"].Current = 40f;
+                fzzy.values["lurchMax"].Current = 0f;
+                fzzy.values["slideStepVelocityReduction"].Current = 0f;
+                fzzy.values["repelEnable"].Current = false;
+                fzzy.values["slideBoostCooldown"].Current = 0f;
+                RemoveWallFriction();
+                MakeAlliesInvincible();
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public void DisableSpeedmod()
         {
-            fzzy.values["airAcceleration"].Current = 500f;
-            fzzy.values["airSpeed"].Current = 60f;
-            fzzy.values["lurchMax"].Current = 0.7f;
-            fzzy.values["slideStepVelocityReduction"].Current = 10f;
-            fzzy.values["repelEnable"].Current = true;
-            fzzy.values["slideBoostCooldown"].Current = 2f;
-            RestoreWallFriction();
-            MakeAlliesKillable();
+            if (FzzyComponent.process == null) return;
+            try
+            {
+                fzzy.values["airAcceleration"].Current = 500f;
+                fzzy.values["airSpeed"].Current = 60f;
+                fzzy.values["lurchMax"].Current = 0.7f;
+                fzzy.values["slideStepVelocityReduction"].Current = 10f;
+                fzzy.values["repelEnable"].Current = true;
+                fzzy.values["slideBoostCooldown"].Current = 2f;
+                RestoreWallFriction();
+                MakeAlliesKillable();
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void MakeAlliesInvincible()
