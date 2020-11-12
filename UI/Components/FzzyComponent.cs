@@ -34,7 +34,7 @@ namespace LiveSplit.UI.Components
         public TimerModel timer;
 
         private NCSAutoLoader _ncsAutoLoader;
-        private Speedmod _speedmod;
+        //private Speedmod _speedmod;
 
         private FzzySplitter _splitter;
 
@@ -142,7 +142,7 @@ namespace LiveSplit.UI.Components
             values["velZ"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C34, new int[] { }));
 
             _ncsAutoLoader = new NCSAutoLoader(this);
-            _speedmod = new Speedmod(this);
+            //_speedmod = new Speedmod(this);
 
             _autoStrafer = new AutoStrafer(this);
             _zLurchMacro = new ZLurchMacro(this);
@@ -199,7 +199,7 @@ namespace LiveSplit.UI.Components
 
             try
             {
-                _speedmod.Tick();
+               //fdsaf _speedmod.Tick();
             }
             catch (Exception e)
             {
@@ -272,7 +272,7 @@ namespace LiveSplit.UI.Components
         public override void Dispose()
         {
             updateTimer.Dispose();
-            _speedmod.DisableSpeedmod();
+            //_speedmod.DisableSpeedmod();
         }
 
         public override string ComponentName => "FzzyTools";

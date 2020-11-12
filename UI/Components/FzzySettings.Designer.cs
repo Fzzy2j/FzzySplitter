@@ -257,6 +257,7 @@ namespace LiveSplit.UI.Components
             // speedmod
             // 
             this.speedmod.AutoSize = true;
+            this.speedmod.Enabled = false;
             this.speedmod.Location = new System.Drawing.Point(116, 43);
             this.speedmod.Name = "speedmod";
             this.speedmod.Size = new System.Drawing.Size(77, 17);
