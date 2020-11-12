@@ -36,7 +36,6 @@ namespace LiveSplit.UI.Components
         {
             this.components = new System.ComponentModel.Container();
             this.tasTools = new System.Windows.Forms.CheckBox();
-            this.autoLoader = new System.Windows.Forms.ComboBox();
             this.treeContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.cmiExpandTree = new System.Windows.Forms.ToolStripMenuItem();
             this.cmiCollapseTree = new System.Windows.Forms.ToolStripMenuItem();
@@ -59,6 +58,8 @@ namespace LiveSplit.UI.Components
             this.installMenuModButton = new System.Windows.Forms.Button();
             this.installMenuModProgress = new System.Windows.Forms.ProgressBar();
             this.settingsTree = new LiveSplit.UI.Components.FzzyTreeView();
+            this.autoLoadNCS = new System.Windows.Forms.CheckBox();
+            this.speedmod = new System.Windows.Forms.CheckBox();
             this.treeContextMenu.SuspendLayout();
             this.treeContextMenu2.SuspendLayout();
             this.SuspendLayout();
@@ -72,19 +73,6 @@ namespace LiveSplit.UI.Components
             this.tasTools.TabIndex = 1;
             this.tasTools.Text = "Enable TAS Tools";
             this.tasTools.UseVisualStyleBackColor = true;
-            // 
-            // autoLoader
-            // 
-            this.autoLoader.FormattingEnabled = true;
-            this.autoLoader.Items.AddRange(new object[] {
-            "Dont Autoload",
-            "Autoload NCS",
-            "Autoload Speedmod"});
-            this.autoLoader.Location = new System.Drawing.Point(10, 42);
-            this.autoLoader.Name = "autoLoader";
-            this.autoLoader.Size = new System.Drawing.Size(121, 21);
-            this.autoLoader.TabIndex = 4;
-            this.autoLoader.Text = "Dont Autoload";
             // 
             // treeContextMenu
             // 
@@ -256,14 +244,35 @@ namespace LiveSplit.UI.Components
             this.settingsTree.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.settingsTree_AfterCheck);
             this.settingsTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.settingsTree_NodeMouseClick);
             // 
+            // autoLoadNCS
+            // 
+            this.autoLoadNCS.AutoSize = true;
+            this.autoLoadNCS.Location = new System.Drawing.Point(10, 43);
+            this.autoLoadNCS.Name = "autoLoadNCS";
+            this.autoLoadNCS.Size = new System.Drawing.Size(100, 17);
+            this.autoLoadNCS.TabIndex = 20;
+            this.autoLoadNCS.Text = "Auto Load NCS";
+            this.autoLoadNCS.UseVisualStyleBackColor = true;
+            // 
+            // speedmod
+            // 
+            this.speedmod.AutoSize = true;
+            this.speedmod.Location = new System.Drawing.Point(116, 43);
+            this.speedmod.Name = "speedmod";
+            this.speedmod.Size = new System.Drawing.Size(77, 17);
+            this.speedmod.TabIndex = 21;
+            this.speedmod.Text = "Speedmod";
+            this.speedmod.UseVisualStyleBackColor = true;
+            // 
             // FzzySettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.speedmod);
+            this.Controls.Add(this.autoLoadNCS);
             this.Controls.Add(this.installMenuModProgress);
             this.Controls.Add(this.installMenuModButton);
             this.Controls.Add(this.settingsTree);
-            this.Controls.Add(this.autoLoader);
             this.Controls.Add(this.tasTools);
             this.Name = "FzzySettings";
             this.Padding = new System.Windows.Forms.Padding(7);
@@ -278,7 +287,6 @@ namespace LiveSplit.UI.Components
 
         #endregion
         private System.Windows.Forms.CheckBox tasTools;
-        private System.Windows.Forms.ComboBox autoLoader;
         private System.Windows.Forms.ContextMenuStrip treeContextMenu;
         private System.Windows.Forms.ToolStripMenuItem cmiExpandTree;
         private System.Windows.Forms.ToolStripMenuItem cmiCollapseTree;
@@ -301,5 +309,7 @@ namespace LiveSplit.UI.Components
         private FzzyTreeView settingsTree;
         private System.Windows.Forms.Button installMenuModButton;
         private System.Windows.Forms.ProgressBar installMenuModProgress;
+        private System.Windows.Forms.CheckBox autoLoadNCS;
+        private System.Windows.Forms.CheckBox speedmod;
     }
 }

@@ -19,7 +19,8 @@ namespace LiveSplit.UI.Components
     public partial class FzzySettings : UserControl
     {
         public bool TASToolsEnabled { get; set; }
-        public string AutoLoader { get; set; }
+        public bool AutoLoadNCS { get; set; }
+        public bool Speedmod { get; set; }
 
         private Dictionary<string, bool> _state;
         public ASLSettings aslsettings;
@@ -29,7 +30,8 @@ namespace LiveSplit.UI.Components
             InitializeComponent();
 
             TASToolsEnabled = false;
-            AutoLoader = "Dont Autosplit";
+            AutoLoadNCS = false;
+            Speedmod = false;
 
             _state = new Dictionary<string, bool>();
         }
@@ -41,7 +43,8 @@ namespace LiveSplit.UI.Components
             if (!element.IsEmpty)
             {
                 TASToolsEnabled = SettingsHelper.ParseBool(element["tasToolsEnabled"]);
-                AutoLoader = SettingsHelper.ParseString(element["autoLoader"]);
+                AutoLoadNCS = SettingsHelper.ParseBool(element["autoLoadNCS"]);
+                Speedmod = SettingsHelper.ParseBool(element["speedmod"]);
 
                 ParseSettingsFromXml(element);
             }
@@ -53,7 +56,8 @@ namespace LiveSplit.UI.Components
 
             AppendSettingsToXml(document, node);
             SettingsHelper.CreateSetting(document, node, "tasToolsEnabled", TASToolsEnabled);
-            SettingsHelper.CreateSetting(document, node, "autoLoader", AutoLoader);
+            SettingsHelper.CreateSetting(document, node, "autoLoadNCS", AutoLoadNCS);
+            SettingsHelper.CreateSetting(document, node, "speedmod", Speedmod);
 
             return node;
         }
@@ -244,10 +248,12 @@ namespace LiveSplit.UI.Components
         private void FzzySettings_Load(object sender, EventArgs e)
         {
             tasTools.DataBindings.Clear();
-            autoLoader.DataBindings.Clear();
+            autoLoadNCS.DataBindings.Clear();
+            speedmod.DataBindings.Clear();
 
             tasTools.DataBindings.Add("Checked", this, "TASToolsEnabled", false, DataSourceUpdateMode.OnPropertyChanged);
-            autoLoader.DataBindings.Add("Text", this, "AutoLoader", false, DataSourceUpdateMode.OnPropertyChanged);
+            autoLoadNCS.DataBindings.Add("Checked", this, "AutoLoadNCS", false, DataSourceUpdateMode.OnPropertyChanged);
+            speedmod.DataBindings.Add("Checked", this, "Speedmod", false, DataSourceUpdateMode.OnPropertyChanged);
         }
         // Custom Setting checked/unchecked (only after initially building the tree)
         private void settingsTree_AfterCheck(object sender, TreeViewEventArgs e)

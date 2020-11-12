@@ -29,9 +29,17 @@ namespace FzzyTools.UI.Components
         private bool _allowGauntletLoad = false;
         private bool _allowB3Load = false;
 
+        private string cfg;
+
         public Speedmod(FzzyComponent fzzy)
         {
             this.fzzy = fzzy;
+            try
+            {
+                this.cfg = Path.Combine(FzzyComponent.GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
+            } catch (Exception)
+            {
+            }
         }
 
         private int loadTimestamp;
@@ -42,7 +50,7 @@ namespace FzzyTools.UI.Components
             {
                 loadTimestamp = Environment.TickCount;
                 Log.Info("Load into " + save);
-                fzzy.RunCommand("load " + save);
+                RunCommand("load " + save);
             }
         }
 
@@ -50,18 +58,13 @@ namespace FzzyTools.UI.Components
 
         public void Tick()
         {
-            if (fzzy.Settings.AutoLoader != "Autoload Speedmod")
+            if (!fzzy.Settings.Speedmod || !fzzy.values["f12Bind"].Current.StartsWith("exec autosplitter.cfg"))
             {
                 if (!fzzy.isLoading)
                 {
-                    if (fzzy.values["airAcceleration"].Current != 500f && fzzy.board.GetWindowInFocus().StartsWith("Titanfall 2"))
+                    if (fzzy.values["airAcceleration"].Current != 500f)
                     {
-                        fzzy.values["airAcceleration"].Current = 500f;
-                        fzzy.values["airSpeed"].Current = 60f;
-                        RestoreWallFriction();
-                        MakeAlliesDeadable();
-
-                        fzzy.RunCommand("jump_keyboardgrace_max 0.7\nslide_step_velocity_reduction 10\nwallrun_repelEnable 1\nslide_boost_cooldown 2");
+                        DisableSpeedmod();
                     }
                 }
             }
@@ -69,14 +72,9 @@ namespace FzzyTools.UI.Components
             {
                 if (!fzzy.isLoading)
                 {
-                    if (fzzy.values["airAcceleration"].Current != 10000f && fzzy.board.GetWindowInFocus().StartsWith("Titanfall 2"))
+                    if (fzzy.values["airAcceleration"].Current != 10000f)
                     {
-                        fzzy.values["airAcceleration"].Current = 10000f;
-                        fzzy.values["airSpeed"].Current = 40f;
-                        RemoveWallFriction();
-                        MakeAlliesInvincible();
-
-                        fzzy.RunCommand("jump_keyboardgrace_max 0\nslide_step_velocity_reduction 0\nwallrun_repelEnable 0\nslide_boost_cooldown 0");
+                        EnableSpeedmod();
                     }
                 }
 
@@ -224,6 +222,30 @@ namespace FzzyTools.UI.Components
             FzzyComponent.process.WriteBytes(ptr, b);
         }
 
+        public void EnableSpeedmod()
+        {
+            fzzy.values["airAcceleration"].Current = 10000f;
+            fzzy.values["airSpeed"].Current = 40f;
+            fzzy.values["lurchMax"].Current = 0f;
+            fzzy.values["slideStepVelocityReduction"].Current = 0f;
+            fzzy.values["repelEnable"].Current = false;
+            fzzy.values["slideBoostCooldown"].Current = 0f;
+            RemoveWallFriction();
+            MakeAlliesInvincible();
+        }
+
+        public void DisableSpeedmod()
+        {
+            fzzy.values["airAcceleration"].Current = 500f;
+            fzzy.values["airSpeed"].Current = 60f;
+            fzzy.values["lurchMax"].Current = 0.7f;
+            fzzy.values["slideStepVelocityReduction"].Current = 10f;
+            fzzy.values["repelEnable"].Current = true;
+            fzzy.values["slideBoostCooldown"].Current = 2f;
+            RestoreWallFriction();
+            MakeAlliesKillable();
+        }
+
         private void MakeAlliesInvincible()
         {
             foreach (ProcessModule m in FzzyComponent.process.Modules)
@@ -239,7 +261,14 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private void MakeAlliesDeadable()
+        private void RunCommand(string cmd)
+        {
+            File.WriteAllText(cfg, cmd);
+            Log.Info("running command: " + cmd);
+            fzzy.board.Send(Keyboard.ScanCodeShort.F12);
+        }
+
+        private void MakeAlliesKillable()
         {
             foreach (ProcessModule m in FzzyComponent.process.Modules)
             {

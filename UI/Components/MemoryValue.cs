@@ -27,6 +27,10 @@ namespace FzzyTools.UI.Components
         private void SetValue(dynamic value)
         {
             pointer.DerefOffsets(FzzyComponent.process, out var ptr);
+            if (value is bool b)
+            {
+                FzzyComponent.process.WriteValue(ptr, b);
+            }
             if (value is float f)
             {
                 FzzyComponent.process.WriteValue(ptr, f);
@@ -35,9 +39,9 @@ namespace FzzyTools.UI.Components
             {
                 FzzyComponent.process.WriteValue(ptr, i);
             }
-            if (value is byte[] b)
+            if (value is byte[] by)
             {
-                FzzyComponent.process.WriteBytes(ptr, b);
+                FzzyComponent.process.WriteBytes(ptr, by);
             }
             if (value is string s)
             {

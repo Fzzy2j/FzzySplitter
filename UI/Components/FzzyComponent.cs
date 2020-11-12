@@ -49,14 +49,11 @@ namespace LiveSplit.UI.Components
 
         private ASLSettings aslSettings;
 
-        private string cfg;
-
         public bool isLoading;
         public bool wasLoading;
 
         public FzzyComponent(LiveSplitState state)
         {
-            this.cfg = Path.Combine(GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
 
             Settings = new FzzySettings();
             this.state = state;
@@ -105,6 +102,12 @@ namespace LiveSplit.UI.Components
             values["embarkCount"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E18D8));
 
             values["f12Bind"] = new MemoryValue("string30", new DeepPointer("engine.dll", 0x1396CC30, new int[] { 0x0 }));
+            values["speedmodLoading"] = new MemoryValue("bool", new DeepPointer("client.dll", 0x23E8738, new int[] { }));
+            values["speedmodLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x13977A70, new int[] { }));
+            values["lurchMax"] = new MemoryValue("float", new DeepPointer("client.dll", 0x11B0308, new int[] { }));
+            values["slideStepVelocityReduction"] = new MemoryValue("int", new DeepPointer("client.dll", 0x11B0D28, new int[] { }));
+            values["repelEnable"] = new MemoryValue("bool", new DeepPointer("client.dll", 0x11B287C, new int[] { }));
+            values["slideBoostCooldown"] = new MemoryValue("float", new DeepPointer("client.dll", 0x11B3AD8, new int[] { }));
 
             values["x"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2172FF8, new int[] { 0xDEC }));
             values["y"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2173B48, new int[] { 0x2A0 }));
@@ -137,8 +140,6 @@ namespace LiveSplit.UI.Components
             values["velX"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C2C, new int[] { }));
             values["velY"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C30, new int[] { }));
             values["velZ"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C34, new int[] { }));
-            values["speedmodLoading"] = new MemoryValue("bool", new DeepPointer("client.dll", 0x23E8738, new int[] { }));
-            values["speedmodLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x13977A70, new int[] { }));
 
             _ncsAutoLoader = new NCSAutoLoader(this);
             _speedmod = new Speedmod(this);
@@ -189,7 +190,7 @@ namespace LiveSplit.UI.Components
 
             try
             {
-                if (Settings.AutoLoader == "Autoload NCS") _ncsAutoLoader.Tick();
+                if (Settings.AutoLoadNCS && !Settings.Speedmod) _ncsAutoLoader.Tick();
             }
             catch (Exception e)
             {
@@ -218,13 +219,6 @@ namespace LiveSplit.UI.Components
             {
                 value.EndTick();
             }
-        }
-
-        public void RunCommand(string cmd)
-        {
-            File.WriteAllText(cfg, cmd);
-            Log.Info("running command: " + cmd);
-            board.Send(Keyboard.ScanCodeShort.F12);
         }
 
         public static string GetTitanfallInstallDirectory()
@@ -278,6 +272,7 @@ namespace LiveSplit.UI.Components
         public override void Dispose()
         {
             updateTimer.Dispose();
+            _speedmod.DisableSpeedmod();
         }
 
         public override string ComponentName => "FzzyTools";
