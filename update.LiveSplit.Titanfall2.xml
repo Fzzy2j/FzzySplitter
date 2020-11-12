@@ -1,7 +1,7 @@
 <updates>
     <update version="1.0">
         <files>
-            <file path="LiveSplit.Titanfall.dll" status="changed"/>
+            <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
         </files>
         <changelog>
             <change>start</change>
@@ -9,7 +9,7 @@
     </update>
     <update version="1.1">
         <files>
-            <file path="LiveSplit.Titanfall.dll" status="changed"/>
+            <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
         </files>
         <changelog>
             <change>bindings pog</change>
@@ -17,7 +17,7 @@
     </update>
   <update version="1.2.0">
     <files>
-      <file path="LiveSplit.Titanfall.dll" status="changed"/>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
     </files>
     <changelog>
       <change>trying to make auto updates work</change>
@@ -25,7 +25,7 @@
   </update>
   <update version="1.3.0">
     <files>
-      <file path="LiveSplit.Titanfall.dll" status="changed"/>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
     </files>
     <changelog>
       <change>Speedmod updates</change>
