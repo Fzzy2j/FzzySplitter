@@ -23,7 +23,7 @@ namespace TitanfallAutosplitter.UI.Components
             if (fzzy.values["timescale"].Current >= 1) return;
             float velocity = (float)Math.Sqrt(Math.Pow(fzzy.values["velX"].Current, 2) + Math.Pow(fzzy.values["velY"].Current, 2));
 
-            var movementOverTime = 50 - (500 * (fzzy.updateTimer.Interval / 1000f) * fzzy.values["timescale"].Current);
+            var movementOverTime = (fzzy.values["airSpeed"].Current - 5) - (500 * (fzzy.updateTimer.Interval / 1000f) * fzzy.values["timescale"].Current);
             if (fzzy.values["holdingD"].Current && 
                 !fzzy.values["holdingA"].Current && 
                 !fzzy.values["holdingW"].Current && 

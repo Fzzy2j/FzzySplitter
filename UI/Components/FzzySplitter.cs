@@ -47,7 +47,6 @@ namespace FzzyTools.UI.Components
 
         public void Tick()
         {
-
             var settings = fzzy.Settings.aslsettings.Reader;
             Update(settings);
             if (fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.Running || fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.Paused)
@@ -199,15 +198,21 @@ namespace FzzyTools.UI.Components
             {
 
                 //Battery 1
-                if (DistanceSquared(-4568, -3669) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                if (settings["btBattery1"])
                 {
-                    return true;
+                    if (DistanceSquared(-4568, -3669) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    {
+                        return true;
+                    }
                 }
 
                 //Battery 2
-                if (DistanceSquared(-4111, 4583) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                if (settings["btBattery2"])
                 {
-                    return true;
+                    if (DistanceSquared(-4111, 4583) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -216,28 +221,40 @@ namespace FzzyTools.UI.Components
             {
 
                 // Button 1
-                if (fzzy.values["bnrbutton1"].Old == 0 && fzzy.values["bnrbutton1"].Current > 0 && !fzzy.isLoading)
+                if (settings["bnrButton1"])
                 {
-                    return true;
+                    if (fzzy.values["bnrbutton1"].Old == 0 && fzzy.values["bnrbutton1"].Current > 0 && !fzzy.isLoading)
+                    {
+                        return true;
+                    }
                 }
 
                 // Door trigger
-                if (Y <= -226 && X <= -827 && Z > 450 && !bnrdoorsplit && !fzzy.isLoading)
+                if (settings["bnrDoor"])
                 {
-                    bnrdoorsplit = true;
-                    return true;
+                    if (Y <= -226 && X <= -827 && Z > 450 && !bnrdoorsplit && !fzzy.isLoading)
+                    {
+                        bnrdoorsplit = true;
+                        return true;
+                    }
                 }
 
                 // Button 2
-                if (fzzy.values["bnrbutton2"].Old + 8 == fzzy.values["bnrbutton2"].Current && !fzzy.isLoading)
+                if (settings["bnrButton2"])
                 {
-                    return true;
+                    if (fzzy.values["bnrbutton2"].Old + 8 == fzzy.values["bnrbutton2"].Current && !fzzy.isLoading)
+                    {
+                        return true;
+                    }
                 }
 
                 // BT embark
-                if (fzzy.values["embarkCount"].Old == 0 && fzzy.values["embarkCount"].Current == 1)
+                if (settings["bnrEmbark"])
                 {
-                    return true;
+                    if (fzzy.values["embarkCount"].Old == 0 && fzzy.values["embarkCount"].Current == 1)
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -263,23 +280,46 @@ namespace FzzyTools.UI.Components
             if (fzzy.values["level"].Current == "sp_timeshift_spoke02" && settings["enc2Splits"])
             {
 
-                // Button 2
-                if (DistanceSquared(2805, -3363) < Math.Pow(200, 2) && fzzy.values["enc2button1"].Old + 8 == fzzy.values["enc2button1"].Current && !fzzy.isLoading)
+                if (settings["enc2Dialogue"])
                 {
-                    return true;
+                    if (X > 8755 && X < 9655 && Y < -4528 && Z > 5000)
+                    {
+                        if (!enc2Dialogue)
+                        {
+                            splitTimer = 3000;
+                            enc2Dialogue = true;
+                        }
+                    }
+                    else if (fzzy.isLoading)
+                        enc2Dialogue = false;
                 }
 
-                // Button 3
-                if (DistanceSquared(6271, -3552) < Math.Pow(200, 2) && fzzy.values["enc2button2"].Old + 8 == fzzy.values["enc2button2"].Current && !fzzy.isLoading)
+                // Button 1
+                if (settings["enc2Button1"])
                 {
-                    return true;
+                    if (DistanceSquared(2805, -3363) < Math.Pow(200, 2) && fzzy.values["enc2button1"].Old + 8 == fzzy.values["enc2button1"].Current && !fzzy.isLoading)
+                    {
+                        return true;
+                    }
+                }
+
+                // Button 2
+                if (settings["enc2Button2"])
+                {
+                    if (DistanceSquared(6271, -3552) < Math.Pow(200, 2) && fzzy.values["enc2button2"].Old + 8 == fzzy.values["enc2button2"].Current && !fzzy.isLoading)
+                    {
+                        return true;
+                    }
                 }
 
                 // Hellroom
-                if (DistanceSquared(10708, -2263) < 15000 && !hellroomsplit && !fzzy.isLoading)
+                if (settings["enc2Hellroom"])
                 {
-                    hellroomsplit = true;
-                    return true;
+                    if (DistanceSquared(10708, -2263) < 15000 && !hellroomsplit && !fzzy.isLoading)
+                    {
+                        hellroomsplit = true;
+                        return true;
+                    }
                 }
             }
 
@@ -288,28 +328,37 @@ namespace FzzyTools.UI.Components
             {
 
                 // Death warp
-                var warpX = fzzy.values["x"].Old - X;
-                var warpY = fzzy.values["y"].Old - Y;
-                var warpDistanceSquared = warpX * warpX + warpY * warpY;
-                if (DistanceSquared(4019, 4233) < 500 && warpDistanceSquared > 20000 && !fzzy.wasLoading)
+                if (settings["b2Warp"])
                 {
-                    return true;
-                }
-
-                // Button 1
-                if (fzzy.values["b2button"].Current != fzzy.values["b2button"].Old && Environment.TickCount - b2buttonTimestamp > 1000)
-                {
-                    b2buttonTimestamp = Environment.TickCount;
-                    if (DistanceSquared(2690, 10366) < Math.Pow(200, 2))
+                    var warpX = fzzy.values["x"].Old - X;
+                    var warpY = fzzy.values["y"].Old - Y;
+                    var warpDistanceSquared = warpX * warpX + warpY * warpY;
+                    if (DistanceSquared(4019, 4233) < 500 && warpDistanceSquared > 20000 && !fzzy.wasLoading)
                     {
                         return true;
                     }
                 }
 
-                // Heatsink trigger
-                if (fzzy.values["x"].Old > -2113 && X <= -2113 && Y < 11800 && Y > 10100)
+                // Button 1
+                if (settings["b2Button1"])
                 {
-                    return true;
+                    if (fzzy.values["b2button"].Current != fzzy.values["b2button"].Old && Environment.TickCount - b2buttonTimestamp > 1000)
+                    {
+                        b2buttonTimestamp = Environment.TickCount;
+                        if (DistanceSquared(2690, 10366) < Math.Pow(200, 2))
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                // Heatsink trigger
+                if (settings["b2Trigger"])
+                {
+                    if (fzzy.values["x"].Old > -2113 && X <= -2113 && Y < 11800 && Y > 10100)
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -318,15 +367,21 @@ namespace FzzyTools.UI.Components
             {
 
                 // Module retrieve
-                if (DistanceSquared(-10670, 9523) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                if (settings["b3Module1"])
                 {
-                    splitTimer = 1900;
+                    if (DistanceSquared(-10670, 9523) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    {
+                        splitTimer = 1900;
+                    }
                 }
 
                 //Module 2
-                if (DistanceSquared(3797, -1905) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                if (settings["btModule2"])
                 {
-                    splitTimer = 1850;
+                    if (DistanceSquared(3797, -1905) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    {
+                        splitTimer = 1850;
+                    }
                 }
             }
 
@@ -347,19 +402,25 @@ namespace FzzyTools.UI.Components
             {
 
                 // Elevator
-                if (!arkElevatorSplit && fzzy.values["arkElevator"].Old > 0 && fzzy.values["arkElevator"].Current == 0)
+                if (settings["arkElevator"])
                 {
-                    splitTimer = 1600;
-                    arkElevatorSplit = true;
+                    if (!arkElevatorSplit && fzzy.values["arkElevator"].Old > 0 && fzzy.values["arkElevator"].Current == 0)
+                    {
+                        splitTimer = 1600;
+                        arkElevatorSplit = true;
+                    }
                 }
 
                 // Knife
-                if (DistanceSquared(-8021, -4567) < Math.Pow(1500, 2))
+                if (settings["arkKnife"])
                 {
-                    if (!arkKnifeSplit && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    if (DistanceSquared(-8021, -4567) < Math.Pow(1500, 2))
                     {
-                        arkKnifeSplit = true;
-                        return true;
+                        if (!arkKnifeSplit && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                        {
+                            arkKnifeSplit = true;
+                            return true;
+                        }
                     }
                 }
             }
@@ -369,15 +430,21 @@ namespace FzzyTools.UI.Components
             {
 
                 // Datacore
-                if (DistanceSquared(5252, -5776) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                if (settings["foldDataCore"])
                 {
-                    splitTimer = 7950;
+                    if (DistanceSquared(5252, -5776) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    {
+                        splitTimer = 7950;
+                    }
                 }
 
                 // Escape land
-                if (DistanceSquared(535, 6549) < 25000 && fzzy.values["angle"].Old == 0 && fzzy.values["angle"].Current != 0)
+                if (settings["foldEscape"])
                 {
-                    return true;
+                    if (DistanceSquared(535, 6549) < 25000 && fzzy.values["angle"].Old == 0 && fzzy.values["angle"].Current != 0)
+                    {
+                        return true;
+                    }
                 }
             }
             return false;

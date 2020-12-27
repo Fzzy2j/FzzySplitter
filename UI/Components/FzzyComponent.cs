@@ -34,7 +34,7 @@ namespace LiveSplit.UI.Components
         public TimerModel timer;
 
         private NCSAutoLoader _ncsAutoLoader;
-        //private Speedmod _speedmod;
+        private Speedmod _speedmod;
 
         private FzzySplitter _splitter;
 
@@ -67,15 +67,43 @@ namespace LiveSplit.UI.Components
             aslSettings.AddSetting("subSplits", false, "Subsplits", null);
 
             aslSettings.AddSetting("btSplits", true, "BT-7274", "subSplits");
+            aslSettings.AddSetting("btBattery1", true, "Split on first battery", "btSplits");
+            aslSettings.AddSetting("btBattery2", true, "Split on second battery", "btSplits");
+
             aslSettings.AddSetting("bnrSplits", true, "Blood and Rust", "subSplits");
-            aslSettings.AddSetting("ita3Splits", true, "Into the Abyss 3", "subSplits");
-            aslSettings.AddSetting("enc1Splits", true, "Effect and Cause 1", "subSplits");
+            aslSettings.AddSetting("bnrButton1", true, "Split on first button", "bnrSplits");
+            aslSettings.AddSetting("bnrDoor", true, "Split at door", "bnrSplits");
+            aslSettings.AddSetting("bnrButton2", true, "Split on second button", "bnrSplits");
+            aslSettings.AddSetting("bnrEmbark", true, "Split on embark BT", "bnrSplits");
+
+            aslSettings.AddSetting("ita3Splits", true, "Into the Abyss 3 Embark", "subSplits");
+
+            aslSettings.AddSetting("enc1Splits", true, "Effect and Cause 1 Cutscene", "subSplits");
+
             aslSettings.AddSetting("enc2Splits", true, "Effect and Cause 2", "subSplits");
+            aslSettings.AddSetting("enc2Button1", true, "Split on button 1", "enc2Splits");
+            aslSettings.AddSetting("enc2Button2", true, "Split on button 2", "enc2Splits");
+            aslSettings.AddSetting("enc2Dialogue", true, "Split during second dialogue", "enc2Splits");
+            aslSettings.AddSetting("enc2Hellroom", true, "Split at hellroom entrance", "enc2Splits");
+
             aslSettings.AddSetting("b2Splits", true, "The Beacon 2", "subSplits");
+            aslSettings.AddSetting("b2Warp", true, "Split on death warp", "b2Splits");
+            aslSettings.AddSetting("b2Button1", true, "Split on first button", "b2Splits");
+            aslSettings.AddSetting("b2Trigger", true, "Split when you touch heatsink trigger", "b2Splits");
+
             aslSettings.AddSetting("b3Splits", true, "The Beacon 3", "subSplits");
-            aslSettings.AddSetting("tbfSplits", true, "Trial by Fire", "subSplits");
+            aslSettings.AddSetting("b3Module1", true, "Split on retrieve module", "b3Splits");
+            aslSettings.AddSetting("b3Module2", true, "Split on insert module", "b3Splits");
+
+            aslSettings.AddSetting("tbfSplits", true, "Trial by Fire Elevator", "subSplits");
+
             aslSettings.AddSetting("arkSplits", true, "The Ark", "subSplits");
+            aslSettings.AddSetting("arkElevator", true, "Split when the elevator starts going up", "arkSplits");
+            aslSettings.AddSetting("arkKnife", true, "Split when you start data knife cutscene", "arkSplits");
+
             aslSettings.AddSetting("foldSplits", true, "The Fold Weapon", "subSplits");
+            aslSettings.AddSetting("foldDataCore", true, "Split when you insert the data core", "foldSplits");
+            aslSettings.AddSetting("foldEscape", true, "Split when escape starts", "foldSplits");
 
             aslSettings.AddSetting("ilSettings", false, "IL Settings", null);
             aslSettings.AddSetting("BnRpause", false, "Blood and Rust IL pause", "ilSettings");
@@ -142,7 +170,7 @@ namespace LiveSplit.UI.Components
             values["velZ"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C34, new int[] { }));
 
             _ncsAutoLoader = new NCSAutoLoader(this);
-            //_speedmod = new Speedmod(this);
+            _speedmod = new Speedmod(this);
 
             _autoStrafer = new AutoStrafer(this);
             _zLurchMacro = new ZLurchMacro(this);
@@ -199,7 +227,7 @@ namespace LiveSplit.UI.Components
 
             try
             {
-               //fdsaf _speedmod.Tick();
+               _speedmod.Tick();
             }
             catch (Exception e)
             {

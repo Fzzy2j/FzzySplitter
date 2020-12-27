@@ -16,12 +16,6 @@ namespace FzzyTools.UI.Components
     class Speedmod
     {
 
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        public static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out UIntPtr lpNumberOfBytesWritten);
-
         private FzzyComponent fzzy;
 
         private int _previousTickCount;
@@ -31,9 +25,12 @@ namespace FzzyTools.UI.Components
 
         private string cfg;
 
+        private MemoryValue speedmodCode;
+
         public Speedmod(FzzyComponent fzzy)
         {
             this.fzzy = fzzy;
+            this.speedmodCode = new MemoryValue("byte", new DeepPointer("server.dll", 0x43373A, new int[] { }));
             try
             {
                 this.cfg = Path.Combine(FzzyComponent.GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
@@ -41,6 +38,11 @@ namespace FzzyTools.UI.Components
             catch (Exception)
             {
             }
+        }
+
+        public bool IsSpeedmodEnabled()
+        {
+            return speedmodCode.Current == 0x83;
         }
 
         private int loadTimestamp;
@@ -63,8 +65,9 @@ namespace FzzyTools.UI.Components
             {
                 if (!fzzy.isLoading)
                 {
-                    if (fzzy.values["airAcceleration"].Current != 500f)
+                    if (IsSpeedmodEnabled())
                     {
+                        Log.Info("disableSpeedmod");
                         DisableSpeedmod();
                     }
                 }
@@ -73,10 +76,12 @@ namespace FzzyTools.UI.Components
             {
                 if (!fzzy.isLoading)
                 {
-                    if (fzzy.values["airAcceleration"].Current != 10000f)
+                    if (!IsSpeedmodEnabled())
                     {
                         EnableSpeedmod();
                     }
+                    fzzy.values["airAcceleration"].Current = 10000f;
+                    fzzy.values["airSpeed"].Current = 40f;
                 }
 
                 if (fzzy.values["speedmodLevel"].Current == "sp_training")
@@ -203,6 +208,7 @@ namespace FzzyTools.UI.Components
             }
 
             _previousTickCount = Environment.TickCount;
+            speedmodCode.EndTick();
         }
 
         private float DistanceSquared(float x, float y, float z)
@@ -226,6 +232,7 @@ namespace FzzyTools.UI.Components
         public void EnableSpeedmod()
         {
             if (FzzyComponent.process == null) return;
+            if (IsSpeedmodEnabled()) return;
             try
             {
                 fzzy.values["airAcceleration"].Current = 10000f;
@@ -245,6 +252,7 @@ namespace FzzyTools.UI.Components
         public void DisableSpeedmod()
         {
             if (FzzyComponent.process == null) return;
+            if (!IsSpeedmodEnabled()) return;
             try
             {
                 fzzy.values["airAcceleration"].Current = 500f;

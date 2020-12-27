@@ -40,4 +40,13 @@
       <change>Hover bug fix</change>
     </changelog>
   </update>
+  <update version="1.4">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Speedmod enabled</change>
+      <change>Added individual check boxes for sub splits</change>
+    </changelog>
+  </update>
 </updates>

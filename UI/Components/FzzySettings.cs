@@ -335,7 +335,6 @@ namespace LiveSplit.UI.Components
         }
 
         private string menumod = Path.Combine(Path.GetTempPath(), "menumod.exe");
-        private string saves = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installsaves.exe");
 
         private void installMenuModButton_Click(object sender, EventArgs e)
         {
@@ -372,6 +371,62 @@ namespace LiveSplit.UI.Components
                 installMenuModProgress.Visible = true;
             }
 
+            InstallSaves();
+        }
+
+        private static string saves = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installsaves.exe");
+
+        public static bool AreSavesInstalled()
+        {
+            var savesDirectory = Directory.GetParent(saves);
+            var files = Directory.GetFiles(savesDirectory.FullName);
+            var requiredFiles = new string[]
+            {
+                "fastany1",
+                "fastany2",
+                "fastany3",
+                "fastany4",
+                "fastany5",
+                "fastany6",
+                "fastany7",
+                "fastany8",
+                "fastany9",
+                "fastany3SATCHEL",
+                "fastany4FRAG",
+                "fastany4SATCHEL",
+                "fasthelms2",
+                "fasthelms5",
+                "speedmod1",
+                "speedmod2",
+                "speedmod3",
+                "speedmod4",
+                "speedmod5",
+                "speedmod6",
+                "speedmod7",
+                "speedmod8",
+                "speedmod9",
+                "speedmod10",
+                "speedmod11",
+                "speedmod12"
+            };
+            foreach (var check in requiredFiles)
+            {
+                bool exists = false;
+                foreach (var file in files)
+                {
+                    if (Path.GetFileNameWithoutExtension(file) == check)
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) return false;
+            }
+            return true;
+        }
+        public static void InstallSaves()
+        {
+            if (AreSavesInstalled()) return;
             using (WebClient webClient = new WebClient())
             {
                 webClient.DownloadFileAsync(new Uri(FzzyComponent.SAVES_INSTALLER_LINK), saves);
@@ -379,7 +434,7 @@ namespace LiveSplit.UI.Components
             }
         }
 
-        private void SavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        private static void SavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -404,6 +459,11 @@ namespace LiveSplit.UI.Components
                 FileName = menumod
             };
             Process.Start(startInfo);
+        }
+
+        private void speedmod_CheckedChanged(object sender, EventArgs e)
+        {
+            InstallSaves();
         }
     }
     class FzzyTreeView : TreeView

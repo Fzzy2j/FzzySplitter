@@ -257,13 +257,13 @@ namespace LiveSplit.UI.Components
             // speedmod
             // 
             this.speedmod.AutoSize = true;
-            this.speedmod.Enabled = false;
             this.speedmod.Location = new System.Drawing.Point(116, 43);
             this.speedmod.Name = "speedmod";
             this.speedmod.Size = new System.Drawing.Size(77, 17);
             this.speedmod.TabIndex = 21;
             this.speedmod.Text = "Speedmod";
             this.speedmod.UseVisualStyleBackColor = true;
+            this.speedmod.CheckedChanged += new System.EventHandler(this.speedmod_CheckedChanged);
             // 
             // FzzySettings
             // 

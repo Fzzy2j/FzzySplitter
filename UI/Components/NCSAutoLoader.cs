@@ -110,6 +110,7 @@ namespace TitanfallAuto_splitter.UI.Components
             if (fzzy.values["level"].Current == "sp_beacon" &&
                 fzzy.values["b3Door"].Current - 8 == fzzy.values["b3Door"].Old &&
                 DistanceSquared(11671, -2462) < Math.Pow(4000, 2) &&
+                fzzy.values["x"].Current < 11700 &&
                 fzzy.values["isB1"].Current != 0)
             {
                 fzzy.board.Send(Keyboard.ScanCodeShort.F6);
