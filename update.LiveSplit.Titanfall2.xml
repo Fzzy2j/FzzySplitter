@@ -49,4 +49,12 @@
       <change>Added individual check boxes for sub splits</change>
     </changelog>
   </update>
+  <update version="1.4.1">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Fixed beacon 3 module 2 split</change>
+    </changelog>
+  </update>
 </updates>

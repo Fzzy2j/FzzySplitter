@@ -376,7 +376,7 @@ namespace FzzyTools.UI.Components
                 }
 
                 //Module 2
-                if (settings["btModule2"])
+                if (settings["b3Module2"])
                 {
                     if (DistanceSquared(3797, -1905) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
                     {
