@@ -57,7 +57,7 @@
       <change>Fixed beacon 3 module 2 split</change>
     </changelog>
   </update>
-  <update version="1.5">
+  <update version="1.5.0">
     <files>
       <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
     </files>
