@@ -60,7 +60,6 @@ namespace FzzyTools.UI.Components
                 {
                     if (IsSpeedmodEnabled())
                     {
-                        Log.Info("disableSpeedmod");
                         DisableSpeedmod();
                     }
                 }
