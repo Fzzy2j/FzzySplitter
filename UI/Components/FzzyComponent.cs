@@ -24,7 +24,8 @@ namespace LiveSplit.UI.Components
     {
 
         public const string MENU_MOD_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/Enhanced.Menu.exe";
-        public const string SAVES_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installsaves.exe";
+        public const string FASTANY_SAVES_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installsaves.exe";
+        public const string SPEEDMOD_SAVES_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installspeedmodsaves.exe";
 
         public FzzySettings Settings { get; set; }
 
@@ -38,9 +39,10 @@ namespace LiveSplit.UI.Components
 
         private FzzySplitter _splitter;
 
-        private AutoStrafer _autoStrafer;
-        private ZLurchMacro _zLurchMacro;
-        private AutoJumper _autoJumper;
+        public AutoStrafer autoStrafer;
+        public ZLurchMacro zLurchMacro;
+        public AutoJumper autoJumper;
+        public Aimbot aimbot;
 
         public readonly Keyboard board = new Keyboard();
         public static Process process;
@@ -130,12 +132,15 @@ namespace LiveSplit.UI.Components
             values["embarkCount"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E18D8));
 
             values["f12Bind"] = new MemoryValue("string30", new DeepPointer("engine.dll", 0x1396CC30, new int[] { 0x0 }));
-            values["speedmodLoading"] = new MemoryValue("bool", new DeepPointer("client.dll", 0x23E8738, new int[] { }));
+            values["speedmodLoading"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x760B54, new int[] { }));
             values["speedmodLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x13977A70, new int[] { }));
             values["lurchMax"] = new MemoryValue("float", new DeepPointer("client.dll", 0x11B0308, new int[] { }));
             values["slideStepVelocityReduction"] = new MemoryValue("int", new DeepPointer("client.dll", 0x11B0D28, new int[] { }));
             values["repelEnable"] = new MemoryValue("bool", new DeepPointer("client.dll", 0x11B287C, new int[] { }));
             values["slideBoostCooldown"] = new MemoryValue("float", new DeepPointer("client.dll", 0x11B3AD8, new int[] { }));
+            values["editableVelocityX"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00B0EB50, new int[] { 0xD8, 0x6B8, 0x428 }));
+            values["editableVelocityY"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00B0EB50, new int[] { 0xD8, 0x6B8, 0x42C }));
+            values["editableVelocityZ"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00B0EB50, new int[] { 0xD8, 0x6B8, 0x430 }));
 
             values["x"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2172FF8, new int[] { 0xDEC }));
             values["y"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2173B48, new int[] { 0x2A0 }));
@@ -157,6 +162,7 @@ namespace LiveSplit.UI.Components
             values["maxHealth"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x13084248, new int[] { 0xA90, 0x18, 0xED8, 0x48, 0xA40, 0x10, 0xCB0, 0x4D0 }));
             values["currentHealth"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x13084248, new int[] { 0xA90, 0x18, 0xED8, 0x48, 0xA40, 0x10, 0xCB0, 0x4D4 }));
             values["yaw"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00E69EA0, new int[] { 0x1E94 }));
+            values["pitch"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00E69EA0, new int[] { 0x1E90 }));
             values["holdingW"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396C7D8, new int[] { }));
             values["holdingA"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396C678, new int[] { }));
             values["holdingS"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396C798, new int[] { }));
@@ -168,13 +174,19 @@ namespace LiveSplit.UI.Components
             values["velX"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C2C, new int[] { }));
             values["velY"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C30, new int[] { }));
             values["velZ"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C34, new int[] { }));
+            values["viewThunkVertical"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00B188C0, new int[] { 0xD8, 0x1A24 }));
+            values["viewThunkHorizontal"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00B188C0, new int[] { 0xD8, 0x1A28 }));
+            values["recoilVertical"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00B188C0, new int[] { 0xD8, 0x1A3C }));
+            values["recoilHorizontal"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00B188C0, new int[] { 0xD8, 0x1A40 }));
+            values["holdingM3"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396CC98, new int[] { }));
 
             _ncsAutoLoader = new NCSAutoLoader(this);
             _speedmod = new Speedmod(this);
 
-            _autoStrafer = new AutoStrafer(this);
-            _zLurchMacro = new ZLurchMacro(this);
-            _autoJumper = new AutoJumper(this);
+            autoStrafer = new AutoStrafer(this);
+            zLurchMacro = new ZLurchMacro(this);
+            autoJumper = new AutoJumper(this);
+            aimbot = new Aimbot(this);
             _splitter = new FzzySplitter(this);
 
             updateTimer = new Timer() { Interval = 15 };
@@ -206,9 +218,13 @@ namespace LiveSplit.UI.Components
             {
                 if (Settings.TASToolsEnabled)
                 {
-                    _autoStrafer.Tick();
-                    _zLurchMacro.Tick();
-                    _autoJumper.Tick();
+                    autoStrafer.Tick();
+                    zLurchMacro.Tick();
+                    autoJumper.Tick();
+                }
+                if (Settings.TASAimbot)
+                {
+                    aimbot.Tick();
                 }
             }
             catch (Exception e)

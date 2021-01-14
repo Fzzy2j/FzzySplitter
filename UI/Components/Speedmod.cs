@@ -25,12 +25,10 @@ namespace FzzyTools.UI.Components
 
         private string cfg;
 
-        private MemoryValue speedmodCode;
-
         public Speedmod(FzzyComponent fzzy)
         {
             this.fzzy = fzzy;
-            this.speedmodCode = new MemoryValue("byte", new DeepPointer("server.dll", 0x43373A, new int[] { }));
+            //var entityBase = new MemoryValue("byte", new DeepPointer("server.dll", 0xC27CE0, new int[] { }));
             try
             {
                 this.cfg = Path.Combine(FzzyComponent.GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
@@ -38,11 +36,6 @@ namespace FzzyTools.UI.Components
             catch (Exception)
             {
             }
-        }
-
-        public bool IsSpeedmodEnabled()
-        {
-            return speedmodCode.Current == 0x83;
         }
 
         private int loadTimestamp;
@@ -57,7 +50,7 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private int loadingTimestamp = -1;
+        private int levelSelectTimestamp;
 
         public void Tick()
         {
@@ -84,20 +77,23 @@ namespace FzzyTools.UI.Components
                     fzzy.values["airSpeed"].Current = 40f;
                 }
 
-                if (fzzy.values["speedmodLevel"].Current == "sp_training")
+                if (fzzy.values["speedmodLoading"].Current == 0 && fzzy.values["speedmodLoading"].Old > 0)
                 {
-                    if (!fzzy.values["speedmodLoading"].Current)
-                    {
-                        loadingTimestamp = -1;
-                    }
-                    else if (loadingTimestamp == -1)
-                    {
-                        loadingTimestamp = Environment.TickCount;
-                    }
-                    if (fzzy.values["speedmodLoading"].Current && Environment.TickCount - loadingTimestamp > 1000)
-                    {
-                        Load("speedmod1");
-                    }
+                    levelSelectTimestamp = Environment.TickCount;
+                }
+                if (fzzy.values["speedmodLoading"].Current == 0 && Environment.TickCount - levelSelectTimestamp > 1000)
+                {
+                    levelSelectTimestamp = int.MinValue;
+                    if (fzzy.values["speedmodLevel"].Current == "sp_training") Load("speedmod1");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_crashsite") Load("speedmod2");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_sewers1") Load("speedmod3");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_boomtown_start") Load("speedmod4");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_boomtown_end") Load("speedmod5");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_timeshift_spoke02") Load("speedmod7");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_beacon_spoke0") Load("speedmod8");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_beacon") Load("speedmod9");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_tday") Load("speedmod10");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_skyway_v1") Load("speedmod11");
                 }
 
                 if (fzzy.values["clFrames"].Current <= 0)
@@ -208,7 +204,6 @@ namespace FzzyTools.UI.Components
             }
 
             _previousTickCount = Environment.TickCount;
-            speedmodCode.EndTick();
         }
 
         private float DistanceSquared(float x, float y, float z)
@@ -239,7 +234,7 @@ namespace FzzyTools.UI.Components
                 fzzy.values["airSpeed"].Current = 40f;
                 fzzy.values["lurchMax"].Current = 0f;
                 fzzy.values["slideStepVelocityReduction"].Current = 0f;
-                fzzy.values["repelEnable"].Current = false;
+                //fzzy.values["repelEnable"].Current = false;
                 fzzy.values["slideBoostCooldown"].Current = 0f;
                 RemoveWallFriction();
                 MakeAlliesInvincible();
@@ -259,7 +254,7 @@ namespace FzzyTools.UI.Components
                 fzzy.values["airSpeed"].Current = 60f;
                 fzzy.values["lurchMax"].Current = 0.7f;
                 fzzy.values["slideStepVelocityReduction"].Current = 10f;
-                fzzy.values["repelEnable"].Current = true;
+                //fzzy.values["repelEnable"].Current = true;
                 fzzy.values["slideBoostCooldown"].Current = 2f;
                 RestoreWallFriction();
                 MakeAlliesKillable();
@@ -293,67 +288,40 @@ namespace FzzyTools.UI.Components
 
         private void MakeAlliesKillable()
         {
-            foreach (ProcessModule m in FzzyComponent.process.Modules)
-            {
-                if (m.ModuleName == "server.dll")
-                {
-                    var code = new byte[] { 0x89, 0x3B, 0x48, 0x8B, 0x5C, 0x24, 0x30, 0x48, 0x83, 0xC4, 0x20, 0x5F, 0xC3, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC };
-                    FzzyComponent.process.WriteBytes(m.BaseAddress + 0x43373A, code);
-                    var jmp = new byte[] { 0x74, 0x15 };
-                    FzzyComponent.process.WriteBytes(m.BaseAddress + 0x433725, jmp);
-                    break;
-                }
-            }
+            var code = new byte[] { 0x89, 0x3B, 0x48, 0x8B, 0x5C, 0x24, 0x30, 0x48, 0x83, 0xC4, 0x20, 0x5F, 0xC3, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC };
+            Write(new DeepPointer("server.dll", 0x43373A), code);
+            var jmp = new byte[] { 0x74, 0x15 };
+            Write(new DeepPointer("server.dll", 0x433725), jmp);
+        }
+
+        public bool IsSpeedmodEnabled()
+        {
+            var speedmodCode = new DeepPointer("server.dll", 0x43373A, new int[] { }).Deref<byte>(FzzyComponent.process);
+            return speedmodCode == 0x83;
         }
 
         private void RemoveWallFriction()
         {
-            // X Friction
-            Write(new DeepPointer("client.dll", 0x1FA2CF), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("client.dll", 0x1F9705), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("client.dll", 0x20CD14), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("client.dll", 0x20D6E5), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+            byte[] code = new byte[] {
+                0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+                0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+                0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+            };
 
-            Write(new DeepPointer("server.dll", 0x16BE9A), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("server.dll", 0x16AD35), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("server.dll", 0x1852FB), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("server.dll", 0x185D36), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-
-            // Y Friction
-            Write(new DeepPointer("client.dll", 0x1FA2E7), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("client.dll", 0x1F971D), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("client.dll", 0x20CD28), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("client.dll", 0x20D6F5), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-
-            Write(new DeepPointer("server.dll", 0x16BEB2), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("server.dll", 0x16AD4D), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("server.dll", 0x185313), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-            Write(new DeepPointer("server.dll", 0x185D46), new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+            Write(new DeepPointer("client.dll", 0x20D6E5), code);
+            Write(new DeepPointer("server.dll", 0x185D36), code);
         }
 
         private void RestoreWallFriction()
         {
-            // X Friction
-            Write(new DeepPointer("client.dll", 0x1FA2CF), new byte[] { 0xF3, 0x0F, 0x11, 0x81, 0x8C, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("client.dll", 0x1F9705), new byte[] { 0xF3, 0x0F, 0x11, 0x81, 0x8C, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("client.dll", 0x20CD14), new byte[] { 0xF3, 0x0F, 0x11, 0x82, 0x8C, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("client.dll", 0x20D6E5), new byte[] { 0xF3, 0x0F, 0x11, 0x81, 0x8C, 0x00, 0x00, 0x00 });
+            byte[] code = new byte[] {
+                0xF3, 0x0F, 0x11, 0x81, 0x8C, 0x00, 0x00, 0x00, // movss [rcx+8C],xmm0
+                0xF3, 0x0F, 0x59, 0x89, 0x90, 0x00, 0x00, 0x00, // mulss xmm1,[rcx+90]
+                0xF3, 0x0F, 0x11, 0x89, 0x90, 0x00, 0x00, 0x00, // movss [rcx+90],xmm1
+            };
 
-            Write(new DeepPointer("server.dll", 0x16BE9A), new byte[] { 0xF3, 0x0F, 0x11, 0x81, 0x8C, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("server.dll", 0x16AD35), new byte[] { 0xF3, 0x0F, 0x11, 0x81, 0x8C, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("server.dll", 0x1852FB), new byte[] { 0xF3, 0x0F, 0x11, 0x82, 0x8C, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("server.dll", 0x185D36), new byte[] { 0xF3, 0x0F, 0x11, 0x81, 0x8C, 0x00, 0x00, 0x00 });
-
-            // Y Friction
-            Write(new DeepPointer("client.dll", 0x1FA2E7), new byte[] { 0xF3, 0x0F, 0x11, 0x89, 0x90, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("client.dll", 0x1F971D), new byte[] { 0xF3, 0x0F, 0x11, 0x89, 0x90, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("client.dll", 0x20CD28), new byte[] { 0xF3, 0x0F, 0x11, 0x8A, 0x90, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("client.dll", 0x20D6F5), new byte[] { 0xF3, 0x0F, 0x11, 0x89, 0x90, 0x00, 0x00, 0x00 });
-
-            Write(new DeepPointer("server.dll", 0x16BEB2), new byte[] { 0xF3, 0x0F, 0x11, 0x89, 0x90, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("server.dll", 0x16AD4D), new byte[] { 0xF3, 0x0F, 0x11, 0x89, 0x90, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("server.dll", 0x185313), new byte[] { 0xF3, 0x0F, 0x11, 0x8A, 0x90, 0x00, 0x00, 0x00 });
-            Write(new DeepPointer("server.dll", 0x185D46), new byte[] { 0xF3, 0x0F, 0x11, 0x89, 0x90, 0x00, 0x00, 0x00 });
+            Write(new DeepPointer("client.dll", 0x20D6E5), code);
+            Write(new DeepPointer("server.dll", 0x185D36), code);
         }
 
     }

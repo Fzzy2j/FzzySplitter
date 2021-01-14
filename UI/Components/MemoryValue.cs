@@ -123,6 +123,10 @@ namespace FzzyTools.UI.Components
                     current = false;
                     old = false;
                     break;
+                case "address":
+                    current = IntPtr.Zero;
+                    old = IntPtr.Zero;
+                    break;
                 default:
                     if (type.StartsWith("string"))
                     {
@@ -176,6 +180,11 @@ namespace FzzyTools.UI.Components
                     break;
                 case "bool":
                     current = pointer.Deref<bool>(FzzyComponent.process);
+                    break;
+                case "address":
+                    IntPtr ptr;
+                    pointer.DerefOffsets(FzzyComponent.process, out ptr);
+                    current = ptr;
                     break;
                 default:
                     if (type.StartsWith("string"))

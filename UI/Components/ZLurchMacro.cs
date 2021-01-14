@@ -1,4 +1,5 @@
-﻿using LiveSplit.UI.Components;
+﻿using FzzyTools.UI.Components;
+using LiveSplit.UI.Components;
 
 namespace TitanfallAutosplitter.UI.Components
 {
@@ -15,7 +16,7 @@ namespace TitanfallAutosplitter.UI.Components
 
         public void Tick()
         {
-            if (fzzy.values["timescale"].Current >= 1) return;
+            if (fzzy.values["timescale"].Current >= 1 || fzzy.aimbot.AimbotRunning) return;
             if (_pressingW)
             {
                 fzzy.board.Unpress(Keyboard.ScanCodeShort.KEY_W);

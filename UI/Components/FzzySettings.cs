@@ -21,6 +21,7 @@ namespace LiveSplit.UI.Components
         public bool TASToolsEnabled { get; set; }
         public bool AutoLoadNCS { get; set; }
         public bool Speedmod { get; set; }
+        public bool TASAimbot { get; set; }
 
         private Dictionary<string, bool> _state;
         public ASLSettings aslsettings;
@@ -32,6 +33,7 @@ namespace LiveSplit.UI.Components
             TASToolsEnabled = false;
             AutoLoadNCS = false;
             Speedmod = false;
+            TASAimbot = false;
 
             _state = new Dictionary<string, bool>();
         }
@@ -45,6 +47,7 @@ namespace LiveSplit.UI.Components
                 TASToolsEnabled = SettingsHelper.ParseBool(element["tasToolsEnabled"]);
                 AutoLoadNCS = SettingsHelper.ParseBool(element["autoLoadNCS"]);
                 Speedmod = SettingsHelper.ParseBool(element["speedmod"]);
+                TASAimbot = SettingsHelper.ParseBool(element["tasAimbot"]);
 
                 ParseSettingsFromXml(element);
             }
@@ -58,6 +61,7 @@ namespace LiveSplit.UI.Components
             SettingsHelper.CreateSetting(document, node, "tasToolsEnabled", TASToolsEnabled);
             SettingsHelper.CreateSetting(document, node, "autoLoadNCS", AutoLoadNCS);
             SettingsHelper.CreateSetting(document, node, "speedmod", Speedmod);
+            SettingsHelper.CreateSetting(document, node, "tasAimbot", TASAimbot);
 
             return node;
         }
@@ -250,10 +254,12 @@ namespace LiveSplit.UI.Components
             tasTools.DataBindings.Clear();
             autoLoadNCS.DataBindings.Clear();
             speedmod.DataBindings.Clear();
+            tasAimbot.DataBindings.Clear();
 
             tasTools.DataBindings.Add("Checked", this, "TASToolsEnabled", false, DataSourceUpdateMode.OnPropertyChanged);
             autoLoadNCS.DataBindings.Add("Checked", this, "AutoLoadNCS", false, DataSourceUpdateMode.OnPropertyChanged);
             speedmod.DataBindings.Add("Checked", this, "Speedmod", false, DataSourceUpdateMode.OnPropertyChanged);
+            tasAimbot.DataBindings.Add("Checked", this, "TASAimbot", false, DataSourceUpdateMode.OnPropertyChanged);
         }
         // Custom Setting checked/unchecked (only after initially building the tree)
         private void settingsTree_AfterCheck(object sender, TreeViewEventArgs e)
@@ -371,16 +377,15 @@ namespace LiveSplit.UI.Components
                 installMenuModProgress.Visible = true;
             }
 
-            InstallSaves();
+            InstallFastanySaves();
         }
 
-        private static string saves = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installsaves.exe");
+        private static string fastanySavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installsaves.exe");
+        private static string speedmodSavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installspeedmodsaves.exe");
 
-        public static bool AreSavesInstalled()
+        public static bool AreFastanySavesInstalled()
         {
-            var savesDirectory = Directory.GetParent(saves);
-            var files = Directory.GetFiles(savesDirectory.FullName);
-            var requiredFiles = new string[]
+            var saves = new string[]
             {
                 "fastany1",
                 "fastany2",
@@ -396,6 +401,13 @@ namespace LiveSplit.UI.Components
                 "fastany4SATCHEL",
                 "fasthelms2",
                 "fasthelms5",
+            };
+            return AreSavesInstalled(saves);
+        }
+        public static bool AreSpeedmodSavesInstalled()
+        {
+            var saves = new string[]
+            {
                 "speedmod1",
                 "speedmod2",
                 "speedmod3",
@@ -409,7 +421,14 @@ namespace LiveSplit.UI.Components
                 "speedmod11",
                 "speedmod12"
             };
-            foreach (var check in requiredFiles)
+            return AreSavesInstalled(saves);
+        }
+
+        public static bool AreSavesInstalled(string[] saves)
+        {
+            var savesDirectory = Directory.GetParent(fastanySavesInstaller);
+            var files = Directory.GetFiles(savesDirectory.FullName);
+            foreach (var check in saves)
             {
                 bool exists = false;
                 foreach (var file in files)
@@ -424,22 +443,41 @@ namespace LiveSplit.UI.Components
             }
             return true;
         }
-        public static void InstallSaves()
+        public static void InstallFastanySaves()
         {
-            if (AreSavesInstalled()) return;
+            if (AreFastanySavesInstalled()) return;
             using (WebClient webClient = new WebClient())
             {
-                webClient.DownloadFileAsync(new Uri(FzzyComponent.SAVES_INSTALLER_LINK), saves);
-                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(SavesDownloadCompleted);
+                webClient.DownloadFileAsync(new Uri(FzzyComponent.FASTANY_SAVES_INSTALLER_LINK), fastanySavesInstaller);
+                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(FastanySavesDownloadCompleted);
             }
         }
 
-        private static void SavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        private static void FastanySavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
         {
             var startInfo = new ProcessStartInfo
             {
-                WorkingDirectory = Directory.GetParent(saves).FullName,
-                FileName = saves
+                WorkingDirectory = Directory.GetParent(fastanySavesInstaller).FullName,
+                FileName = fastanySavesInstaller
+            };
+            Process.Start(startInfo);
+        }
+        public static void InstallSpeedmodSaves()
+        {
+            if (AreSpeedmodSavesInstalled()) return;
+            using (WebClient webClient = new WebClient())
+            {
+                webClient.DownloadFileAsync(new Uri(FzzyComponent.SPEEDMOD_SAVES_INSTALLER_LINK), speedmodSavesInstaller);
+                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(SpeedmodSavesDownloadCompleted);
+            }
+        }
+
+        private static void SpeedmodSavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                WorkingDirectory = Directory.GetParent(speedmodSavesInstaller).FullName,
+                FileName = speedmodSavesInstaller
             };
             Process.Start(startInfo);
         }
@@ -463,7 +501,7 @@ namespace LiveSplit.UI.Components
 
         private void speedmod_CheckedChanged(object sender, EventArgs e)
         {
-            InstallSaves();
+            InstallSpeedmodSaves();
         }
     }
     class FzzyTreeView : TreeView

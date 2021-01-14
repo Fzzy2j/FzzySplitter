@@ -1,4 +1,5 @@
-﻿using LiveSplit.ComponentUtil;
+﻿using FzzyTools.UI.Components;
+using LiveSplit.ComponentUtil;
 using LiveSplit.UI.Components;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace TitanfallAutosplitter.UI.Components
 
         public void Tick()
         {
-            if (fzzy.values["timescale"].Current >= 1) return;
+            if (fzzy.values["timescale"].Current >= 1 || fzzy.aimbot.AimbotRunning) return;
             float velocity = (float)Math.Sqrt(Math.Pow(fzzy.values["velX"].Current, 2) + Math.Pow(fzzy.values["velY"].Current, 2));
 
             var movementOverTime = (fzzy.values["airSpeed"].Current - 5) - (500 * (fzzy.updateTimer.Interval / 1000f) * fzzy.values["timescale"].Current);

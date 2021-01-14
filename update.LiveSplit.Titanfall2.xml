@@ -57,4 +57,13 @@
       <change>Fixed beacon 3 module 2 split</change>
     </changelog>
   </update>
+  <update version="1.5">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Added TAS Aimbot</change>
+      <change>Lots of Speedmod changes</change>
+    </changelog>
+  </update>
 </updates>

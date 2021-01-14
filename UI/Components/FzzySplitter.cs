@@ -45,10 +45,13 @@ namespace FzzyTools.UI.Components
             }
         }
 
+        private int splitTimestamp;
+
         public void Tick()
         {
             var settings = fzzy.Settings.aslsettings.Reader;
             Update(settings);
+            if (!fzzy.state.IsGameTimeInitialized) fzzy.timer.InitializeGameTime();
             if (fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.Running || fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.Paused)
             {
                 fzzy.state.IsGameTimePaused = IsLoading(settings);
@@ -58,7 +61,11 @@ namespace FzzyTools.UI.Components
                 }
                 if (Split(settings))
                 {
-                    fzzy.timer.Split();
+                    if (Environment.TickCount - splitTimestamp > 1000)
+                    {
+                        splitTimestamp = Environment.TickCount;
+                        fzzy.timer.Split();
+                    }
                 }
             }
             if (fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.NotRunning)

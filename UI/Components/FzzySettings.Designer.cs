@@ -60,6 +60,7 @@ namespace LiveSplit.UI.Components
             this.settingsTree = new LiveSplit.UI.Components.FzzyTreeView();
             this.autoLoadNCS = new System.Windows.Forms.CheckBox();
             this.speedmod = new System.Windows.Forms.CheckBox();
+            this.tasAimbot = new System.Windows.Forms.CheckBox();
             this.treeContextMenu.SuspendLayout();
             this.treeContextMenu2.SuspendLayout();
             this.SuspendLayout();
@@ -265,10 +266,21 @@ namespace LiveSplit.UI.Components
             this.speedmod.UseVisualStyleBackColor = true;
             this.speedmod.CheckedChanged += new System.EventHandler(this.speedmod_CheckedChanged);
             // 
+            // tasAimbot
+            // 
+            this.tasAimbot.AutoSize = true;
+            this.tasAimbot.Location = new System.Drawing.Point(199, 43);
+            this.tasAimbot.Name = "tasAimbot";
+            this.tasAimbot.Size = new System.Drawing.Size(82, 17);
+            this.tasAimbot.TabIndex = 22;
+            this.tasAimbot.Text = "TAS Aimbot";
+            this.tasAimbot.UseVisualStyleBackColor = true;
+            // 
             // FzzySettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.tasAimbot);
             this.Controls.Add(this.speedmod);
             this.Controls.Add(this.autoLoadNCS);
             this.Controls.Add(this.installMenuModProgress);
@@ -312,5 +324,6 @@ namespace LiveSplit.UI.Components
         private System.Windows.Forms.ProgressBar installMenuModProgress;
         private System.Windows.Forms.CheckBox autoLoadNCS;
         private System.Windows.Forms.CheckBox speedmod;
+        private System.Windows.Forms.CheckBox tasAimbot;
     }
 }
