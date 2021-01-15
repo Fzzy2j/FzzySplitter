@@ -66,4 +66,12 @@
       <change>Lots of Speedmod changes</change>
     </changelog>
   </update>
+  <update version="1.5.1">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Beacon 3 NCS auto load bug fix</change>
+    </changelog>
+  </update>
 </updates>

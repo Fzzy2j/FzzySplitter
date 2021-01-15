@@ -28,7 +28,6 @@ namespace FzzyTools.UI.Components
         public Speedmod(FzzyComponent fzzy)
         {
             this.fzzy = fzzy;
-            //var entityBase = new MemoryValue("byte", new DeepPointer("server.dll", 0xC27CE0, new int[] { }));
             try
             {
                 this.cfg = Path.Combine(FzzyComponent.GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");

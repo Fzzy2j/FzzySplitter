@@ -83,7 +83,8 @@ namespace TitanfallAuto_splitter.UI.Components
             if (fzzy.values["level"].Current == "sp_beacon" &&
                 Math.Abs(_btSpeak1Timestamp - _btSpeak2Timestamp) < 100 &&
                 DistanceSquared(12432, -2463) < 1000 * 1000 &&
-                fzzy.values["x"].Current > 11700)
+                fzzy.values["x"].Current > 11700 &&
+                fzzy.values["isB1"].Current == 0)
             {
                 fzzy.board.Send(Keyboard.ScanCodeShort.F4);
                 Log.Info("Load into B2");

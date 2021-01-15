@@ -195,6 +195,8 @@ namespace LiveSplit.UI.Components
                 UpdateScript();
             };
             updateTimer.Enabled = true;
+
+            Log.Info("");
         }
 
         private void UpdateScript()
