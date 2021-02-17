@@ -84,4 +84,12 @@
       <change>Timer will now reset when entering gauntlet</change>
     </changelog>
   </update>
+  <update version="1.6.1">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Fixed level change autosplitting</change>
+    </changelog>
+  </update>
 </updates>

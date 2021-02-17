@@ -5,7 +5,6 @@ using LiveSplit.Model;
 using LiveSplit.Options;
 using Microsoft.Win32;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -127,7 +126,7 @@ namespace LiveSplit.UI.Components
 
             values["f12Bind"] = new MemoryValue("string30", new DeepPointer("engine.dll", 0x1396CC30, new int[] { 0x0 }));
             values["speedmodLoading"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x760B54, new int[] { }));
-            //values["speedmodLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x13977A70, new int[] { }));
+            values["speedmodLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x12A53D55, new int[] { }));
             values["lurchMax"] = new MemoryValue("float", new DeepPointer("client.dll", 0x11B0308, new int[] { }));
             values["slideStepVelocityReduction"] = new MemoryValue("int", new DeepPointer("client.dll", 0x11B0D28, new int[] { }));
             values["repelEnable"] = new MemoryValue("bool", new DeepPointer("client.dll", 0x11B287C, new int[] { }));
@@ -139,7 +138,7 @@ namespace LiveSplit.UI.Components
             values["x"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2172FF8, new int[] { 0xDEC }));
             values["y"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2173B48, new int[] { 0x2A0 }));
             values["z"] = new MemoryValue("float", new DeepPointer("client.dll", 0x216F9C0, new int[] { 0xF4 }));
-            values["level"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x13977A70, new int[] { }));
+            values["level"] = new MemoryValue("string20", new DeepPointer("server.dll", 0x1053370, new int[] { }));
             values["b3Door"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9D18, new int[] { }));
             values["gauntletDialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x02A9F500, new int[] { 0x10, 0x50, 0xCF48, 0x20, 0x4C0, 0x568, 0x7E8, 0x900, 0x10, 0x4B90 }));
             values["arkDialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x23E7C18, new int[] { }));

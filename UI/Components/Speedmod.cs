@@ -46,8 +46,6 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private int levelSelectTimestamp;
-
         public void Tick()
         {
             if (!fzzy.Settings.Speedmod || !fzzy.values["f12Bind"].Current.StartsWith("exec autosplitter.cfg"))
@@ -72,23 +70,18 @@ namespace FzzyTools.UI.Components
                     fzzy.values["airSpeed"].Current = 40f;
                 }
 
-                if (fzzy.values["speedmodLoading"].Current == 0 && fzzy.values["speedmodLoading"].Old > 0)
+                if (fzzy.values["speedmodLevel"].Current != fzzy.values["speedmodLevel"].Old)
                 {
-                    levelSelectTimestamp = Environment.TickCount;
-                }
-                if (fzzy.values["speedmodLoading"].Current == 0 && Environment.TickCount - levelSelectTimestamp > 300)
-                {
-                    levelSelectTimestamp = int.MinValue;
-                    if (fzzy.values["level"].Current == "sp_training") Load("speedmod1");
-                    if (fzzy.values["level"].Current == "sp_crashsite") Load("speedmod2");
-                    if (fzzy.values["level"].Current == "sp_sewers1") Load("speedmod3");
-                    if (fzzy.values["level"].Current == "sp_boomtown_start") Load("speedmod4");
-                    if (fzzy.values["level"].Current == "sp_boomtown_end") Load("speedmod5");
-                    if (fzzy.values["level"].Current == "sp_timeshift_spoke02") Load("speedmod7");
-                    if (fzzy.values["level"].Current == "sp_beacon_spoke0") Load("speedmod8");
-                    if (fzzy.values["level"].Current == "sp_beacon") Load("speedmod9");
-                    if (fzzy.values["level"].Current == "sp_tday") Load("speedmod10");
-                    if (fzzy.values["level"].Current == "sp_skyway_v1") Load("speedmod11");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_training") Load("speedmod1");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_crashsite") Load("speedmod2");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_sewers1") Load("speedmod3");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_boomtown_start") Load("speedmod4");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_boomtown_end") Load("speedmod5");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_timeshift_spoke02") Load("speedmod7");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_beacon_spoke0") Load("speedmod8");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_beacon") Load("speedmod9");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_tday") Load("speedmod10");
+                    if (fzzy.values["speedmodLevel"].Current == "sp_skyway_v1") Load("speedmod11");
                 }
 
                 if (fzzy.values["clFrames"].Current <= 0)
