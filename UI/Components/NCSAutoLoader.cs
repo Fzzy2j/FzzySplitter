@@ -3,7 +3,7 @@ using LiveSplit.Options;
 using LiveSplit.UI.Components;
 using System;
 
-namespace TitanfallAuto_splitter.UI.Components
+namespace FzzyTools.UI.Components
 {
     class NCSAutoLoader
     {

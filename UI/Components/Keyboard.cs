@@ -38,7 +38,7 @@ namespace LiveSplit.UI.Components
             SendInput(1, Inputs, INPUT.Size);
         }
 
-        public string GetWindowInFocus()
+        public static string GetWindowInFocus()
         {
             const int nChars = 256;
             StringBuilder Buff = new StringBuilder(nChars);

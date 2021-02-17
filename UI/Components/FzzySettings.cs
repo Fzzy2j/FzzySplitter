@@ -8,16 +8,13 @@ using LiveSplit.ASL;
 using System.Diagnostics;
 using System.Net;
 using System.ComponentModel;
-using Microsoft.Win32;
-using System.Runtime.InteropServices;
-using FzzyTools.UI.Components;
-using LiveSplit.Options;
-using LiveSplit.ComponentUtil;
+using LiveSplit.Model.Input;
 
 namespace LiveSplit.UI.Components
 {
     public partial class FzzySettings : UserControl
     {
+        //public CompositeHook Hook { get; set; }
         public bool TASToolsEnabled { get; set; }
         public bool AutoLoadNCS { get; set; }
         public bool Speedmod { get; set; }
@@ -29,6 +26,8 @@ namespace LiveSplit.UI.Components
         public FzzySettings()
         {
             InitializeComponent();
+
+            //Hook = new CompositeHook();
 
             TASToolsEnabled = false;
             AutoLoadNCS = false;
@@ -352,7 +351,7 @@ namespace LiveSplit.UI.Components
 
             string titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory();
 
-            if (titanfallInstallDirectory.Length == 0)
+            if (titanfallInstallDirectory == null || titanfallInstallDirectory.Length == 0)
             {
                 MessageBox.Show("Couldn't find Titanfall 2 install location!");
                 return;
@@ -365,11 +364,12 @@ namespace LiveSplit.UI.Components
                 if (settingscontent.Contains("\"load fastany" + i + "\"")) continue;
                 File.AppendAllText(settingscfg, "\nbind \"F" + i + "\" \"load fastany" + i + "\"");
             }
-            File.AppendAllText(settingscfg, "\nbind \"F12\" \"exec autosplitter.cfg\"");
 
             using (WebClient webClient = new WebClient())
             {
                 installMenuModButton.Enabled = false;
+                uninstallMenuModButton.Enabled = false;
+                install = true;
                 menumod = Path.Combine(titanfallInstallDirectory, "vpk\\installmenumod.exe");
                 webClient.DownloadFileAsync(new Uri(FzzyComponent.MENU_MOD_INSTALLER_LINK), menumod);
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(MenuModDownloadCompleted);
@@ -380,8 +380,35 @@ namespace LiveSplit.UI.Components
             InstallFastanySaves();
         }
 
+        private void uninstallMenuModButton_Click(object sender, EventArgs e)
+        {
+            if (FzzyComponent.process != null)
+            {
+                MessageBox.Show("Please close Titanfall 2 to uninstall enhanced menu");
+                return;
+            }
+
+            string titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory();
+
+            if (titanfallInstallDirectory == null || titanfallInstallDirectory.Length == 0)
+            {
+                MessageBox.Show("Couldn't find Titanfall 2 install location!");
+                return;
+            }
+
+            using (WebClient webClient = new WebClient())
+            {
+                installMenuModButton.Enabled = false;
+                menumod = Path.Combine(titanfallInstallDirectory, "vpk\\installmenumod.exe");
+                install = false;
+                webClient.DownloadFileAsync(new Uri(FzzyComponent.MENU_MOD_UNINSTALLER_LINK), menumod);
+                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(MenuModDownloadCompleted);
+                webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(MenuModProgressChanged);
+                installMenuModProgress.Visible = true;
+            }
+        }
+
         private static string fastanySavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installsaves.exe");
-        private static string speedmodSavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installspeedmodsaves.exe");
 
         public static bool AreFastanySavesInstalled()
         {
@@ -462,46 +489,28 @@ namespace LiveSplit.UI.Components
             };
             Process.Start(startInfo);
         }
-        public static void InstallSpeedmodSaves()
-        {
-            if (AreSpeedmodSavesInstalled()) return;
-            using (WebClient webClient = new WebClient())
-            {
-                webClient.DownloadFileAsync(new Uri(FzzyComponent.SPEEDMOD_SAVES_INSTALLER_LINK), speedmodSavesInstaller);
-                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(SpeedmodSavesDownloadCompleted);
-            }
-        }
-
-        private static void SpeedmodSavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
-        {
-            var startInfo = new ProcessStartInfo
-            {
-                WorkingDirectory = Directory.GetParent(speedmodSavesInstaller).FullName,
-                FileName = speedmodSavesInstaller
-            };
-            Process.Start(startInfo);
-        }
 
         private void MenuModProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             installMenuModProgress.Value = e.ProgressPercentage;
         }
 
+        private bool install = true;
+
         private void MenuModDownloadCompleted(object sender, AsyncCompletedEventArgs e)
         {
             installMenuModProgress.Visible = false;
             installMenuModButton.Enabled = true;
+            uninstallMenuModButton.Enabled = true;
             var startInfo = new ProcessStartInfo
             {
                 WorkingDirectory = Directory.GetParent(menumod).FullName,
                 FileName = menumod
             };
             Process.Start(startInfo);
-        }
-
-        private void speedmod_CheckedChanged(object sender, EventArgs e)
-        {
-            InstallSpeedmodSaves();
+            string word = "uninstalled from";
+            if (install) word = "installed to";
+            MessageBox.Show("Menu Mod " + word + ":\n" + Directory.GetParent(menumod).FullName);
         }
     }
     class FzzyTreeView : TreeView

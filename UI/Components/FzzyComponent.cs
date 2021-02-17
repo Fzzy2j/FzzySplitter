@@ -10,13 +10,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Security.Permissions;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
-using TitanfallAuto_splitter.UI.Components;
-using TitanfallAutosplitter.UI.Components;
 
 namespace LiveSplit.UI.Components
 {
@@ -24,6 +19,7 @@ namespace LiveSplit.UI.Components
     {
 
         public const string MENU_MOD_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/Enhanced.Menu.exe";
+        public const string MENU_MOD_UNINSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/uninstallmenumod.exe";
         public const string FASTANY_SAVES_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installsaves.exe";
         public const string SPEEDMOD_SAVES_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installspeedmodsaves.exe";
 
@@ -39,9 +35,7 @@ namespace LiveSplit.UI.Components
 
         private FzzySplitter _splitter;
 
-        public AutoStrafer autoStrafer;
-        public ZLurchMacro zLurchMacro;
-        public AutoJumper autoJumper;
+        public TASTools tasTools;
         public Aimbot aimbot;
 
         public readonly Keyboard board = new Keyboard();
@@ -133,7 +127,7 @@ namespace LiveSplit.UI.Components
 
             values["f12Bind"] = new MemoryValue("string30", new DeepPointer("engine.dll", 0x1396CC30, new int[] { 0x0 }));
             values["speedmodLoading"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x760B54, new int[] { }));
-            values["speedmodLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x13977A70, new int[] { }));
+            //values["speedmodLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x13977A70, new int[] { }));
             values["lurchMax"] = new MemoryValue("float", new DeepPointer("client.dll", 0x11B0308, new int[] { }));
             values["slideStepVelocityReduction"] = new MemoryValue("int", new DeepPointer("client.dll", 0x11B0D28, new int[] { }));
             values["repelEnable"] = new MemoryValue("bool", new DeepPointer("client.dll", 0x11B287C, new int[] { }));
@@ -145,7 +139,7 @@ namespace LiveSplit.UI.Components
             values["x"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2172FF8, new int[] { 0xDEC }));
             values["y"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2173B48, new int[] { 0x2A0 }));
             values["z"] = new MemoryValue("float", new DeepPointer("client.dll", 0x216F9C0, new int[] { 0xF4 }));
-            values["level"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x13536498, new int[] { 0x2C }));
+            values["level"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x13977A70, new int[] { }));
             values["b3Door"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9D18, new int[] { }));
             values["gauntletDialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x02A9F500, new int[] { 0x10, 0x50, 0xCF48, 0x20, 0x4C0, 0x568, 0x7E8, 0x900, 0x10, 0x4B90 }));
             values["arkDialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x23E7C18, new int[] { }));
@@ -163,14 +157,6 @@ namespace LiveSplit.UI.Components
             values["currentHealth"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x13084248, new int[] { 0xA90, 0x18, 0xED8, 0x48, 0xA40, 0x10, 0xCB0, 0x4D4 }));
             values["yaw"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00E69EA0, new int[] { 0x1E94 }));
             values["pitch"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00E69EA0, new int[] { 0x1E90 }));
-            values["holdingW"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396C7D8, new int[] { }));
-            values["holdingA"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396C678, new int[] { }));
-            values["holdingS"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396C798, new int[] { }));
-            values["holdingD"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396C6A8, new int[] { }));
-            values["holdingZ"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396C80C, new int[] { }));
-            values["timescale"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x1315A2C8, new int[] { }));
-            values["holdingShift"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396CAB8, new int[] { }));
-            values["lean"] = new MemoryValue("float", new DeepPointer("client.dll", 0x216FC68, new int[] { }));
             values["velX"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C2C, new int[] { }));
             values["velY"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C30, new int[] { }));
             values["velZ"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB34C34, new int[] { }));
@@ -180,86 +166,70 @@ namespace LiveSplit.UI.Components
             values["recoilHorizontal"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00B188C0, new int[] { 0xD8, 0x1A40 }));
             values["holdingM3"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396CC98, new int[] { }));
 
+            values["timescale"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x1315A2C8, new int[] { }));
+
+            state.CurrentTimingMethod = TimingMethod.GameTime;
+
             _ncsAutoLoader = new NCSAutoLoader(this);
             _speedmod = new Speedmod(this);
 
-            autoStrafer = new AutoStrafer(this);
-            zLurchMacro = new ZLurchMacro(this);
-            autoJumper = new AutoJumper(this);
+            tasTools = new TASTools(this);
             aimbot = new Aimbot(this);
             _splitter = new FzzySplitter(this);
 
             updateTimer = new Timer() { Interval = 15 };
             updateTimer.Tick += (sender, args) =>
             {
-                UpdateScript();
+                try
+                {
+                    UpdateScript();
+                } catch (Exception e)
+                {
+                    Log.Error(e);
+                }
             };
             updateTimer.Enabled = true;
-
-            Log.Info("");
         }
 
         private void UpdateScript()
         {
-            process = Process.GetProcessesByName("Titanfall2").OrderByDescending(x => x.StartTime).FirstOrDefault(x => !x.HasExited);
-            if (process == null) return;
+            if (process == null)
+            {
+                process = Process.GetProcessesByName("Titanfall2").OrderByDescending(x => x.StartTime).FirstOrDefault(x => !x.HasExited);
+                return;
+            }
+            else
+            {
+                if (process.HasExited)
+                {
+                    process = null;
+                    return;
+                }
+            }
 
             if (timer == null) timer = new TimerModel() { CurrentState = state };
 
-            try
+            wasLoading = isLoading;
+            isLoading = values["clFrames"].Current <= 0 || values["thing"].Current == 0;
+
+            if (Settings.TASToolsEnabled && !tasTools.IsStarted)
             {
-                wasLoading = isLoading;
-                isLoading = values["clFrames"].Current <= 0 || values["thing"].Current == 0;
+                tasTools.Start();
             }
-            catch (Exception e)
+            if (!Settings.TASToolsEnabled && tasTools.IsStarted)
             {
-                Log.Error(e);
+                tasTools.Stop();
+            }
+            if (Settings.TASAimbot)
+            {
+                aimbot.Tick();
             }
 
-            try
-            {
-                if (Settings.TASToolsEnabled)
-                {
-                    autoStrafer.Tick();
-                    zLurchMacro.Tick();
-                    autoJumper.Tick();
-                }
-                if (Settings.TASAimbot)
-                {
-                    aimbot.Tick();
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
+            if (Settings.AutoLoadNCS && !Settings.Speedmod) _ncsAutoLoader.Tick();
 
-            try
-            {
-                if (Settings.AutoLoadNCS && !Settings.Speedmod) _ncsAutoLoader.Tick();
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
+            _speedmod.Tick();
 
-            try
-            {
-               _speedmod.Tick();
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
-
-            try
-            {
-                _splitter.Tick();
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
+            _splitter.Tick();
 
             foreach (MemoryValue value in values.Values)
             {
@@ -297,7 +267,7 @@ namespace LiveSplit.UI.Components
                             int lastQuote = line.LastIndexOf('"');
                             int secondToLastQuote = line.Substring(0, lastQuote).LastIndexOf('"');
                             string gameDirectory = line.Substring(secondToLastQuote + 1, lastQuote - secondToLastQuote - 1);
-                            string externalTitanfallDirectory = Path.Combine(gameDirectory, "Titanfall2");
+                            string externalTitanfallDirectory = Path.Combine(gameDirectory, "steamapps\\common\\Titanfall2");
                             if (Directory.Exists(externalTitanfallDirectory))
                             {
                                 titanfallInstallDirectory = externalTitanfallDirectory;
@@ -318,7 +288,8 @@ namespace LiveSplit.UI.Components
         public override void Dispose()
         {
             updateTimer.Dispose();
-            //_speedmod.DisableSpeedmod();
+            tasTools.Stop();
+            _speedmod.DisableSpeedmod();
         }
 
         public override string ComponentName => "FzzyTools";

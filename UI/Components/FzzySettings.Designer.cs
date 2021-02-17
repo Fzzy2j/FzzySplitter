@@ -61,6 +61,7 @@ namespace LiveSplit.UI.Components
             this.autoLoadNCS = new System.Windows.Forms.CheckBox();
             this.speedmod = new System.Windows.Forms.CheckBox();
             this.tasAimbot = new System.Windows.Forms.CheckBox();
+            this.uninstallMenuModButton = new System.Windows.Forms.Button();
             this.treeContextMenu.SuspendLayout();
             this.treeContextMenu2.SuspendLayout();
             this.SuspendLayout();
@@ -264,7 +265,6 @@ namespace LiveSplit.UI.Components
             this.speedmod.TabIndex = 21;
             this.speedmod.Text = "Speedmod";
             this.speedmod.UseVisualStyleBackColor = true;
-            this.speedmod.CheckedChanged += new System.EventHandler(this.speedmod_CheckedChanged);
             // 
             // tasAimbot
             // 
@@ -276,10 +276,21 @@ namespace LiveSplit.UI.Components
             this.tasAimbot.Text = "TAS Aimbot";
             this.tasAimbot.UseVisualStyleBackColor = true;
             // 
+            // uninstallMenuModButton
+            // 
+            this.uninstallMenuModButton.Location = new System.Drawing.Point(322, 40);
+            this.uninstallMenuModButton.Name = "uninstallMenuModButton";
+            this.uninstallMenuModButton.Size = new System.Drawing.Size(133, 23);
+            this.uninstallMenuModButton.TabIndex = 23;
+            this.uninstallMenuModButton.Text = "Uninstall Menu Mod";
+            this.uninstallMenuModButton.UseVisualStyleBackColor = true;
+            this.uninstallMenuModButton.Click += new System.EventHandler(this.uninstallMenuModButton_Click);
+            // 
             // FzzySettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.uninstallMenuModButton);
             this.Controls.Add(this.tasAimbot);
             this.Controls.Add(this.speedmod);
             this.Controls.Add(this.autoLoadNCS);
@@ -325,5 +336,6 @@ namespace LiveSplit.UI.Components
         private System.Windows.Forms.CheckBox autoLoadNCS;
         private System.Windows.Forms.CheckBox speedmod;
         private System.Windows.Forms.CheckBox tasAimbot;
+        private System.Windows.Forms.Button uninstallMenuModButton;
     }
 }

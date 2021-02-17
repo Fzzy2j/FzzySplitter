@@ -2,14 +2,11 @@
 using LiveSplit.Options;
 using LiveSplit.UI.Components;
 using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
+using System.Windows.Forms;
 
 namespace FzzyTools.UI.Components
 {
@@ -79,19 +76,19 @@ namespace FzzyTools.UI.Components
                 {
                     levelSelectTimestamp = Environment.TickCount;
                 }
-                if (fzzy.values["speedmodLoading"].Current == 0 && Environment.TickCount - levelSelectTimestamp > 1000)
+                if (fzzy.values["speedmodLoading"].Current == 0 && Environment.TickCount - levelSelectTimestamp > 300)
                 {
                     levelSelectTimestamp = int.MinValue;
-                    if (fzzy.values["speedmodLevel"].Current == "sp_training") Load("speedmod1");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_crashsite") Load("speedmod2");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_sewers1") Load("speedmod3");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_boomtown_start") Load("speedmod4");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_boomtown_end") Load("speedmod5");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_timeshift_spoke02") Load("speedmod7");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_beacon_spoke0") Load("speedmod8");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_beacon") Load("speedmod9");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_tday") Load("speedmod10");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_skyway_v1") Load("speedmod11");
+                    if (fzzy.values["level"].Current == "sp_training") Load("speedmod1");
+                    if (fzzy.values["level"].Current == "sp_crashsite") Load("speedmod2");
+                    if (fzzy.values["level"].Current == "sp_sewers1") Load("speedmod3");
+                    if (fzzy.values["level"].Current == "sp_boomtown_start") Load("speedmod4");
+                    if (fzzy.values["level"].Current == "sp_boomtown_end") Load("speedmod5");
+                    if (fzzy.values["level"].Current == "sp_timeshift_spoke02") Load("speedmod7");
+                    if (fzzy.values["level"].Current == "sp_beacon_spoke0") Load("speedmod8");
+                    if (fzzy.values["level"].Current == "sp_beacon") Load("speedmod9");
+                    if (fzzy.values["level"].Current == "sp_tday") Load("speedmod10");
+                    if (fzzy.values["level"].Current == "sp_skyway_v1") Load("speedmod11");
                 }
 
                 if (fzzy.values["clFrames"].Current <= 0)
@@ -228,6 +225,7 @@ namespace FzzyTools.UI.Components
             if (IsSpeedmodEnabled()) return;
             try
             {
+                InstallSpeedmod();
                 fzzy.values["airAcceleration"].Current = 10000f;
                 fzzy.values["airSpeed"].Current = 40f;
                 fzzy.values["lurchMax"].Current = 0f;
@@ -240,6 +238,29 @@ namespace FzzyTools.UI.Components
             catch (Exception)
             {
             }
+        }
+
+        private static string speedmodSavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installspeedmodsaves.exe");
+        public static void InstallSpeedmod()
+        {
+            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
+            File.AppendAllText(settingscfg, "\nbind \"F12\" \"exec autosplitter.cfg\"");
+            if (FzzySettings.AreSpeedmodSavesInstalled()) return;
+            using (WebClient webClient = new WebClient())
+            {
+                webClient.DownloadFileAsync(new Uri(FzzyComponent.SPEEDMOD_SAVES_INSTALLER_LINK), speedmodSavesInstaller);
+                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(SpeedmodSavesDownloadCompleted);
+            }
+        }
+
+        private static void SpeedmodSavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                WorkingDirectory = Directory.GetParent(speedmodSavesInstaller).FullName,
+                FileName = speedmodSavesInstaller
+            };
+            Process.Start(startInfo);
         }
 
         public void DisableSpeedmod()

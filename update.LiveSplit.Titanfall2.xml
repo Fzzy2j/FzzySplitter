@@ -74,4 +74,14 @@
       <change>Beacon 3 NCS auto load bug fix</change>
     </changelog>
   </update>
+  <update version="1.6">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Speedmod bug fixes</change>
+      <change>Menu mod uninstall button</change>
+      <change>Timer will now reset when entering gauntlet</change>
+    </changelog>
+  </update>
 </updates>

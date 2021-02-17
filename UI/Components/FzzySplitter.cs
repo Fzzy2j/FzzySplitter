@@ -77,11 +77,21 @@ namespace FzzyTools.UI.Components
             }
         }
 
+        private int levelSelectTimestamp = int.MinValue;
+
         private bool Reset(ASLSettingsReader settings)
         {
-            if (settings["loadReset"] && fzzy.wasLoading && !fzzy.isLoading)
+            if (fzzy.values["speedmodLoading"].Current == 0 && fzzy.values["speedmodLoading"].Old > 0)
             {
-                return true;
+                levelSelectTimestamp = Environment.TickCount;
+            }
+            if (fzzy.values["speedmodLoading"].Current == 0 && Environment.TickCount - levelSelectTimestamp > 1000)
+            {
+                levelSelectTimestamp = int.MinValue;
+                if (fzzy.values["level"].Current == "sp_training")
+                {
+                    return true;
+                }
             }
             return false;
         }
