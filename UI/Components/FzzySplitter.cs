@@ -77,21 +77,11 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private int levelSelectTimestamp = int.MinValue;
-
         private bool Reset(ASLSettingsReader settings)
         {
-            if (fzzy.values["speedmodLoading"].Current == 0 && fzzy.values["speedmodLoading"].Old > 0)
+            if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old && fzzy.values["currentLevel"].Current == "sp_training")
             {
-                levelSelectTimestamp = Environment.TickCount;
-            }
-            if (fzzy.values["speedmodLoading"].Current == 0 && Environment.TickCount - levelSelectTimestamp > 1000)
-            {
-                levelSelectTimestamp = int.MinValue;
-                if (fzzy.values["level"].Current == "sp_training")
-                {
-                    return true;
-                }
+                return true;
             }
             return false;
         }
@@ -113,14 +103,14 @@ namespace FzzyTools.UI.Components
             if (settings["BnRpause"])
             {
                 if (fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 &&
-                    fzzy.values["level"].Current == "sp_sewers1" && fzzy.values["x"].Current > -9000)
+                    fzzy.values["lastLevel"].Current == "sp_sewers1" && fzzy.values["x"].Current > -9000)
                     bnrIlPause = true;
                 if (bnrIlPause) return true;
             }
             if (settings["enc3pause"])
             {
                 if (fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 &&
-                    fzzy.values["level"].Current == "sp_hub_timeshift" && fzzy.values["y"].Current > 4000) enc3IlPause = true;
+                    fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && fzzy.values["y"].Current > 4000) enc3IlPause = true;
                 if (enc3IlPause) return true;
             }
             return fzzy.isLoading;
@@ -199,19 +189,19 @@ namespace FzzyTools.UI.Components
             }
 
             // End of game
-            if (fzzy.values["level"].Current == "sp_skyway_v1" && X < -10000 && Y > 0 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 && settings["endSplit"])
+            if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && X < -10000 && Y > 0 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 && settings["endSplit"])
             {
                 return true;
             }
 
             //Level change
-            if (fzzy.values["level"].Current != fzzy.values["level"].Old && settings["levelChangeSplit"])
+            if (fzzy.values["lastLevel"].Current != fzzy.values["lastLevel"].Old && settings["levelChangeSplit"])
             {
                 return true;
             }
 
             // BT-7274
-            if (fzzy.values["level"].Current == "sp_crashsite" && settings["btSplits"])
+            if (fzzy.values["lastLevel"].Current == "sp_crashsite" && settings["btSplits"])
             {
 
                 //Battery 1
@@ -234,7 +224,7 @@ namespace FzzyTools.UI.Components
             }
 
             // Blood and Rust
-            if (fzzy.values["level"].Current == "sp_sewers1" && settings["bnrSplits"])
+            if (fzzy.values["lastLevel"].Current == "sp_sewers1" && settings["bnrSplits"])
             {
 
                 // Button 1
@@ -276,7 +266,7 @@ namespace FzzyTools.UI.Components
             }
 
             //Embark on ITA3
-            if (fzzy.values["level"].Current == "sp_boomtown_end" && settings["ita3Splits"])
+            if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && settings["ita3Splits"])
             {
                 if (fzzy.values["embarkCount"].Old == 0 && fzzy.values["embarkCount"].Current == 1)
                 {
@@ -285,7 +275,7 @@ namespace FzzyTools.UI.Components
             }
 
             //Helmet on E&C1
-            if (fzzy.values["level"].Current == "sp_hub_timeshift" && settings["enc1Splits"])
+            if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && settings["enc1Splits"])
             {
                 if (DistanceSquared(997, -2718) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
                 {
@@ -294,7 +284,7 @@ namespace FzzyTools.UI.Components
             }
 
             //E&C 2
-            if (fzzy.values["level"].Current == "sp_timeshift_spoke02" && settings["enc2Splits"])
+            if (fzzy.values["lastLevel"].Current == "sp_timeshift_spoke02" && settings["enc2Splits"])
             {
 
                 if (settings["enc2Dialogue"])
@@ -341,7 +331,7 @@ namespace FzzyTools.UI.Components
             }
 
             // Beacon 2
-            if (fzzy.values["level"].Current == "sp_beacon_spoke0" && settings["b2Splits"])
+            if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0" && settings["b2Splits"])
             {
 
                 // Death warp
@@ -380,7 +370,7 @@ namespace FzzyTools.UI.Components
             }
 
             // Beacon 3
-            if (fzzy.values["level"].Current == "sp_beacon" && settings["b3Splits"])
+            if (fzzy.values["lastLevel"].Current == "sp_beacon" && settings["b3Splits"])
             {
 
                 // Module retrieve
@@ -403,7 +393,7 @@ namespace FzzyTools.UI.Components
             }
 
             //TBF Elevator
-            if (fzzy.values["level"].Current == "sp_tday" && settings["tbfSplits"])
+            if (fzzy.values["lastLevel"].Current == "sp_tday" && settings["tbfSplits"])
             {
                 if (DistanceSquared(-7867, 2758) < Math.Pow(600, 2) && fzzy.values["z"].Current > 450 && fzzy.values["z"].Old <= 450)
                 {
@@ -415,7 +405,7 @@ namespace FzzyTools.UI.Components
             }
 
             // The Ark
-            if (fzzy.values["level"].Current == "sp_s2s" && settings["arkSplits"])
+            if (fzzy.values["lastLevel"].Current == "sp_s2s" && settings["arkSplits"])
             {
 
                 // Elevator
@@ -443,7 +433,7 @@ namespace FzzyTools.UI.Components
             }
 
             // The Fold Weapon
-            if (fzzy.values["level"].Current == "sp_skyway_v1" && settings["foldSplits"])
+            if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && settings["foldSplits"])
             {
 
                 // Datacore
@@ -474,52 +464,52 @@ namespace FzzyTools.UI.Components
             {
                 float threshold = (float)Math.Pow(500, 2);
                 //Speedmod
-                if (fzzy.values["level"].Current == "sp_training" && DistanceSquared(-7573, 375) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_training" && DistanceSquared(-7573, 375) < threshold)
                     return true;
                 //Pilots Gauntlet
-                if (fzzy.values["level"].Current == "sp_training" && DistanceSquared(10662, -10200) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_training" && DistanceSquared(10662, -10200) < threshold)
                     return true;
                 //BT-7274
-                if (fzzy.values["level"].Current == "sp_crashsite" && DistanceSquared(-13568, -14336) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_crashsite" && DistanceSquared(-13568, -14336) < threshold)
                     return true;
                 //Blood and Rust
-                if (fzzy.values["level"].Current == "sp_sewers1" && DistanceSquared(9075, -14415) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_sewers1" && DistanceSquared(9075, -14415) < threshold)
                     return true;
                 //ITA 1
-                if (fzzy.values["level"].Current == "sp_boomtown_start" && DistanceSquared(13578, -8781) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown_start" && DistanceSquared(13578, -8781) < threshold)
                     return true;
                 //ITA 2
-                if (fzzy.values["level"].Current == "sp_boomtown" && DistanceSquared(-4087, 11155) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown" && DistanceSquared(-4087, 11155) < threshold)
                     return true;
                 //ITA 3
-                if (fzzy.values["level"].Current == "sp_boomtown_end" && DistanceSquared(-15120, -5284) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && DistanceSquared(-15120, -5284) < threshold)
                     return true;
                 //E&C 1
-                if (fzzy.values["level"].Current == "sp_hub_timeshift" && DistanceSquared(910, -7112) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && DistanceSquared(910, -7112) < threshold)
                     return true;
                 //E&C 2
-                if (fzzy.values["level"].Current == "sp_timeshift_spoke02" && DistanceSquared(-251, -3350) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_timeshift_spoke02" && DistanceSquared(-251, -3350) < threshold)
                     return true;
                 //E&C 3
-                if (fzzy.values["level"].Current == "sp_hub_timeshift" && DistanceSquared(1388, -2737) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && DistanceSquared(1388, -2737) < threshold)
                     return true;
                 //Beacon 1
-                if (fzzy.values["level"].Current == "sp_beacon" && DistanceSquared(14297, -10858) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_beacon" && DistanceSquared(14297, -10858) < threshold)
                     return true;
                 //Beacon 2
-                if (fzzy.values["level"].Current == "sp_beacon_spoke0" && DistanceSquared(-1088, -336) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0" && DistanceSquared(-1088, -336) < threshold)
                     return true;
                 //Beacon 3
-                if (fzzy.values["level"].Current == "sp_beacon" && DistanceSquared(12360, -1008) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_beacon" && DistanceSquared(12360, -1008) < threshold)
                     return true;
                 //TBF
-                if (fzzy.values["level"].Current == "sp_tday" && DistanceSquared(593, -15557) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_tday" && DistanceSquared(593, -15557) < threshold)
                     return true;
                 //The Ark
-                if (fzzy.values["level"].Current == "sp_s2s" && DistanceSquared(-25, -15189) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_s2s" && DistanceSquared(-25, -15189) < threshold)
                     return true;
                 //The Fold Weapon
-                if (fzzy.values["level"].Current == "sp_skyway_v1" && DistanceSquared(-11646, -6724) < threshold)
+                if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && DistanceSquared(-11646, -6724) < threshold)
                     return true;
             }
             return false;

@@ -70,18 +70,18 @@ namespace FzzyTools.UI.Components
                     fzzy.values["airSpeed"].Current = 40f;
                 }
 
-                if (fzzy.values["speedmodLevel"].Current != fzzy.values["speedmodLevel"].Old)
+                if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old)
                 {
-                    if (fzzy.values["speedmodLevel"].Current == "sp_training") Load("speedmod1");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_crashsite") Load("speedmod2");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_sewers1") Load("speedmod3");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_boomtown_start") Load("speedmod4");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_boomtown_end") Load("speedmod5");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_timeshift_spoke02") Load("speedmod7");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_beacon_spoke0") Load("speedmod8");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_beacon") Load("speedmod9");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_tday") Load("speedmod10");
-                    if (fzzy.values["speedmodLevel"].Current == "sp_skyway_v1") Load("speedmod11");
+                    if (fzzy.values["currentLevel"].Current == "sp_training") Load("speedmod1");
+                    if (fzzy.values["currentLevel"].Current == "sp_crashsite") Load("speedmod2");
+                    if (fzzy.values["currentLevel"].Current == "sp_sewers1") Load("speedmod3");
+                    if (fzzy.values["currentLevel"].Current == "sp_boomtown_start") Load("speedmod4");
+                    if (fzzy.values["currentLevel"].Current == "sp_boomtown_end") Load("speedmod5");
+                    if (fzzy.values["currentLevel"].Current == "sp_timeshift_spoke02") Load("speedmod7");
+                    if (fzzy.values["currentLevel"].Current == "sp_beacon_spoke0") Load("speedmod8");
+                    if (fzzy.values["currentLevel"].Current == "sp_beacon") Load("speedmod9");
+                    if (fzzy.values["currentLevel"].Current == "sp_tday") Load("speedmod10");
+                    if (fzzy.values["currentLevel"].Current == "sp_skyway_v1") Load("speedmod11");
                 }
 
                 if (fzzy.values["clFrames"].Current <= 0)
