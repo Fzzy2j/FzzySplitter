@@ -140,6 +140,7 @@ namespace FzzyTools.UI.Components
 
         private void Update(ASLSettingsReader settings)
         {
+            fzzy.values["currentLevel"].Update();
             if (fzzy.isLoading)
             {
                 splitTimer = 0;

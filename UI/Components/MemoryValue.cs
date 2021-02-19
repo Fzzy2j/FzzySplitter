@@ -49,6 +49,11 @@ namespace FzzyTools.UI.Components
             }
         }
 
+        public void Update()
+        {
+            if (!fromThisTick) NextTick();
+        }
+
         public dynamic Current {
             get
             {
