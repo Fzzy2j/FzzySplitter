@@ -100,7 +100,7 @@
       <change>Fixed auto reset being too aggressive</change>
     </changelog>
   </update>
-  <update version="1.6.2">
+  <update version="1.6.3">
     <files>
       <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
     </files>
