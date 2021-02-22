@@ -45,7 +45,7 @@ namespace FzzyTools.UI.Components
                 _gauntletTimestamp = Environment.TickCount;
             }
 
-            if (fzzy.values["level"].Current == "sp_training" &&
+            if (fzzy.values["lastLevel"].Current == "sp_training" &&
                 fzzy.values["radioSpeaking"].Current > fzzy.values["radioSpeaking"].Old &&
                 fzzy.values["dialogue"].Current > fzzy.values["dialogue"].Old &&
                 Environment.TickCount - _gauntletTimestamp < 500)
@@ -54,7 +54,7 @@ namespace FzzyTools.UI.Components
                 Log.Info("Load into BT");
             }
 
-            if (fzzy.values["level"].Current == "sp_sewers1" &&
+            if (fzzy.values["lastLevel"].Current == "sp_sewers1" &&
                 fzzy.values["inCutscene"].Current == 1 && fzzy.values["inCutscene"].Old == 0 &&
                 fzzy.values["rodeo"].Current == fzzy.values["rodeo"].Old &&
                 DistanceSquared(-5472, -6726, 3202) < 4000 * 4000 &&
@@ -64,7 +64,7 @@ namespace FzzyTools.UI.Components
                 Log.Info("Delayed load into ITA1");
             }
 
-            if (fzzy.values["level"].Current == "sp_hub_timeshift" &&
+            if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" &&
                 fzzy.values["inCutscene"].Current == 1 && fzzy.values["inCutscene"].Old == 0 &&
                 DistanceSquared(-1108, 6017, -10596) < 1000 * 1000)
             {
@@ -80,7 +80,7 @@ namespace FzzyTools.UI.Components
             {
                 _btSpeak1Timestamp = Environment.TickCount;
             }
-            if (fzzy.values["level"].Current == "sp_beacon" &&
+            if (fzzy.values["lastLevel"].Current == "sp_beacon" &&
                 Math.Abs(_btSpeak1Timestamp - _btSpeak2Timestamp) < 100 &&
                 DistanceSquared(12432, -2463) < 1000 * 1000 &&
                 fzzy.values["x"].Current > 11700 &&
@@ -90,7 +90,7 @@ namespace FzzyTools.UI.Components
                 Log.Info("Load into B2");
             }
 
-            if (fzzy.values["level"].Current == "sp_beacon_spoke0")
+            if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0")
             {
                 if (fzzy.values["y"].Current > 3000) allowB3Load = true;
 
@@ -108,7 +108,7 @@ namespace FzzyTools.UI.Components
                 allowB3Load = false;
             }
 
-            if (fzzy.values["level"].Current == "sp_beacon" &&
+            if (fzzy.values["lastLevel"].Current == "sp_beacon" &&
                 fzzy.values["b3Door"].Current - 8 == fzzy.values["b3Door"].Old &&
                 DistanceSquared(11671, -2462) < Math.Pow(4000, 2) &&
                 fzzy.values["x"].Current < 11700 &&
@@ -118,7 +118,7 @@ namespace FzzyTools.UI.Components
                 Log.Info("Load into TBF");
             }
 
-            if (fzzy.values["level"].Current == "sp_tday" &&
+            if (fzzy.values["lastLevel"].Current == "sp_tday" &&
                 fzzy.values["clFrames"].Current <= 0 && fzzy.values["clFrames"].Old > 0 &&
                 DistanceSquared(4903, 13589, 2518) < 4000 * 4000)
             {
@@ -131,7 +131,7 @@ namespace FzzyTools.UI.Components
                 _arkTimestamp = Environment.TickCount;
             }
 
-            if (fzzy.values["level"].Current == "sp_s2s" &&
+            if (fzzy.values["lastLevel"].Current == "sp_s2s" &&
                 fzzy.values["radioSpeaking"].Current > fzzy.values["radioSpeaking"].Old &&
                 fzzy.values["dialogue"].Current > fzzy.values["dialogue"].Old &&
                 Environment.TickCount - _arkTimestamp < 500 &&
@@ -141,7 +141,7 @@ namespace FzzyTools.UI.Components
                 Log.Info("Load into Fold Weapon");
             }
 
-            if (fzzy.values["level"].Current == "sp_skyway_v1" &&
+            if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" &&
                 fzzy.values["inCutscene"].Current == 1 &&
                 fzzy.values["x"].Current != fzzy.values["x"].Old &&
                 DistanceSquared(7271, 13878, 5642) < 25)

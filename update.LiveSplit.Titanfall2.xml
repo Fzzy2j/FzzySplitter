@@ -108,4 +108,12 @@
       <change>Fixed auto reset being too aggressive pt2</change>
     </changelog>
   </update>
+  <update version="1.6.4">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Fixed NCS auto loader breaking the universe and everything in it</change>
+    </changelog>
+  </update>
 </updates>
