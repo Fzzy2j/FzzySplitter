@@ -80,6 +80,7 @@ namespace LiveSplit.UI.Components
             aslSettings.AddSetting("enc2Button2", true, "Split on button 2", "enc2Splits");
             aslSettings.AddSetting("enc2Dialogue", true, "Split during second dialogue", "enc2Splits");
             aslSettings.AddSetting("enc2Hellroom", true, "Split at hellroom entrance", "enc2Splits");
+            aslSettings.AddSetting("enc2Vent", true, "Split at the bottom of the end vents", "enc2Splits");
 
             aslSettings.AddSetting("b2Splits", true, "The Beacon 2", "subSplits");
             aslSettings.AddSetting("b2Warp", true, "Split on death warp", "b2Splits");
@@ -139,6 +140,7 @@ namespace LiveSplit.UI.Components
             values["lastLevel"] = new MemoryValue("string20", new DeepPointer("server.dll", 0x1053370, new int[] { }));
             values["currentLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x12A53D55, new int[] { }));
             values["b3Door"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9D18, new int[] { }));
+            values["tbfElevator"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9B28, new int[] { }));
             values["gauntletDialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x02A9F500, new int[] { 0x10, 0x50, 0xCF48, 0x20, 0x4C0, 0x568, 0x7E8, 0x900, 0x10, 0x4B90 }));
             values["arkDialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x23E7C18, new int[] { }));
             values["isB1"] = new MemoryValue("int", new DeepPointer("engine.dll", 0xF8DCC1C, new int[] { }));

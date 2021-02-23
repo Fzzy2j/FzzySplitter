@@ -329,6 +329,15 @@ namespace FzzyTools.UI.Components
                         return true;
                     }
                 }
+
+                // Vents
+                if (settings["enc2Vent"])
+                {
+                    if (DistanceSquared(2380, -4750) < 15000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    {
+                        return true;
+                    }
+                }
             }
 
             // Beacon 2
@@ -396,12 +405,9 @@ namespace FzzyTools.UI.Components
             //TBF Elevator
             if (fzzy.values["lastLevel"].Current == "sp_tday" && settings["tbfSplits"])
             {
-                if (DistanceSquared(-7867, 2758) < Math.Pow(600, 2) && fzzy.values["z"].Current > 450 && fzzy.values["z"].Old <= 450)
+                if (DistanceSquared(-7867, 2758) < Math.Pow(600, 2) && fzzy.values["tbfElevator"].Current - 8 == fzzy.values["tbfElevator"].Old)
                 {
-                    if (fzzy.values["velZ"].Current == 0)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
 

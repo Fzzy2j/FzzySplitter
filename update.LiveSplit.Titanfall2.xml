@@ -116,4 +116,13 @@
       <change>Fixed NCS auto loader breaking the universe and everything in it</change>
     </changelog>
   </update>
+  <update version="1.6.5">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Added vent split to enc2</change>
+      <change>Improved timing on trial by fire elevator split to be more like it used to be when it was a subtitle split</change>
+    </changelog>
+  </update>
 </updates>
