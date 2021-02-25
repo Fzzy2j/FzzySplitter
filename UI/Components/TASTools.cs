@@ -18,7 +18,7 @@ namespace FzzyTools.UI.Components
 
         private FzzyComponent fzzy;
 
-        private Dictionary<Keyboard.ScanCodeShort, int> pressedKeys = new Dictionary<Keyboard.ScanCodeShort, int>();
+        private Dictionary<Keyboard.ScanCodeShort, long> pressedKeys = new Dictionary<Keyboard.ScanCodeShort, long>();
 
         private bool allowKick;
 
@@ -100,7 +100,7 @@ namespace FzzyTools.UI.Components
         {
             if (pressedKeys.ContainsKey(key)) return;
             fzzy.board.Press(key);
-            pressedKeys[key] = Environment.TickCount;
+            pressedKeys[key] = DateTime.Now.Ticks;
         }
 
         private const int MOVEMENT_KEY_PRESS_TIME = 8;
@@ -195,13 +195,13 @@ namespace FzzyTools.UI.Components
             while (tasRunning)
             {
                 List<Keyboard.ScanCodeShort> removals = new List<Keyboard.ScanCodeShort>();
-                foreach (KeyValuePair<Keyboard.ScanCodeShort, int> entry in pressedKeys)
+                foreach (KeyValuePair<Keyboard.ScanCodeShort, long> entry in pressedKeys)
                 {
-                    if (Environment.TickCount - entry.Value > MOVEMENT_KEY_PRESS_TIME)
+                    if (DateTime.Now.Ticks - entry.Value > MOVEMENT_KEY_PRESS_TIME)
                     {
                         fzzy.board.Unpress(entry.Key);
                     }
-                    if (Environment.TickCount - entry.Value > MOVEMENT_KEY_PRESS_TIME * 2)
+                    if (DateTime.Now.Ticks - entry.Value > MOVEMENT_KEY_PRESS_TIME * 2)
                     {
                         removals.Add(entry.Key);
                     }
@@ -248,12 +248,12 @@ namespace FzzyTools.UI.Components
                     var yawOffset = ((x - (bitmap.Width / 2)) / sampleDensity) * displayDensity;
                     var pitchOffset = ((y - (bitmap.Height / 2)) / sampleDensity) * displayDensity;
 
-                    var pixelStart = Environment.TickCount;
+                    var pixelStart = DateTime.Now.Ticks;
 
                     if (pixel.R < 255)
                     {
                         var padding = (int)(30f / tasValues["timescale"].Current);
-                        while (Environment.TickCount - pixelStart < padding)
+                        while (DateTime.Now.Ticks - pixelStart < padding)
                         {
                             tasValues["yaw"].Current = (startYaw - yawOffset) - tasValues["viewThunkHorizontal"].Current - tasValues["recoilHorizontal"].Current;
                             tasValues["pitch"].Current = (startPitch + pitchOffset) - tasValues["viewThunkVertical"].Current - tasValues["recoilVertical"].Current;

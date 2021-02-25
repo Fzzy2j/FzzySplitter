@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Windows.Forms;
 
 namespace FzzyTools.UI.Components
 {
@@ -15,7 +14,7 @@ namespace FzzyTools.UI.Components
 
         private FzzyComponent fzzy;
 
-        private int _previousTickCount;
+        private long _previousTickCount;
 
         private bool _allowGauntletLoad = false;
         private bool _allowB3Load = false;
@@ -34,13 +33,13 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private int loadTimestamp;
+        private long loadTimestamp;
 
         private void Load(string save)
         {
-            if (Environment.TickCount - loadTimestamp > 5000)
+            if (DateTime.Now.Ticks - loadTimestamp > 5000)
             {
-                loadTimestamp = Environment.TickCount;
+                loadTimestamp = DateTime.Now.Ticks;
                 Log.Info("Load into " + save);
                 RunCommand("load " + save);
             }
@@ -88,9 +87,8 @@ namespace FzzyTools.UI.Components
                 {
                     _allowGauntletLoad = false;
                 }
-                if (fzzy.values["level"].Current == "sp_training")
+                if (fzzy.values["lastLevel"].Current == "sp_training")
                 {
-
                     if (DistanceSquared(880, 6770, 466) < 1000 * 1000) _allowGauntletLoad = true;
 
                     float projection = 0.866049f * fzzy.values["x"].Current + 0.499959f * fzzy.values["y"].Current;
@@ -102,7 +100,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["level"].Current == "sp_crashsite")
+                if (fzzy.values["lastLevel"].Current == "sp_crashsite")
                 {
                     if (DistanceSquared(-445, -383, 112) < 25)
                     {
@@ -110,7 +108,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["level"].Current == "sp_sewers1")
+                if (fzzy.values["lastLevel"].Current == "sp_sewers1")
                 {
                     if (DistanceSquared(-9138, -6732, 2605) < 500 * 500 && fzzy.values["inCutscene"].Current == 1)
                     {
@@ -118,7 +116,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["level"].Current == "sp_boomtown")
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown")
                 {
                     float xDistance = fzzy.values["x"].Current - 8167;
                     float yDistance = fzzy.values["y"].Current + 3583;
@@ -129,7 +127,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["level"].Current == "sp_boomtown_end")
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown_end")
                 {
                     if (DistanceSquared(8644, 1097, -2621) < 7000 * 7000 && fzzy.values["inCutscene"].Current == 1)
                     {
@@ -137,7 +135,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["level"].Current == "sp_hub_timeshift")
+                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift")
                 {
                     if (Math.Abs(fzzy.values["x"].Current - 1112.845) < 1 && Math.Abs(fzzy.values["y"].Current + 2741) < 100 && Math.Abs(fzzy.values["z"].Current + 859) < 1000)
                     {
@@ -145,14 +143,14 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["level"].Current == "sp_hub_timeshift" &&
+                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" &&
                    fzzy.values["inCutscene"].Current == 1 && fzzy.values["inCutscene"].Old == 0 &&
                    DistanceSquared(-1108, 6017, -10596) < 1000 * 1000)
                 {
                     Load("speedmod8");
                 }
 
-                if (fzzy.values["level"].Current == "sp_beacon_spoke0")
+                if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0")
                 {
                     if (fzzy.values["y"].Current > 3000) _allowB3Load = true;
 
@@ -169,21 +167,21 @@ namespace FzzyTools.UI.Components
                     _allowB3Load = false;
                 }
 
-                if (fzzy.values["level"].Current == "sp_beacon" &&
+                if (fzzy.values["lastLevel"].Current == "sp_beacon" &&
                     fzzy.values["b3Fight"].Current > 0 &&
                     fzzy.values["inCutscene"].Current == 2)
                 {
                     Load("speedmod10");
                 }
 
-                if (fzzy.values["level"].Current == "sp_tday" &&
+                if (fzzy.values["lastLevel"].Current == "sp_tday" &&
                     DistanceSquared(6738, 12395, 2573) < 1000 * 1000 &&
                     fzzy.values["inCutscene"].Current == 1)
                 {
                     Load("speedmod11");
                 }
 
-                if (fzzy.values["level"].Current == "sp_skyway_v1" &&
+                if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" &&
                     DistanceSquared(9023, 12180, 5693) < 1000 * 1000 &&
                     fzzy.values["inCutscene"].Current == 1)
                 {
@@ -191,7 +189,7 @@ namespace FzzyTools.UI.Components
                 }
             }
 
-            _previousTickCount = Environment.TickCount;
+            _previousTickCount = DateTime.Now.Ticks;
         }
 
         private float DistanceSquared(float x, float y, float z)

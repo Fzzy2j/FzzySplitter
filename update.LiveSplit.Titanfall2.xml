@@ -125,4 +125,13 @@
       <change>Improved timing on trial by fire elevator split to be more like it used to be when it was a subtitle split</change>
     </changelog>
   </update>
+  <update version="1.6.6">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Speedmod fixes</change>
+      <change>Stability fixes</change>
+    </changelog>
+  </update>
 </updates>

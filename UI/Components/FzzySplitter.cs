@@ -3,11 +3,7 @@ using LiveSplit.ComponentUtil;
 using LiveSplit.Options;
 using LiveSplit.UI.Components;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace FzzyTools.UI.Components
 {
@@ -45,7 +41,7 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private int splitTimestamp;
+        private long splitTimestamp;
 
         public void Tick()
         {
@@ -61,9 +57,9 @@ namespace FzzyTools.UI.Components
                 }
                 if (Split(settings))
                 {
-                    if (Environment.TickCount - splitTimestamp > 1000)
+                    if (DateTime.Now.Ticks - splitTimestamp > 1000)
                     {
-                        splitTimestamp = Environment.TickCount;
+                        splitTimestamp = DateTime.Now.Ticks;
                         fzzy.timer.Split();
                     }
                 }
@@ -156,9 +152,8 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private int splitTimerTimestamp;
-        private int splitTimer;
-        private int b2buttonTimestamp;
+        private long splitTimerTimestamp;
+        private long splitTimer;
         private bool hellroomsplit;
         private bool bnrdoorsplit;
         private bool enc2Dialogue;
@@ -173,8 +168,8 @@ namespace FzzyTools.UI.Components
                 fzzy.values["menuText"].Current != fzzy.values["menuText"].Old) return true;
 
             // This is used for delaying splits
-            var timePassed = Environment.TickCount - splitTimerTimestamp;
-            splitTimerTimestamp = Environment.TickCount;
+            var timePassed = DateTime.Now.Ticks - splitTimerTimestamp;
+            splitTimerTimestamp = DateTime.Now.Ticks;
             if (splitTimer > 0)
             {
                 var adjustment = splitTimer - timePassed;
@@ -195,7 +190,7 @@ namespace FzzyTools.UI.Components
                 return true;
             }
 
-            //Level change
+            // Level change
             if (fzzy.values["lastLevel"].Current != fzzy.values["lastLevel"].Old && settings["levelChangeSplit"])
             {
                 return true;
@@ -205,7 +200,7 @@ namespace FzzyTools.UI.Components
             if (fzzy.values["lastLevel"].Current == "sp_crashsite" && settings["btSplits"])
             {
 
-                //Battery 1
+                // Battery 1
                 if (settings["btBattery1"])
                 {
                     if (DistanceSquared(-4568, -3669) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
@@ -214,7 +209,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                //Battery 2
+                // Battery 2
                 if (settings["btBattery2"])
                 {
                     if (DistanceSquared(-4111, 4583) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
@@ -266,7 +261,7 @@ namespace FzzyTools.UI.Components
                 }
             }
 
-            //Embark on ITA3
+            // Embark on ITA3
             if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && settings["ita3Splits"])
             {
                 if (fzzy.values["embarkCount"].Old == 0 && fzzy.values["embarkCount"].Current == 1)
@@ -275,7 +270,7 @@ namespace FzzyTools.UI.Components
                 }
             }
 
-            //Helmet on E&C1
+            // Helmet on E&C1
             if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && settings["enc1Splits"])
             {
                 if (DistanceSquared(997, -2718) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
@@ -284,7 +279,7 @@ namespace FzzyTools.UI.Components
                 }
             }
 
-            //E&C 2
+            // E&C 2
             if (fzzy.values["lastLevel"].Current == "sp_timeshift_spoke02" && settings["enc2Splits"])
             {
 
@@ -333,7 +328,7 @@ namespace FzzyTools.UI.Components
                 // Vents
                 if (settings["enc2Vent"])
                 {
-                    if (DistanceSquared(2380, -4750) < 15000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    if (fzzy.values["z"].Current < -1200 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
                     {
                         return true;
                     }
@@ -359,9 +354,8 @@ namespace FzzyTools.UI.Components
                 // Button 1
                 if (settings["b2Button1"])
                 {
-                    if (fzzy.values["b2button"].Current != fzzy.values["b2button"].Old && Environment.TickCount - b2buttonTimestamp > 1000)
+                    if (fzzy.values["b2button"].Current != fzzy.values["b2button"].Old)
                     {
-                        b2buttonTimestamp = Environment.TickCount;
                         if (DistanceSquared(2690, 10366) < Math.Pow(200, 2))
                         {
                             return true;
@@ -392,7 +386,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                //Module 2
+                // Module 2
                 if (settings["b3Module2"])
                 {
                     if (DistanceSquared(3797, -1905) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
@@ -402,7 +396,7 @@ namespace FzzyTools.UI.Components
                 }
             }
 
-            //TBF Elevator
+            // TBF Elevator
             if (fzzy.values["lastLevel"].Current == "sp_tday" && settings["tbfSplits"])
             {
                 if (DistanceSquared(-7867, 2758) < Math.Pow(600, 2) && fzzy.values["tbfElevator"].Current - 8 == fzzy.values["tbfElevator"].Old)
