@@ -57,9 +57,9 @@ namespace FzzyTools.UI.Components
                 }
                 if (Split(settings))
                 {
-                    if (DateTime.Now.Ticks - splitTimestamp > 1000)
+                    if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - splitTimestamp > 1000)
                     {
-                        splitTimestamp = DateTime.Now.Ticks;
+                        splitTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                         fzzy.timer.Split();
                     }
                 }
@@ -168,8 +168,8 @@ namespace FzzyTools.UI.Components
                 fzzy.values["menuText"].Current != fzzy.values["menuText"].Old) return true;
 
             // This is used for delaying splits
-            var timePassed = DateTime.Now.Ticks - splitTimerTimestamp;
-            splitTimerTimestamp = DateTime.Now.Ticks;
+            var timePassed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - splitTimerTimestamp;
+            splitTimerTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (splitTimer > 0)
             {
                 var adjustment = splitTimer - timePassed;

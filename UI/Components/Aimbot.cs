@@ -132,7 +132,7 @@ namespace FzzyTools.UI.Components
                 oldYaw = fzzy.values["yaw"].Current;
                 oldPitch = fzzy.values["pitch"].Current;
                 ChooseTarget();
-                startMillis = DateTime.Now.Ticks;
+                startMillis = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 aimbotThread = new Thread(DoAimbot);
                 aimbotThread.Start();
             }
@@ -147,11 +147,11 @@ namespace FzzyTools.UI.Components
             while (true)
             {
                 if (!Lock()) if (!ChooseTarget()) break;
-                if (DateTime.Now.Ticks - startMillis > padding / 2)
+                if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startMillis > padding / 2)
                 {
                     fzzy.board.Send(Keyboard.ScanCodeShort.KEY_M);
                 }
-                if (DateTime.Now.Ticks - startMillis > padding)
+                if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startMillis > padding)
                 {
                     fzzy.values["yaw"].Current = oldYaw;
                     fzzy.values["pitch"].Current = oldPitch;

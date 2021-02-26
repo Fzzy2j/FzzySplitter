@@ -134,4 +134,13 @@
       <change>Stability fixes</change>
     </changelog>
   </update>
+  <update version="1.6.7">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Fixed timings being broken for ncs auto loader</change>
+      <change>Fixed speedmod being too aggressive with loading saves</change>
+    </changelog>
+  </update>
 </updates>

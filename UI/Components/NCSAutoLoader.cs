@@ -32,23 +32,23 @@ namespace FzzyTools.UI.Components
         {
             if (_queuedKeyDelay > 0)
             {
-                _queuedKeyDelay -= DateTime.Now.Ticks - _previousTimestamp;
+                _queuedKeyDelay -= DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _previousTimestamp;
                 if (_queuedKeyDelay <= 0)
                 {
                     fzzy.board.Send(_queuedKey);
                 }
             }
-            _previousTimestamp = DateTime.Now.Ticks;
+            _previousTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             if (fzzy.values["gauntletDialogue"].Current > fzzy.values["gauntletDialogue"].Old)
             {
-                _gauntletTimestamp = DateTime.Now.Ticks;
+                _gauntletTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
 
             if (fzzy.values["lastLevel"].Current == "sp_training" &&
                 fzzy.values["radioSpeaking"].Current > fzzy.values["radioSpeaking"].Old &&
                 fzzy.values["dialogue"].Current > fzzy.values["dialogue"].Old &&
-                DateTime.Now.Ticks - _gauntletTimestamp < 500)
+                DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _gauntletTimestamp < 500)
             {
                 fzzy.board.Send(Keyboard.ScanCodeShort.F1);
                 Log.Info("Load into BT");
@@ -74,11 +74,11 @@ namespace FzzyTools.UI.Components
 
             if (fzzy.values["btSpeak2"].Current == 1 && fzzy.values["btSpeak2"].Old != 1)
             {
-                _btSpeak2Timestamp = DateTime.Now.Ticks;
+                _btSpeak2Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
             if (fzzy.values["btSpeak1"].Current > fzzy.values["btSpeak1"].Old)
             {
-                _btSpeak1Timestamp = DateTime.Now.Ticks;
+                _btSpeak1Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
             if (fzzy.values["lastLevel"].Current == "sp_beacon" &&
                 Math.Abs(_btSpeak1Timestamp - _btSpeak2Timestamp) < 100 &&
@@ -128,13 +128,13 @@ namespace FzzyTools.UI.Components
 
             if (fzzy.values["arkDialogue"].Current > fzzy.values["arkDialogue"].Old)
             {
-                _arkTimestamp = DateTime.Now.Ticks;
+                _arkTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
 
             if (fzzy.values["lastLevel"].Current == "sp_s2s" &&
                 fzzy.values["radioSpeaking"].Current > fzzy.values["radioSpeaking"].Old &&
                 fzzy.values["dialogue"].Current > fzzy.values["dialogue"].Old &&
-                DateTime.Now.Ticks - _arkTimestamp < 500 &&
+                DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _arkTimestamp < 500 &&
                 DistanceSquared(-2635, 7157, 7444) < 5000 * 5000)
             {
                 fzzy.board.Send(Keyboard.ScanCodeShort.F8);

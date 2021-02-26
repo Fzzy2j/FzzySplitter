@@ -100,7 +100,7 @@ namespace FzzyTools.UI.Components
         {
             if (pressedKeys.ContainsKey(key)) return;
             fzzy.board.Press(key);
-            pressedKeys[key] = DateTime.Now.Ticks;
+            pressedKeys[key] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
         private const int MOVEMENT_KEY_PRESS_TIME = 8;
@@ -197,11 +197,11 @@ namespace FzzyTools.UI.Components
                 List<Keyboard.ScanCodeShort> removals = new List<Keyboard.ScanCodeShort>();
                 foreach (KeyValuePair<Keyboard.ScanCodeShort, long> entry in pressedKeys)
                 {
-                    if (DateTime.Now.Ticks - entry.Value > MOVEMENT_KEY_PRESS_TIME)
+                    if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - entry.Value > MOVEMENT_KEY_PRESS_TIME)
                     {
                         fzzy.board.Unpress(entry.Key);
                     }
-                    if (DateTime.Now.Ticks - entry.Value > MOVEMENT_KEY_PRESS_TIME * 2)
+                    if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - entry.Value > MOVEMENT_KEY_PRESS_TIME * 2)
                     {
                         removals.Add(entry.Key);
                     }
@@ -248,12 +248,12 @@ namespace FzzyTools.UI.Components
                     var yawOffset = ((x - (bitmap.Width / 2)) / sampleDensity) * displayDensity;
                     var pitchOffset = ((y - (bitmap.Height / 2)) / sampleDensity) * displayDensity;
 
-                    var pixelStart = DateTime.Now.Ticks;
+                    var pixelStart = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
                     if (pixel.R < 255)
                     {
                         var padding = (int)(30f / tasValues["timescale"].Current);
-                        while (DateTime.Now.Ticks - pixelStart < padding)
+                        while (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - pixelStart < padding)
                         {
                             tasValues["yaw"].Current = (startYaw - yawOffset) - tasValues["viewThunkHorizontal"].Current - tasValues["recoilHorizontal"].Current;
                             tasValues["pitch"].Current = (startPitch + pitchOffset) - tasValues["viewThunkVertical"].Current - tasValues["recoilVertical"].Current;

@@ -19,14 +19,14 @@ namespace FzzyTools.UI.Components
         private bool _allowGauntletLoad = false;
         private bool _allowB3Load = false;
 
-        private string cfg;
+        //private string cfg;
 
         public Speedmod(FzzyComponent fzzy)
         {
             this.fzzy = fzzy;
             try
             {
-                this.cfg = Path.Combine(FzzyComponent.GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
+                //this.cfg = Path.Combine(FzzyComponent.GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
             }
             catch (Exception)
             {
@@ -37,17 +37,19 @@ namespace FzzyTools.UI.Components
 
         private void Load(string save)
         {
-            if (DateTime.Now.Ticks - loadTimestamp > 5000)
+            if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - loadTimestamp > 5000)
             {
-                loadTimestamp = DateTime.Now.Ticks;
+                loadTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 Log.Info("Load into " + save);
                 RunCommand("load " + save);
             }
         }
 
+        private long unloadTimestamp;
+
         public void Tick()
         {
-            if (!fzzy.Settings.Speedmod || !fzzy.values["f12Bind"].Current.StartsWith("exec autosplitter.cfg"))
+            if (!fzzy.Settings.Speedmod)// || !fzzy.values["f12Bind"].Current.StartsWith("exec autosplitter.cfg"))
             {
                 if (!fzzy.isLoading)
                 {
@@ -70,6 +72,11 @@ namespace FzzyTools.UI.Components
                 }
 
                 if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old)
+                {
+                    if (fzzy.values["currentLevel"].Current.Length == 0) unloadTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                }
+
+                if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - unloadTimestamp > 500)
                 {
                     if (fzzy.values["currentLevel"].Current == "sp_training") Load("speedmod1");
                     if (fzzy.values["currentLevel"].Current == "sp_crashsite") Load("speedmod2");
@@ -129,7 +136,7 @@ namespace FzzyTools.UI.Components
 
                 if (fzzy.values["lastLevel"].Current == "sp_boomtown_end")
                 {
-                    if (DistanceSquared(8644, 1097, -2621) < 7000 * 7000 && fzzy.values["inCutscene"].Current == 1)
+                    if (DistanceSquared(8644, 1097, -2621) < 7000 * 7000 && fzzy.values["inCutscene"].Current == 1 && fzzy.values["rodeo"].Current == fzzy.values["rodeo"].Old)
                     {
                         Load("speedmod7");
                     }
@@ -189,7 +196,7 @@ namespace FzzyTools.UI.Components
                 }
             }
 
-            _previousTickCount = DateTime.Now.Ticks;
+            _previousTickCount = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
         private float DistanceSquared(float x, float y, float z)
@@ -234,8 +241,6 @@ namespace FzzyTools.UI.Components
         private static string speedmodSavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installspeedmodsaves.exe");
         public static void InstallSpeedmod()
         {
-            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
-            File.AppendAllText(settingscfg, "\nbind \"F12\" \"exec autosplitter.cfg\"");
             if (FzzySettings.AreSpeedmodSavesInstalled()) return;
             using (WebClient webClient = new WebClient())
             {
@@ -291,9 +296,9 @@ namespace FzzyTools.UI.Components
 
         private void RunCommand(string cmd)
         {
-            File.WriteAllText(cfg, cmd);
+            fzzy.values["f11Bind"].Current = cmd;
             Log.Info("running command: " + cmd);
-            fzzy.board.Send(Keyboard.ScanCodeShort.F12);
+            fzzy.board.Send(Keyboard.ScanCodeShort.F11);
         }
 
         private void MakeAlliesKillable()
