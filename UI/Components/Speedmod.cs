@@ -296,6 +296,11 @@ namespace FzzyTools.UI.Components
 
         private void RunCommand(string cmd)
         {
+            if (cmd.Length > 16) return;
+            for (int i = 0; i < 16 - cmd.Length; i++)
+            {
+                cmd += " ";
+            }
             fzzy.values["f11Bind"].Current = cmd;
             Log.Info("running command: " + cmd);
             fzzy.board.Send(Keyboard.ScanCodeShort.F11);

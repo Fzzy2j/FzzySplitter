@@ -3,6 +3,7 @@ using LiveSplit.ComponentUtil;
 using LiveSplit.Options;
 using LiveSplit.UI.Components;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace FzzyTools.UI.Components
@@ -41,8 +42,6 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private long splitTimestamp;
-
         public void Tick()
         {
             var settings = fzzy.Settings.aslsettings.Reader;
@@ -55,17 +54,14 @@ namespace FzzyTools.UI.Components
                 {
                     fzzy.timer.Reset();
                 }
-                if (Split(settings))
-                {
-                    if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - splitTimestamp > 1000)
-                    {
-                        splitTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                        fzzy.timer.Split();
-                    }
-                }
+                Split(settings);
             }
             if (fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.NotRunning)
             {
+                if (finishedSplits.Count > 0)
+                {
+                    finishedSplits.Clear();
+                }
                 if (Start(settings))
                 {
                     fzzy.timer.Start();
@@ -73,9 +69,28 @@ namespace FzzyTools.UI.Components
             }
         }
 
+        private List<string> finishedSplits = new List<string>();
+
+        private void DoSingleSplit(string key, int delay = 0)
+        {
+            if (finishedSplits.Contains(key)) return;
+            if (delay <= 0)
+            {
+                fzzy.timer.Split();
+            } else
+            {
+                splitTimer = delay;
+            }
+            finishedSplits.Add(key);
+        }
+
         private bool Reset(ASLSettingsReader settings)
         {
             if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old && fzzy.values["currentLevel"].Current == "sp_training")
+            {
+                return true;
+            }
+            if (settings["loadReset"] && fzzy.wasLoading && !fzzy.isLoading)
             {
                 return true;
             }
@@ -139,35 +154,21 @@ namespace FzzyTools.UI.Components
             fzzy.values["currentLevel"].Update();
             if (fzzy.isLoading)
             {
-                splitTimer = 0;
-
-                bnrdoorsplit = false;
-                hellroomsplit = false;
-
                 bnrIlPause = false;
                 enc3IlPause = false;
-
-                arkElevatorSplit = false;
-                arkKnifeSplit = false;
             }
         }
 
         private long splitTimerTimestamp;
         private long splitTimer;
-        private bool hellroomsplit;
-        private bool bnrdoorsplit;
-        private bool enc2Dialogue;
-        private bool arkElevatorSplit;
-        private bool arkKnifeSplit;
 
-        private bool Split(ASLSettingsReader settings)
+        private void Split(ASLSettingsReader settings)
         {
-            if (settings["flagSplit"] && fzzy.values["flag"].Old == 1 && fzzy.values["flag"].Current == 0) return true;
+            if (settings["flagSplit"] && fzzy.values["flag"].Old == 1 && fzzy.values["flag"].Current == 0) fzzy.timer.Split();
 
             if (settings["helmetSplit"] && (fzzy.values["menuText"].Current.StartsWith("Found ") || fzzy.values["menuText"].Current.StartsWith("尋獲 ")) &&
-                fzzy.values["menuText"].Current != fzzy.values["menuText"].Old) return true;
+                fzzy.values["menuText"].Current != fzzy.values["menuText"].Old) fzzy.timer.Split();
 
-            // This is used for delaying splits
             var timePassed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - splitTimerTimestamp;
             splitTimerTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (splitTimer > 0)
@@ -176,7 +177,7 @@ namespace FzzyTools.UI.Components
                 if (adjustment <= 0)
                 {
                     splitTimer = 0;
-                    return true;
+                    fzzy.timer.Split();
                 }
                 else
                 {
@@ -187,13 +188,22 @@ namespace FzzyTools.UI.Components
             // End of game
             if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && X < -10000 && Y > 0 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 && settings["endSplit"])
             {
-                return true;
+                DoSingleSplit("runEnd");
             }
 
             // Level change
-            if (fzzy.values["lastLevel"].Current != fzzy.values["lastLevel"].Old && settings["levelChangeSplit"])
+            if (fzzy.values["lastLevel"].Current.Length > 0 && fzzy.values["lastLevel"].Current != fzzy.values["lastLevel"].Old && settings["levelChangeSplit"])
             {
-                return true;
+                var level = fzzy.values["lastLevel"].Current;
+                if (level == "sp_beacon")
+                {
+                    level += fzzy.values["isB1"].Current;
+                }
+                if (level == "sp_hub_timeshift")
+                {
+                    level += fzzy.values["isENC1"].Current;
+                }
+                DoSingleSplit(level);
             }
 
             // BT-7274
@@ -205,7 +215,7 @@ namespace FzzyTools.UI.Components
                 {
                     if (DistanceSquared(-4568, -3669) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
                     {
-                        return true;
+                        DoSingleSplit("btBattery1");
                     }
                 }
 
@@ -214,7 +224,7 @@ namespace FzzyTools.UI.Components
                 {
                     if (DistanceSquared(-4111, 4583) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
                     {
-                        return true;
+                        DoSingleSplit("btBattery2");
                     }
                 }
             }
@@ -228,17 +238,16 @@ namespace FzzyTools.UI.Components
                 {
                     if (fzzy.values["bnrbutton1"].Old == 0 && fzzy.values["bnrbutton1"].Current > 0 && !fzzy.isLoading)
                     {
-                        return true;
+                        DoSingleSplit("bnrButton1");
                     }
                 }
 
                 // Door trigger
                 if (settings["bnrDoor"])
                 {
-                    if (Y <= -226 && X <= -827 && Z > 450 && !bnrdoorsplit && !fzzy.isLoading)
+                    if (Y <= -226 && X <= -827 && Z > 450 && !fzzy.isLoading)
                     {
-                        bnrdoorsplit = true;
-                        return true;
+                        DoSingleSplit("bnrTrigger");
                     }
                 }
 
@@ -247,7 +256,7 @@ namespace FzzyTools.UI.Components
                 {
                     if (fzzy.values["bnrbutton2"].Old + 8 == fzzy.values["bnrbutton2"].Current && !fzzy.isLoading)
                     {
-                        return true;
+                        DoSingleSplit("bnrButton2");
                     }
                 }
 
@@ -256,7 +265,7 @@ namespace FzzyTools.UI.Components
                 {
                     if (fzzy.values["embarkCount"].Old == 0 && fzzy.values["embarkCount"].Current == 1)
                     {
-                        return true;
+                        DoSingleSplit("bnrEmbark");
                     }
                 }
             }
@@ -266,7 +275,7 @@ namespace FzzyTools.UI.Components
             {
                 if (fzzy.values["embarkCount"].Old == 0 && fzzy.values["embarkCount"].Current == 1)
                 {
-                    return true;
+                    DoSingleSplit("ita3Embark");
                 }
             }
 
@@ -275,7 +284,7 @@ namespace FzzyTools.UI.Components
             {
                 if (DistanceSquared(997, -2718) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
                 {
-                    splitTimer = 1800;
+                    DoSingleSplit("enc1Helmet", 1800);
                 }
             }
 
@@ -287,14 +296,8 @@ namespace FzzyTools.UI.Components
                 {
                     if (X > 8755 && X < 9655 && Y < -4528 && Z > 5000)
                     {
-                        if (!enc2Dialogue)
-                        {
-                            splitTimer = 3000;
-                            enc2Dialogue = true;
-                        }
+                        DoSingleSplit("enc2Dialogue", 3000);
                     }
-                    else if (fzzy.isLoading)
-                        enc2Dialogue = false;
                 }
 
                 // Button 1
@@ -302,7 +305,7 @@ namespace FzzyTools.UI.Components
                 {
                     if (DistanceSquared(2805, -3363) < Math.Pow(200, 2) && fzzy.values["enc2button1"].Old + 8 == fzzy.values["enc2button1"].Current && !fzzy.isLoading)
                     {
-                        return true;
+                        DoSingleSplit("enc2Button1");
                     }
                 }
 
@@ -311,17 +314,16 @@ namespace FzzyTools.UI.Components
                 {
                     if (DistanceSquared(6271, -3552) < Math.Pow(200, 2) && fzzy.values["enc2button2"].Old + 8 == fzzy.values["enc2button2"].Current && !fzzy.isLoading)
                     {
-                        return true;
+                        DoSingleSplit("enc2Button2");
                     }
                 }
 
                 // Hellroom
                 if (settings["enc2Hellroom"])
                 {
-                    if (DistanceSquared(10708, -2263) < 15000 && !hellroomsplit && !fzzy.isLoading)
+                    if (DistanceSquared(10708, -2263) < 15000 && !fzzy.isLoading)
                     {
-                        hellroomsplit = true;
-                        return true;
+                        DoSingleSplit("enc2Hellroom");
                     }
                 }
 
@@ -330,7 +332,7 @@ namespace FzzyTools.UI.Components
                 {
                     if (fzzy.values["z"].Current < -1200 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
                     {
-                        return true;
+                        DoSingleSplit("enc2Vent");
                     }
                 }
             }
@@ -347,7 +349,7 @@ namespace FzzyTools.UI.Components
                     var warpDistanceSquared = warpX * warpX + warpY * warpY;
                     if (DistanceSquared(4019, 4233) < 500 && warpDistanceSquared > 20000 && !fzzy.wasLoading)
                     {
-                        return true;
+                        DoSingleSplit("b2Warp");
                     }
                 }
 
@@ -358,7 +360,7 @@ namespace FzzyTools.UI.Components
                     {
                         if (DistanceSquared(2690, 10366) < Math.Pow(200, 2))
                         {
-                            return true;
+                            DoSingleSplit("b2Button1");
                         }
                     }
                 }
@@ -368,7 +370,7 @@ namespace FzzyTools.UI.Components
                 {
                     if (fzzy.values["x"].Old > -2113 && X <= -2113 && Y < 11800 && Y > 10100)
                     {
-                        return true;
+                        DoSingleSplit("b2Trigger");
                     }
                 }
             }
@@ -382,7 +384,7 @@ namespace FzzyTools.UI.Components
                 {
                     if (DistanceSquared(-10670, 9523) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
                     {
-                        splitTimer = 1900;
+                        DoSingleSplit("b3Module1", 1900);
                     }
                 }
 
@@ -391,7 +393,7 @@ namespace FzzyTools.UI.Components
                 {
                     if (DistanceSquared(3797, -1905) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
                     {
-                        splitTimer = 1850;
+                        DoSingleSplit("b3Module2", 1850);
                     }
                 }
             }
@@ -401,7 +403,7 @@ namespace FzzyTools.UI.Components
             {
                 if (DistanceSquared(-7867, 2758) < Math.Pow(600, 2) && fzzy.values["tbfElevator"].Current - 8 == fzzy.values["tbfElevator"].Old)
                 {
-                    return true;
+                    DoSingleSplit("tbfElevator");
                 }
             }
 
@@ -412,10 +414,9 @@ namespace FzzyTools.UI.Components
                 // Elevator
                 if (settings["arkElevator"])
                 {
-                    if (!arkElevatorSplit && fzzy.values["arkElevator"].Old > 0 && fzzy.values["arkElevator"].Current == 0)
+                    if (fzzy.values["arkElevator"].Old > 0 && fzzy.values["arkElevator"].Current == 0)
                     {
-                        splitTimer = 1600;
-                        arkElevatorSplit = true;
+                        DoSingleSplit("arkElevator", 1600);
                     }
                 }
 
@@ -424,10 +425,9 @@ namespace FzzyTools.UI.Components
                 {
                     if (DistanceSquared(-8021, -4567) < Math.Pow(1500, 2))
                     {
-                        if (!arkKnifeSplit && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                        if (fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
                         {
-                            arkKnifeSplit = true;
-                            return true;
+                            DoSingleSplit("arkKnife");
                         }
                     }
                 }
@@ -451,11 +451,10 @@ namespace FzzyTools.UI.Components
                 {
                     if (DistanceSquared(535, 6549) < 25000 && fzzy.values["angle"].Old == 0 && fzzy.values["angle"].Current != 0)
                     {
-                        return true;
+                        DoSingleSplit("escape");
                     }
                 }
             }
-            return false;
         }
 
         private bool Start(ASLSettingsReader settings)

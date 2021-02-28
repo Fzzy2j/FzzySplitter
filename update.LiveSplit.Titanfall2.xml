@@ -143,4 +143,13 @@
       <change>Fixed speedmod being too aggressive with loading saves</change>
     </changelog>
   </update>
+  <update version="1.6.8">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Speedmod fixes</change>
+      <change>Splits will now only happen once per timer start</change>
+    </changelog>
+  </update>
 </updates>
