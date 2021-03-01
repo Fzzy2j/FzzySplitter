@@ -152,4 +152,12 @@
       <change>Splits will now only happen once per timer start</change>
     </changelog>
   </update>
+  <update version="1.6.9">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Fixed no-split on beacon 1/3 and effect and cause 1/3</change>
+    </changelog>
+  </update>
 </updates>

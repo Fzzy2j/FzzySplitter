@@ -19,37 +19,23 @@ namespace FzzyTools.UI.Components
         private bool _allowGauntletLoad = false;
         private bool _allowB3Load = false;
 
-        //private string cfg;
-
         public Speedmod(FzzyComponent fzzy)
         {
             this.fzzy = fzzy;
-            try
-            {
-                //this.cfg = Path.Combine(FzzyComponent.GetTitanfallInstallDirectory(), "r2\\cfg\\autosplitter.cfg");
-            }
-            catch (Exception)
-            {
-            }
         }
-
-        private long loadTimestamp;
 
         private void Load(string save)
         {
-            if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - loadTimestamp > 5000)
-            {
-                loadTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                Log.Info("Load into " + save);
-                RunCommand("load " + save);
-            }
+            if (fzzy.isLoading) return;
+            Log.Info("Load into " + save);
+            RunCommand("load " + save);
         }
 
         private long unloadTimestamp;
 
         public void Tick()
         {
-            if (!fzzy.Settings.Speedmod)// || !fzzy.values["f12Bind"].Current.StartsWith("exec autosplitter.cfg"))
+            if (!fzzy.Settings.Speedmod)
             {
                 if (!fzzy.isLoading)
                 {
@@ -241,6 +227,8 @@ namespace FzzyTools.UI.Components
         private static string speedmodSavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installspeedmodsaves.exe");
         public static void InstallSpeedmod()
         {
+            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
+            File.AppendAllText(settingscfg, "\nbind \"F11\" \"load speedmod1\"");
             if (FzzySettings.AreSpeedmodSavesInstalled()) return;
             using (WebClient webClient = new WebClient())
             {

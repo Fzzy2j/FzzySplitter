@@ -195,15 +195,13 @@ namespace FzzyTools.UI.Components
             if (fzzy.values["lastLevel"].Current.Length > 0 && fzzy.values["lastLevel"].Current != fzzy.values["lastLevel"].Old && settings["levelChangeSplit"])
             {
                 var level = fzzy.values["lastLevel"].Current;
-                if (level == "sp_beacon")
+                if (level == "sp_beacon" || level == "sp_hub_timeshift")
                 {
-                    level += fzzy.values["isB1"].Current;
-                }
-                if (level == "sp_hub_timeshift")
+                    fzzy.timer.Split();
+                } else
                 {
-                    level += fzzy.values["isENC1"].Current;
+                    DoSingleSplit(level);
                 }
-                DoSingleSplit(level);
             }
 
             // BT-7274

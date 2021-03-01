@@ -144,8 +144,7 @@ namespace LiveSplit.UI.Components
             values["tbfElevator"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9B28, new int[] { }));
             values["gauntletDialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x02A9F500, new int[] { 0x10, 0x50, 0xCF48, 0x20, 0x4C0, 0x568, 0x7E8, 0x900, 0x10, 0x4B90 }));
             values["arkDialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x23E7C18, new int[] { }));
-            values["isB1"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7CBA34, new int[] { }));
-            values["isENC1"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7CBA38, new int[] { }));
+            values["isB1"] = new MemoryValue("int", new DeepPointer("engine.dll", 0xF8DCC1C, new int[] { }));
             values["rodeo"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E0FE4, new int[] { }));
             values["btSpeak1"] = new MemoryValue("int", new DeepPointer("client.dll", 0x02A9F080, new int[] { 0xC0, 0x4C0, 0x568, 0x2A8, 0xC0, 0x10, 0x48 }));
             values["btSpeak2"] = new MemoryValue("int", new DeepPointer("client.dll", 0x02A9F080, new int[] { 0xC0, 0x3B8, 0x180, 0x520, 0xB8, 0x648, 0x10, 0xD8, 0x10, 0x4C }));
