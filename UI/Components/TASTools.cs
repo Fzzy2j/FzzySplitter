@@ -51,11 +51,6 @@ namespace FzzyTools.UI.Components
             tasValues["viewThunkHorizontal"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00B188C0, new int[] { 0xD8, 0x1A28 }));
             tasValues["recoilVertical"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00B188C0, new int[] { 0xD8, 0x1A3C }));
             tasValues["recoilHorizontal"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00B188C0, new int[] { 0xD8, 0x1A40 }));
-
-            tasValues["sv_usercmd_max_queued"] = new MemoryValue("int", new DeepPointer("server.dll", 0x12106EC, new int[] { }));
-            tasValues["miles_map_begin_fade_time"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2B77E08, new int[] { }));
-            tasValues["miles_map_begin_silence_time"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2B77AA8, new int[] { }));
-            tasValues["player_inputRespawnInputDebounceDuration"] = new MemoryValue("float", new DeepPointer("client.dll", 0xC21468, new int[] { }));
         }
 
         public bool IsStarted { get { return tasThread != null; } }
@@ -65,15 +60,11 @@ namespace FzzyTools.UI.Components
             if (tasThread != null) return;
             try
             {
-                tasValues["sv_usercmd_max_queued"].Current = 400;
-                tasValues["miles_map_begin_fade_time"].Current = 0f;
-                tasValues["miles_map_begin_silence_time"].Current = 0f;
-                tasValues["player_inputRespawnInputDebounceDuration"].Current = 0f;
-
                 tasRunning = true;
                 tasThread = new Thread(TASMain);
                 tasThread.Start();
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Log.Error(e);
             }
@@ -83,17 +74,6 @@ namespace FzzyTools.UI.Components
         {
             if (tasThread == null) return;
             tasRunning = false;
-
-            try
-            {
-                tasValues["sv_usercmd_max_queued"].Current = 40;
-                tasValues["miles_map_begin_fade_time"].Current = 1.5f;
-                tasValues["miles_map_begin_silence_time"].Current = 0.5f;
-                tasValues["player_inputRespawnInputDebounceDuration"].Current = 0.5f;
-            } catch(Exception e)
-            {
-                Log.Error(e);
-            }
         }
 
         public void PressMovement(Keyboard.ScanCodeShort key)
@@ -105,15 +85,18 @@ namespace FzzyTools.UI.Components
 
         private const int MOVEMENT_KEY_PRESS_TIME = 8;
 
+        private long zigzagMacro;
+        private const int ZIGZAG_ALTERNATE_TIME = 84;
+
         public void Tick()
         {
             if (FzzyComponent.process == null || FzzyComponent.process.HasExited) return;
-            if (tasValues["timescale"].Current >= 1 || fzzy.aimbot.AimbotRunning) return;
+            //if (tasValues["timescale"].Current >= 1 || fzzy.aimbot.AimbotRunning) return;
 
             float velocity = (float)Math.Sqrt(Math.Pow(tasValues["velX"].Current, 2) + Math.Pow(tasValues["velY"].Current, 2));
             var oldvelocity = Math.Sqrt(Math.Pow(tasValues["velX"].Old, 2) + Math.Pow(tasValues["velY"].Old, 2));
 
-            var strafeOffset = 2f;
+            var margin = 10;
             if (tasValues["holdingD"].Current &&
                 !tasValues["holdingA"].Current &&
                 !tasValues["holdingW"].Current &&
@@ -122,7 +105,7 @@ namespace FzzyTools.UI.Components
                 var x = tasValues["velX"].Current;
                 var y = tasValues["velY"].Current;
 
-                float offset = (float)((180 / Math.PI) * Math.Abs(Math.Asin((tasValues["airSpeed"].Current - strafeOffset) / velocity)));
+                float offset = (float)((180 / Math.PI) * Math.Abs(Math.Asin((tasValues["airSpeed"].Current - margin) / velocity)));
 
                 var yaw = (float)((180 / Math.PI) * -Math.Atan2(x, y)) + 90 + offset;
                 tasValues["yaw"].Current = yaw;
@@ -136,28 +119,54 @@ namespace FzzyTools.UI.Components
                 var x = tasValues["velX"].Current;
                 var y = tasValues["velY"].Current;
 
-                float offset = (float)((180 / Math.PI) * Math.Abs(Math.Asin((tasValues["airSpeed"].Current - strafeOffset) / velocity)));
+                float offset = (float)((180 / Math.PI) * Math.Abs(Math.Asin((tasValues["airSpeed"].Current - margin) / velocity)));
 
                 var yaw = (float)((180 / Math.PI) * -Math.Atan2(x, y)) + 90 - offset;
                 tasValues["yaw"].Current = yaw;
             }
 
-            if (tasValues["holdingZ"].Current && !tasValues["holdingZ"].Old)
+            if (fzzy.Settings.SpeedmodEnabled)
             {
-                var x = tasValues["velX"].Current;
-                var y = tasValues["velY"].Current;
-
-                var yaw = (float)((180 / Math.PI) * -Math.Atan2(x, y)) + 90;
-                tasValues["yaw"].Current = yaw;
+                if (tasValues["holdingZ"].Current &&
+                    !tasValues["holdingW"].Current &&
+                    !tasValues["holdingS"].Current)
+                {
+                    if (zigzagMacro > ZIGZAG_ALTERNATE_TIME)
+                    {
+                        fzzy.board.Press(Keyboard.ScanCodeShort.KEY_D);
+                        fzzy.board.Unpress(Keyboard.ScanCodeShort.KEY_A);
+                    }
+                    else
+                    {
+                        fzzy.board.Press(Keyboard.ScanCodeShort.KEY_A);
+                        fzzy.board.Unpress(Keyboard.ScanCodeShort.KEY_D);
+                    }
+                }
+                if (!tasValues["holdingZ"].Current && tasValues["holdingZ"].Old)
+                {
+                    fzzy.board.Unpress(Keyboard.ScanCodeShort.KEY_D);
+                    fzzy.board.Unpress(Keyboard.ScanCodeShort.KEY_A);
+                }
             }
-
-            if (tasValues["holdingZ"].Current &&
-                !tasValues["holdingD"].Current &&
-                !tasValues["holdingW"].Current &&
-                !tasValues["holdingS"].Current &&
-                !tasValues["holdingA"].Current)
+            else
             {
-                PressMovement(Keyboard.ScanCodeShort.KEY_W);
+                if (tasValues["holdingZ"].Current && !tasValues["holdingZ"].Old)
+                {
+                    var x = tasValues["velX"].Current;
+                    var y = tasValues["velY"].Current;
+
+                    var yaw = (float)((180 / Math.PI) * -Math.Atan2(x, y)) + 90;
+                    tasValues["yaw"].Current = yaw;
+                }
+
+                if (tasValues["holdingZ"].Current &&
+                    !tasValues["holdingD"].Current &&
+                    !tasValues["holdingW"].Current &&
+                    !tasValues["holdingS"].Current &&
+                    !tasValues["holdingA"].Current)
+                {
+                    PressMovement(Keyboard.ScanCodeShort.KEY_W);
+                }
             }
             if (tasValues["holdingB"].Current &&
                 !tasValues["holdingD"].Current &&
@@ -166,7 +175,7 @@ namespace FzzyTools.UI.Components
                 !tasValues["holdingA"].Current)
             {
                 PressMovement(Keyboard.ScanCodeShort.KEY_N);
-                PressMovement(Keyboard.ScanCodeShort.KEY_S);
+                PressMovement(Keyboard.ScanCodeShort.KEY_W);
             }
 
             if (Math.Abs(tasValues["lean"].Current) > Math.Abs(tasValues["lean"].Old) && Math.Abs(tasValues["lean"].Current) > 12)
@@ -183,17 +192,26 @@ namespace FzzyTools.UI.Components
                 {
                     PressMovement(Keyboard.ScanCodeShort.KEY_N);
                 }
-                if (allowKick && tasValues["approachingWall"].Current)
+                if (allowKick && tasValues["approachingWall"].Current && !fzzy.Settings.SpeedmodEnabled)
                 {
                     PressMovement(Keyboard.ScanCodeShort.KEY_N);
                 }
             }
         }
 
+        private long lastTick;
+
         public void TASMain()
         {
             while (tasRunning)
             {
+                var deltaTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastTick;
+                lastTick = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                zigzagMacro -= deltaTime;
+                if (zigzagMacro <= 0)
+                {
+                    zigzagMacro = ZIGZAG_ALTERNATE_TIME * 2;
+                }
                 List<Keyboard.ScanCodeShort> removals = new List<Keyboard.ScanCodeShort>();
                 foreach (KeyValuePair<Keyboard.ScanCodeShort, long> entry in pressedKeys)
                 {

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Net;
 using System.ComponentModel;
 using LiveSplit.Model.Input;
+using FzzyTools.UI.Components;
 
 namespace LiveSplit.UI.Components
 {
@@ -17,8 +18,11 @@ namespace LiveSplit.UI.Components
         //public CompositeHook Hook { get; set; }
         public bool TASToolsEnabled { get; set; }
         public bool AutoLoadNCS { get; set; }
-        public bool Speedmod { get; set; }
-        public bool TASAimbot { get; set; }
+        public bool SpeedmodEnabled { get; set; }
+        //public bool TASAimbot { get; set; }
+        public bool AutoLoad18HourSave { get; set; }
+
+        public string TitanfallInstallDirectoryOverride { get; set; }
 
         private Dictionary<string, bool> _state;
         public ASLSettings aslsettings;
@@ -31,8 +35,9 @@ namespace LiveSplit.UI.Components
 
             TASToolsEnabled = false;
             AutoLoadNCS = false;
-            Speedmod = false;
-            TASAimbot = false;
+            SpeedmodEnabled = false;
+            //TASAimbot = false;
+            AutoLoad18HourSave = false;
 
             _state = new Dictionary<string, bool>();
         }
@@ -45,8 +50,10 @@ namespace LiveSplit.UI.Components
             {
                 TASToolsEnabled = SettingsHelper.ParseBool(element["tasToolsEnabled"]);
                 AutoLoadNCS = SettingsHelper.ParseBool(element["autoLoadNCS"]);
-                Speedmod = SettingsHelper.ParseBool(element["speedmod"]);
-                TASAimbot = SettingsHelper.ParseBool(element["tasAimbot"]);
+                SpeedmodEnabled = SettingsHelper.ParseBool(element["speedmod"]);
+                AutoLoad18HourSave = SettingsHelper.ParseBool(element["btSave"]);
+                TitanfallInstallDirectoryOverride = SettingsHelper.ParseString(element["installDir"]);
+                //TASAimbot = SettingsHelper.ParseBool(element["tasAimbot"]);
 
                 ParseSettingsFromXml(element);
             }
@@ -59,8 +66,10 @@ namespace LiveSplit.UI.Components
             AppendSettingsToXml(document, node);
             SettingsHelper.CreateSetting(document, node, "tasToolsEnabled", TASToolsEnabled);
             SettingsHelper.CreateSetting(document, node, "autoLoadNCS", AutoLoadNCS);
-            SettingsHelper.CreateSetting(document, node, "speedmod", Speedmod);
-            SettingsHelper.CreateSetting(document, node, "tasAimbot", TASAimbot);
+            SettingsHelper.CreateSetting(document, node, "speedmod", SpeedmodEnabled);
+            SettingsHelper.CreateSetting(document, node, "btSave", AutoLoad18HourSave);
+            SettingsHelper.CreateSetting(document, node, "installDir", TitanfallInstallDirectoryOverride);
+            //SettingsHelper.CreateSetting(document, node, "tasAimbot", TASAimbot);
 
             return node;
         }
@@ -253,12 +262,12 @@ namespace LiveSplit.UI.Components
             tasTools.DataBindings.Clear();
             autoLoadNCS.DataBindings.Clear();
             speedmod.DataBindings.Clear();
-            tasAimbot.DataBindings.Clear();
+            btSave.DataBindings.Clear();
 
             tasTools.DataBindings.Add("Checked", this, "TASToolsEnabled", false, DataSourceUpdateMode.OnPropertyChanged);
             autoLoadNCS.DataBindings.Add("Checked", this, "AutoLoadNCS", false, DataSourceUpdateMode.OnPropertyChanged);
-            speedmod.DataBindings.Add("Checked", this, "Speedmod", false, DataSourceUpdateMode.OnPropertyChanged);
-            tasAimbot.DataBindings.Add("Checked", this, "TASAimbot", false, DataSourceUpdateMode.OnPropertyChanged);
+            speedmod.DataBindings.Add("Checked", this, "SpeedmodEnabled", false, DataSourceUpdateMode.OnPropertyChanged);
+            btSave.DataBindings.Add("Checked", this, "AutoLoad18HourSave", false, DataSourceUpdateMode.OnPropertyChanged);
         }
         // Custom Setting checked/unchecked (only after initially building the tree)
         private void settingsTree_AfterCheck(object sender, TreeViewEventArgs e)
@@ -349,7 +358,7 @@ namespace LiveSplit.UI.Components
                 return;
             }
 
-            string titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory();
+            string titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory(this);
 
             if (titanfallInstallDirectory == null || titanfallInstallDirectory.Length == 0)
             {
@@ -388,7 +397,7 @@ namespace LiveSplit.UI.Components
                 return;
             }
 
-            string titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory();
+            string titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory(this);
 
             if (titanfallInstallDirectory == null || titanfallInstallDirectory.Length == 0)
             {
@@ -511,6 +520,33 @@ namespace LiveSplit.UI.Components
             string word = "uninstalled from";
             if (install) word = "installed to";
             MessageBox.Show("Menu Mod " + word + ":\n" + Directory.GetParent(menumod).FullName);
+        }
+
+        private void btSave_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!btSave.Checked) return;
+            if (!AreSavesInstalled(new string[] { "fastany1" }))
+            {
+                using (WebClient webClient = new WebClient())
+                {
+                    var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\fastany1.sav");
+                    webClient.DownloadFileAsync(new Uri(FzzyComponent.FASTANY1_SAVE_LINK), path);
+                }
+            }
+
+            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
+            string settingscontent = File.ReadAllText(settingscfg);
+            if (!settingscontent.Contains("load fastany1"))
+            {
+                File.AppendAllText(settingscfg, "\nbind \"F1\" \"load fastany1\"");
+
+                if (FzzyComponent.process != null) MessageBox.Show("18 Hour Cutscene Bind Added!\nRestart your game for it to take effect.");
+            }
+        }
+
+        private void speedmod_CheckedChanged(object sender, EventArgs e)
+        {
+            if (speedmod.Checked) Speedmod.InstallSpeedmod();
         }
     }
     class FzzyTreeView : TreeView

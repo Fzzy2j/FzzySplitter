@@ -57,11 +57,11 @@ namespace LiveSplit.UI.Components
             this.resetSettingToDefaultToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.installMenuModButton = new System.Windows.Forms.Button();
             this.installMenuModProgress = new System.Windows.Forms.ProgressBar();
-            this.settingsTree = new LiveSplit.UI.Components.FzzyTreeView();
             this.autoLoadNCS = new System.Windows.Forms.CheckBox();
             this.speedmod = new System.Windows.Forms.CheckBox();
-            this.tasAimbot = new System.Windows.Forms.CheckBox();
+            this.btSave = new System.Windows.Forms.CheckBox();
             this.uninstallMenuModButton = new System.Windows.Forms.Button();
+            this.settingsTree = new LiveSplit.UI.Components.FzzyTreeView();
             this.treeContextMenu.SuspendLayout();
             this.treeContextMenu2.SuspendLayout();
             this.SuspendLayout();
@@ -215,9 +215,9 @@ namespace LiveSplit.UI.Components
             // 
             // installMenuModButton
             // 
-            this.installMenuModButton.Location = new System.Drawing.Point(322, 10);
+            this.installMenuModButton.Location = new System.Drawing.Point(334, 10);
             this.installMenuModButton.Name = "installMenuModButton";
-            this.installMenuModButton.Size = new System.Drawing.Size(133, 23);
+            this.installMenuModButton.Size = new System.Drawing.Size(121, 23);
             this.installMenuModButton.TabIndex = 18;
             this.installMenuModButton.Text = "Install Menu Mod";
             this.installMenuModButton.UseVisualStyleBackColor = true;
@@ -225,11 +225,53 @@ namespace LiveSplit.UI.Components
             // 
             // installMenuModProgress
             // 
-            this.installMenuModProgress.Location = new System.Drawing.Point(183, 10);
+            this.installMenuModProgress.Location = new System.Drawing.Point(211, 10);
             this.installMenuModProgress.Name = "installMenuModProgress";
-            this.installMenuModProgress.Size = new System.Drawing.Size(133, 23);
+            this.installMenuModProgress.Size = new System.Drawing.Size(117, 23);
             this.installMenuModProgress.TabIndex = 19;
             this.installMenuModProgress.Visible = false;
+            // 
+            // autoLoadNCS
+            // 
+            this.autoLoadNCS.AutoSize = true;
+            this.autoLoadNCS.Location = new System.Drawing.Point(10, 43);
+            this.autoLoadNCS.Name = "autoLoadNCS";
+            this.autoLoadNCS.Size = new System.Drawing.Size(100, 17);
+            this.autoLoadNCS.TabIndex = 20;
+            this.autoLoadNCS.Text = "Auto Load NCS";
+            this.autoLoadNCS.UseVisualStyleBackColor = true;
+            // 
+            // speedmod
+            // 
+            this.speedmod.AutoSize = true;
+            this.speedmod.Location = new System.Drawing.Point(128, 19);
+            this.speedmod.Name = "speedmod";
+            this.speedmod.Size = new System.Drawing.Size(77, 17);
+            this.speedmod.TabIndex = 21;
+            this.speedmod.Text = "Speedmod";
+            this.speedmod.UseVisualStyleBackColor = true;
+            this.speedmod.CheckedChanged += new System.EventHandler(this.speedmod_CheckedChanged);
+            // 
+            // btSave
+            // 
+            this.btSave.AutoSize = true;
+            this.btSave.Location = new System.Drawing.Point(112, 43);
+            this.btSave.Name = "btSave";
+            this.btSave.Size = new System.Drawing.Size(144, 17);
+            this.btSave.TabIndex = 22;
+            this.btSave.Text = "Auto Load 18 Hour Save";
+            this.btSave.UseVisualStyleBackColor = true;
+            this.btSave.CheckedChanged += new System.EventHandler(this.btSave_CheckedChanged);
+            // 
+            // uninstallMenuModButton
+            // 
+            this.uninstallMenuModButton.Location = new System.Drawing.Point(334, 40);
+            this.uninstallMenuModButton.Name = "uninstallMenuModButton";
+            this.uninstallMenuModButton.Size = new System.Drawing.Size(121, 23);
+            this.uninstallMenuModButton.TabIndex = 23;
+            this.uninstallMenuModButton.Text = "Uninstall Menu Mod";
+            this.uninstallMenuModButton.UseVisualStyleBackColor = true;
+            this.uninstallMenuModButton.Click += new System.EventHandler(this.uninstallMenuModButton_Click);
             // 
             // settingsTree
             // 
@@ -246,52 +288,12 @@ namespace LiveSplit.UI.Components
             this.settingsTree.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.settingsTree_AfterCheck);
             this.settingsTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.settingsTree_NodeMouseClick);
             // 
-            // autoLoadNCS
-            // 
-            this.autoLoadNCS.AutoSize = true;
-            this.autoLoadNCS.Location = new System.Drawing.Point(10, 43);
-            this.autoLoadNCS.Name = "autoLoadNCS";
-            this.autoLoadNCS.Size = new System.Drawing.Size(100, 17);
-            this.autoLoadNCS.TabIndex = 20;
-            this.autoLoadNCS.Text = "Auto Load NCS";
-            this.autoLoadNCS.UseVisualStyleBackColor = true;
-            // 
-            // speedmod
-            // 
-            this.speedmod.AutoSize = true;
-            this.speedmod.Location = new System.Drawing.Point(116, 43);
-            this.speedmod.Name = "speedmod";
-            this.speedmod.Size = new System.Drawing.Size(77, 17);
-            this.speedmod.TabIndex = 21;
-            this.speedmod.Text = "Speedmod";
-            this.speedmod.UseVisualStyleBackColor = true;
-            // 
-            // tasAimbot
-            // 
-            this.tasAimbot.AutoSize = true;
-            this.tasAimbot.Location = new System.Drawing.Point(199, 43);
-            this.tasAimbot.Name = "tasAimbot";
-            this.tasAimbot.Size = new System.Drawing.Size(82, 17);
-            this.tasAimbot.TabIndex = 22;
-            this.tasAimbot.Text = "TAS Aimbot";
-            this.tasAimbot.UseVisualStyleBackColor = true;
-            // 
-            // uninstallMenuModButton
-            // 
-            this.uninstallMenuModButton.Location = new System.Drawing.Point(322, 40);
-            this.uninstallMenuModButton.Name = "uninstallMenuModButton";
-            this.uninstallMenuModButton.Size = new System.Drawing.Size(133, 23);
-            this.uninstallMenuModButton.TabIndex = 23;
-            this.uninstallMenuModButton.Text = "Uninstall Menu Mod";
-            this.uninstallMenuModButton.UseVisualStyleBackColor = true;
-            this.uninstallMenuModButton.Click += new System.EventHandler(this.uninstallMenuModButton_Click);
-            // 
             // FzzySettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.uninstallMenuModButton);
-            this.Controls.Add(this.tasAimbot);
+            this.Controls.Add(this.btSave);
             this.Controls.Add(this.speedmod);
             this.Controls.Add(this.autoLoadNCS);
             this.Controls.Add(this.installMenuModProgress);
@@ -335,7 +337,7 @@ namespace LiveSplit.UI.Components
         private System.Windows.Forms.ProgressBar installMenuModProgress;
         private System.Windows.Forms.CheckBox autoLoadNCS;
         private System.Windows.Forms.CheckBox speedmod;
-        private System.Windows.Forms.CheckBox tasAimbot;
+        private System.Windows.Forms.CheckBox btSave;
         private System.Windows.Forms.Button uninstallMenuModButton;
     }
 }

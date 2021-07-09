@@ -21,6 +21,7 @@ namespace LiveSplit.UI.Components
         public const string MENU_MOD_UNINSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/uninstallmenumod.exe";
         public const string FASTANY_SAVES_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installsaves.exe";
         public const string SPEEDMOD_SAVES_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installspeedmodsaves.exe";
+        public const string FASTANY1_SAVE_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/fastany1.sav";
 
         public FzzySettings Settings { get; set; }
 
@@ -49,7 +50,6 @@ namespace LiveSplit.UI.Components
 
         public FzzyComponent(LiveSplitState state)
         {
-
             Settings = new FzzySettings();
             this.state = state;
             aslSettings = new ASLSettings();
@@ -121,12 +121,10 @@ namespace LiveSplit.UI.Components
             values["enc2button1"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9C98));
             values["enc2button2"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9E08));
             values["b2button"] = new MemoryValue("int", new DeepPointer("server.dll", 0x1506C00));
-            values["arkElevator"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x139A4D38));
+            values["arkElevator"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x1398B458));
             values["viper"] = new MemoryValue("int", new DeepPointer("client.dll", 0xC0916C));
             values["embarkCount"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E18D8));
 
-            values["f12Bind"] = new MemoryValue("string30", new DeepPointer("engine.dll", 0x1396CC30, new int[] { 0x0 }));
-            values["f11Bind"] = new MemoryValue("string30", new DeepPointer("engine.dll", 0x1396CC20, new int[] { 0x0 }));
             values["lurchMax"] = new MemoryValue("float", new DeepPointer("client.dll", 0x11B0308, new int[] { }));
             values["slideStepVelocityReduction"] = new MemoryValue("int", new DeepPointer("client.dll", 0x11B0D28, new int[] { }));
             values["repelEnable"] = new MemoryValue("bool", new DeepPointer("client.dll", 0x11B287C, new int[] { }));
@@ -135,11 +133,14 @@ namespace LiveSplit.UI.Components
             values["editableVelocityY"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00B0EB50, new int[] { 0xD8, 0x6B8, 0x42C }));
             values["editableVelocityZ"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00B0EB50, new int[] { 0xD8, 0x6B8, 0x430 }));
 
+            values["currentLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x12A53D55, new int[] { }));
+            values["inLoadingScreen"] = new MemoryValue("bool", new DeepPointer("client.dll", 0xB38C5C, new int[] { }));
+            values["inPressSpaceToContinue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x290C0A8, new int[] { }));
+
             values["x"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2172FF8, new int[] { 0xDEC }));
             values["y"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2173B48, new int[] { 0x2A0 }));
             values["z"] = new MemoryValue("float", new DeepPointer("client.dll", 0x216F9C0, new int[] { 0xF4 }));
             values["lastLevel"] = new MemoryValue("string20", new DeepPointer("server.dll", 0x1053370, new int[] { }));
-            values["currentLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x12A53D55, new int[] { }));
             values["b3Door"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9D18, new int[] { }));
             values["tbfElevator"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9B28, new int[] { }));
             values["gauntletDialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x02A9F500, new int[] { 0x10, 0x50, 0xCF48, 0x20, 0x4C0, 0x568, 0x7E8, 0x900, 0x10, 0x4B90 }));
@@ -184,7 +185,8 @@ namespace LiveSplit.UI.Components
                 try
                 {
                     UpdateScript();
-                } catch (Exception e)
+                }
+                catch (Exception e)
                 {
                     Log.Error(e);
                 }
@@ -211,7 +213,9 @@ namespace LiveSplit.UI.Components
             if (timer == null) timer = new TimerModel() { CurrentState = state };
 
             wasLoading = isLoading;
-            isLoading = values["clFrames"].Current <= 0 || values["thing"].Current == 0;
+            //isLoading = values["inLoadingScreen"].Current;
+            isLoading = values["clFrames"].Current <= 0 || values["inLoadingScreen"].Current || values["inPressSpaceToContinue"].Current != 0;
+            //Log.Info(isLoading + "cl: " + values["clFrames"].Current + "   thing: " + values["thing"].Current);
 
             if (Settings.TASToolsEnabled && !tasTools.IsStarted)
             {
@@ -221,12 +225,9 @@ namespace LiveSplit.UI.Components
             {
                 tasTools.Stop();
             }
-            if (Settings.TASAimbot)
-            {
-                aimbot.Tick();
-            }
+            //aimbot.Tick();
 
-            if (Settings.AutoLoadNCS && !Settings.Speedmod) _ncsAutoLoader.Tick();
+            if (Settings.AutoLoadNCS && !Settings.SpeedmodEnabled) _ncsAutoLoader.Tick();
 
             _speedmod.Tick();
 
@@ -238,9 +239,18 @@ namespace LiveSplit.UI.Components
             }
         }
 
-        public static string GetTitanfallInstallDirectory()
+        public string GetTitanfallInstallDirectory()
         {
-
+            return GetTitanfallInstallDirectory(Settings);
+        }
+        public static string GetTitanfallInstallDirectory(FzzySettings settings)
+        {
+            if (settings.TitanfallInstallDirectoryOverride != null 
+                && settings.TitanfallInstallDirectoryOverride.Length > 0 
+                && File.Exists(Path.Combine(settings.TitanfallInstallDirectoryOverride, "Titanfall2.exe")))
+            {
+                return settings.TitanfallInstallDirectoryOverride;
+            }
             string titanfallInstallDirectory = "";
 
             string originInstall = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Respawn\\Titanfall2", "Install Dir", null);

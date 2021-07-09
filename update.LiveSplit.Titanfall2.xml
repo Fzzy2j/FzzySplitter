@@ -160,4 +160,15 @@
       <change>Fixed no-split on beacon 1/3 and effect and cause 1/3</change>
     </changelog>
   </update>
+  <update version="1.7">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Fixed Ark elevator sub-split</change>
+      <change>Speedmod/Menu Mod install will now ask for titanfall directory if it cant be found</change>
+      <change>Auto load 18 hour save</change>
+      <change>Load remover works on unpacked exe</change>
+    </changelog>
+  </update>
 </updates>

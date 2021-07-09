@@ -44,6 +44,8 @@ namespace FzzyTools.UI.Components
 
         public void Tick()
         {
+            if (fzzy.tasTools.tasValues["timescale"].Current != 1) return;
+
             var settings = fzzy.Settings.aslsettings.Reader;
             Update(settings);
             if (!fzzy.state.IsGameTimeInitialized) fzzy.timer.InitializeGameTime();
@@ -77,7 +79,8 @@ namespace FzzyTools.UI.Components
             if (delay <= 0)
             {
                 fzzy.timer.Split();
-            } else
+            }
+            else
             {
                 splitTimer = delay;
             }
@@ -86,7 +89,7 @@ namespace FzzyTools.UI.Components
 
         private bool Reset(ASLSettingsReader settings)
         {
-            if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old && fzzy.values["currentLevel"].Current == "sp_training")
+            if (fzzy.values["currentLevel"].Current.StartsWith("sp_training") && fzzy.values["inPressSpaceToContinue"].Current > 0 && fzzy.values["inPressSpaceToContinue"].Old <= 0)
             {
                 return true;
             }
@@ -149,9 +152,17 @@ namespace FzzyTools.UI.Components
             FzzyComponent.process.WriteBytes(pointerServer, new byte[] { 0x75 });
         }
 
+        private string lastNonLoadLevel = "";
+        private bool levelLoadedFromMenu = false;
+
         private void Update(ASLSettingsReader settings)
         {
-            fzzy.values["currentLevel"].Update();
+            fzzy.values["lastLevel"].Update();
+            if (fzzy.values["inLoadingScreen"].Current && !fzzy.values["inLoadingScreen"].Old)
+            {
+                levelLoadedFromMenu = lastNonLoadLevel == "";
+            }
+            if (!fzzy.values["inLoadingScreen"].Current) lastNonLoadLevel = fzzy.values["currentLevel"].Current;
             if (fzzy.isLoading)
             {
                 bnrIlPause = false;
@@ -162,12 +173,19 @@ namespace FzzyTools.UI.Components
         private long splitTimerTimestamp;
         private long splitTimer;
 
+        private long btSaveDelay;
+        private long previousTimestamp;
+
+        private long lastLoadingTimestamp;
+
         private void Split(ASLSettingsReader settings)
         {
             if (settings["flagSplit"] && fzzy.values["flag"].Old == 1 && fzzy.values["flag"].Current == 0) fzzy.timer.Split();
 
             if (settings["helmetSplit"] && (fzzy.values["menuText"].Current.StartsWith("Found ") || fzzy.values["menuText"].Current.StartsWith("尋獲 ")) &&
                 fzzy.values["menuText"].Current != fzzy.values["menuText"].Old) fzzy.timer.Split();
+
+            if (fzzy.isLoading) lastLoadingTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             var timePassed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - splitTimerTimestamp;
             splitTimerTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -185,6 +203,25 @@ namespace FzzyTools.UI.Components
                 }
             }
 
+            if (btSaveDelay > 0)
+            {
+                btSaveDelay -= DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - previousTimestamp;
+                if (btSaveDelay <= 0)
+                {
+                    fzzy.board.Send(Keyboard.ScanCodeShort.F1);
+                    fzzy.state.AdjustedStartTime -= new TimeSpan(0, 0, 3, 22, 217);
+                }
+            }
+            previousTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            if (fzzy.Settings.AutoLoad18HourSave && fzzy.values["lastLevel"].Current == "sp_crashsite" && DistanceSquared(68, -21, -12216) < 500 * 500)
+            {
+                if (fzzy.values["inCutscene"].Current == 1 && fzzy.values["inCutscene"].Old == 0)
+                {
+                    btSaveDelay = 5050;
+                }
+            }
+
             // End of game
             if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && X < -10000 && Y > 0 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 && settings["endSplit"])
             {
@@ -198,7 +235,8 @@ namespace FzzyTools.UI.Components
                 if (level == "sp_beacon" || level == "sp_hub_timeshift")
                 {
                     fzzy.timer.Split();
-                } else
+                }
+                else
                 {
                     DoSingleSplit(level);
                 }
@@ -410,7 +448,7 @@ namespace FzzyTools.UI.Components
             {
 
                 // Elevator
-                if (settings["arkElevator"])
+                if (settings["arkElevator"] && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastLoadingTimestamp > 5000)
                 {
                     if (fzzy.values["arkElevator"].Old > 0 && fzzy.values["arkElevator"].Current == 0)
                     {
@@ -458,57 +496,9 @@ namespace FzzyTools.UI.Components
         private bool Start(ASLSettingsReader settings)
         {
             if (settings["flagSplit"] && fzzy.values["flag"].Current == 1 && fzzy.values["flag"].Old == 0) return true;
-            if (fzzy.values["clFrames"].Old <= 0 && fzzy.values["clFrames"].Current > 0)
+            if (fzzy.values["inPressSpaceToContinue"].Old > 0 && fzzy.values["inPressSpaceToContinue"].Current <= 0)
             {
-                float threshold = (float)Math.Pow(500, 2);
-                //Speedmod
-                if (fzzy.values["lastLevel"].Current == "sp_training" && DistanceSquared(-7573, 375) < threshold)
-                    return true;
-                //Pilots Gauntlet
-                if (fzzy.values["lastLevel"].Current == "sp_training" && DistanceSquared(10662, -10200) < threshold)
-                    return true;
-                //BT-7274
-                if (fzzy.values["lastLevel"].Current == "sp_crashsite" && DistanceSquared(-13568, -14336) < threshold)
-                    return true;
-                //Blood and Rust
-                if (fzzy.values["lastLevel"].Current == "sp_sewers1" && DistanceSquared(9075, -14415) < threshold)
-                    return true;
-                //ITA 1
-                if (fzzy.values["lastLevel"].Current == "sp_boomtown_start" && DistanceSquared(13578, -8781) < threshold)
-                    return true;
-                //ITA 2
-                if (fzzy.values["lastLevel"].Current == "sp_boomtown" && DistanceSquared(-4087, 11155) < threshold)
-                    return true;
-                //ITA 3
-                if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && DistanceSquared(-15120, -5284) < threshold)
-                    return true;
-                //E&C 1
-                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && DistanceSquared(910, -7112) < threshold)
-                    return true;
-                //E&C 2
-                if (fzzy.values["lastLevel"].Current == "sp_timeshift_spoke02" && DistanceSquared(-251, -3350) < threshold)
-                    return true;
-                //E&C 3
-                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && DistanceSquared(1388, -2737) < threshold)
-                    return true;
-                //Beacon 1
-                if (fzzy.values["lastLevel"].Current == "sp_beacon" && DistanceSquared(14297, -10858) < threshold)
-                    return true;
-                //Beacon 2
-                if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0" && DistanceSquared(-1088, -336) < threshold)
-                    return true;
-                //Beacon 3
-                if (fzzy.values["lastLevel"].Current == "sp_beacon" && DistanceSquared(12360, -1008) < threshold)
-                    return true;
-                //TBF
-                if (fzzy.values["lastLevel"].Current == "sp_tday" && DistanceSquared(593, -15557) < threshold)
-                    return true;
-                //The Ark
-                if (fzzy.values["lastLevel"].Current == "sp_s2s" && DistanceSquared(-25, -15189) < threshold)
-                    return true;
-                //The Fold Weapon
-                if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && DistanceSquared(-11646, -6724) < threshold)
-                    return true;
+                return true;
             }
             return false;
         }

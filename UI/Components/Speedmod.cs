@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Windows.Forms;
 
 namespace FzzyTools.UI.Components
 {
@@ -19,23 +20,39 @@ namespace FzzyTools.UI.Components
         private bool _allowGauntletLoad = false;
         private bool _allowB3Load = false;
 
+        private static string titanfallInstall;
+        private static string cfg { 
+            get
+            {
+                return Path.Combine(titanfallInstall, "r2\\cfg\\autosplitter.cfg");
+            } 
+        }
+
         public Speedmod(FzzyComponent fzzy)
         {
             this.fzzy = fzzy;
+            try
+            {
+                titanfallInstall = fzzy.GetTitanfallInstallDirectory();
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void Load(string save)
         {
-            if (fzzy.isLoading) return;
             Log.Info("Load into " + save);
-            RunCommand("load " + save);
+            RunCommand("load " + save + "; set_loading_progress_detente #INTROSCREEN_HINT_PC #INTROSCREEN_HINT_CONSOLE");
         }
 
-        private long unloadTimestamp;
+        private string lastNonLoadLevel = "";
+        private bool levelLoadedFromMenu = false;
 
         public void Tick()
         {
-            if (!fzzy.Settings.Speedmod)
+            if (cfg == null) return;
+            if (!fzzy.Settings.SpeedmodEnabled)
             {
                 if (!fzzy.isLoading)
                 {
@@ -57,23 +74,24 @@ namespace FzzyTools.UI.Components
                     fzzy.values["airSpeed"].Current = 40f;
                 }
 
-                if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old)
+                if (fzzy.values["inLoadingScreen"].Current && !fzzy.values["inLoadingScreen"].Old)
                 {
-                    if (fzzy.values["currentLevel"].Current.Length == 0) unloadTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    levelLoadedFromMenu = lastNonLoadLevel == "";
                 }
+                if (!fzzy.values["inLoadingScreen"].Current) lastNonLoadLevel = fzzy.values["currentLevel"].Current;
 
-                if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - unloadTimestamp > 500)
+                if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old && levelLoadedFromMenu)
                 {
-                    if (fzzy.values["currentLevel"].Current == "sp_training") Load("speedmod1");
-                    if (fzzy.values["currentLevel"].Current == "sp_crashsite") Load("speedmod2");
-                    if (fzzy.values["currentLevel"].Current == "sp_sewers1") Load("speedmod3");
-                    if (fzzy.values["currentLevel"].Current == "sp_boomtown_start") Load("speedmod4");
-                    if (fzzy.values["currentLevel"].Current == "sp_boomtown_end") Load("speedmod5");
-                    if (fzzy.values["currentLevel"].Current == "sp_timeshift_spoke02") Load("speedmod7");
-                    if (fzzy.values["currentLevel"].Current == "sp_beacon_spoke0") Load("speedmod8");
-                    if (fzzy.values["currentLevel"].Current == "sp_beacon") Load("speedmod9");
-                    if (fzzy.values["currentLevel"].Current == "sp_tday") Load("speedmod10");
-                    if (fzzy.values["currentLevel"].Current == "sp_skyway_v1") Load("speedmod11");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_training")) Load("speedmod1");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_crashsite")) Load("speedmod2");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_sewers1")) Load("speedmod3");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_boomtown_start")) Load("speedmod4");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_boomtown_end")) Load("speedmod5");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_timeshift_spoke02")) Load("speedmod7");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_beacon_spoke0")) Load("speedmod8");
+                    //if (fzzy.values["currentLevel"].Current.StartsWith("sp_beacon")) Load("speedmod9");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_tday")) Load("speedmod10");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_skyway_v1")) Load("speedmod11");
                 }
 
                 if (fzzy.values["clFrames"].Current <= 0)
@@ -209,7 +227,7 @@ namespace FzzyTools.UI.Components
             if (IsSpeedmodEnabled()) return;
             try
             {
-                InstallSpeedmod();
+                //InstallSpeedmod();
                 fzzy.values["airAcceleration"].Current = 10000f;
                 fzzy.values["airSpeed"].Current = 40f;
                 fzzy.values["lurchMax"].Current = 0f;
@@ -227,14 +245,70 @@ namespace FzzyTools.UI.Components
         private static string speedmodSavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installspeedmodsaves.exe");
         public static void InstallSpeedmod()
         {
+            if (titanfallInstall == null || !File.Exists(Path.Combine(titanfallInstall, "Titanfall2.exe")))
+            {
+                string directory = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Titanfall2";
+                ShowInputDialog("Install Directory", "Titanfall 2 Install Directory not Available!\nPlease enter where you have titanfall 2 installed\n(The folder that contains Titanfall2.exe)", ref directory);
+                Log.Info(directory);
+                return;
+            }
             string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
-            File.AppendAllText(settingscfg, "\nbind \"F11\" \"load speedmod1\"");
+            if (!settingscfg.Contains("\nbind \"F11\" \"exec autosplitter.cfg\""))
+            {
+                File.AppendAllText(settingscfg, "\nbind \"F11\" \"exec autosplitter.cfg\"");
+
+                if (FzzyComponent.process != null) MessageBox.Show("Speedmod Installed!\nRestart your game for it to take effect.");
+            }
             if (FzzySettings.AreSpeedmodSavesInstalled()) return;
             using (WebClient webClient = new WebClient())
             {
                 webClient.DownloadFileAsync(new Uri(FzzyComponent.SPEEDMOD_SAVES_INSTALLER_LINK), speedmodSavesInstaller);
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(SpeedmodSavesDownloadCompleted);
             }
+        }
+        private static DialogResult ShowInputDialog(string name, string message, ref string input)
+        {
+            System.Drawing.Size size = new System.Drawing.Size(350, 120);
+            Form inputBox = new Form();
+
+            inputBox.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            inputBox.ClientSize = size;
+            inputBox.Text = name;
+
+            System.Windows.Forms.Label label = new Label();
+            label.Size = new System.Drawing.Size(size.Width - 10, 39);
+            label.Location = new System.Drawing.Point(5, 5);
+            label.Text = message;
+            inputBox.Controls.Add(label);
+
+            System.Windows.Forms.TextBox textBox = new TextBox();
+            textBox.Size = new System.Drawing.Size(size.Width - 10, 23);
+            textBox.Location = new System.Drawing.Point(5, 50);
+            textBox.Text = input;
+            inputBox.Controls.Add(textBox);
+
+            Button okButton = new Button();
+            okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            okButton.Name = "okButton";
+            okButton.Size = new System.Drawing.Size(75, 23);
+            okButton.Text = "&OK";
+            okButton.Location = new System.Drawing.Point(size.Width - 80 - 80, size.Height - 30);
+            inputBox.Controls.Add(okButton);
+
+            Button cancelButton = new Button();
+            cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            cancelButton.Name = "cancelButton";
+            cancelButton.Size = new System.Drawing.Size(75, 23);
+            cancelButton.Text = "&Cancel";
+            cancelButton.Location = new System.Drawing.Point(size.Width - 80, size.Height - 30);
+            inputBox.Controls.Add(cancelButton);
+
+            inputBox.AcceptButton = okButton;
+            inputBox.CancelButton = cancelButton;
+
+            DialogResult result = inputBox.ShowDialog();
+            input = textBox.Text;
+            return result;
         }
 
         private static void SpeedmodSavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
@@ -284,12 +358,7 @@ namespace FzzyTools.UI.Components
 
         private void RunCommand(string cmd)
         {
-            if (cmd.Length > 16) return;
-            for (int i = 0; i < 16 - cmd.Length; i++)
-            {
-                cmd += " ";
-            }
-            fzzy.values["f11Bind"].Current = cmd;
+            File.WriteAllText(cfg, cmd);
             Log.Info("running command: " + cmd);
             fzzy.board.Send(Keyboard.ScanCodeShort.F11);
         }

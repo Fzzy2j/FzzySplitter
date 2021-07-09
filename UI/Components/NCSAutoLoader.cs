@@ -30,6 +30,10 @@ namespace FzzyTools.UI.Components
 
         public void Tick()
         {
+            if (fzzy.isLoading)
+            {
+                _queuedKeyDelay = 0;
+            }
             if (_queuedKeyDelay > 0)
             {
                 _queuedKeyDelay -= DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _previousTimestamp;
@@ -51,16 +55,17 @@ namespace FzzyTools.UI.Components
                 DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _gauntletTimestamp < 500)
             {
                 fzzy.board.Send(Keyboard.ScanCodeShort.F1);
+
                 Log.Info("Load into BT");
             }
 
             if (fzzy.values["lastLevel"].Current == "sp_sewers1" &&
-                fzzy.values["inCutscene"].Current == 1 && fzzy.values["inCutscene"].Old == 0 &&
-                fzzy.values["rodeo"].Current == fzzy.values["rodeo"].Old &&
-                DistanceSquared(-5472, -6726, 3202) < 4000 * 4000 &&
-                DistanceSquared(-9425, -6770, 2589) > 400 * 400)
+                fzzy.values["inCutscene"].Current == 1 && fzzy.values["pitch"].Current > 70 &&
+                fzzy.values["rodeo"].Current == -1 &&
+                DistanceSquared(-5472, -6726, 3202) < 4000 * 4000)
             {
-                QueueKeypress(Keyboard.ScanCodeShort.F2, 5500);
+                QueueKeypress(Keyboard.ScanCodeShort.F2, 5300);
+
                 Log.Info("Delayed load into ITA1");
             }
 
@@ -151,8 +156,9 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private void QueueKeypress(Keyboard.ScanCodeShort key, int delay)
+        public void QueueKeypress(Keyboard.ScanCodeShort key, int delay)
         {
+            if (_queuedKeyDelay > 0 || fzzy.isLoading) return;
             _queuedKey = key;
             _queuedKeyDelay = delay;
         }
