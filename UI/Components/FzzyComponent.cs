@@ -194,10 +194,27 @@ namespace LiveSplit.UI.Components
             updateTimer.Enabled = true;
         }
 
+        private static bool addToSettingsOnClose;
+        private static string settingToAdd;
+        public static void AddToSettingsOnClose(string setting)
+        {
+            addToSettingsOnClose = true;
+            settingToAdd = setting;
+        }
+
         private void UpdateScript()
         {
             if (process == null)
             {
+                if (addToSettingsOnClose)
+                {
+                    string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
+                    if (!settingscfg.Contains(settingToAdd))
+                    {
+                        File.AppendAllText(settingscfg, settingToAdd);
+                    }
+                    addToSettingsOnClose = false;
+                }
                 process = Process.GetProcessesByName("Titanfall2").OrderByDescending(x => x.StartTime).FirstOrDefault(x => !x.HasExited);
                 return;
             }

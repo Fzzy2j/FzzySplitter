@@ -538,15 +538,21 @@ namespace LiveSplit.UI.Components
             string settingscontent = File.ReadAllText(settingscfg);
             if (!settingscontent.Contains("load fastany1"))
             {
-                File.AppendAllText(settingscfg, "\nbind \"F1\" \"load fastany1\"");
-
-                if (FzzyComponent.process != null) MessageBox.Show("18 Hour Cutscene Bind Added!\nRestart your game for it to take effect.");
+                if (FzzyComponent.process != null)
+                {
+                    FzzyComponent.AddToSettingsOnClose("load fastany1");
+                    MessageBox.Show("18 Hour Cutscene Bind Added!\nRestart your game for it to take effect.");
+                }
+                else
+                {
+                    File.AppendAllText(settingscfg, "\nbind \"F1\" \"load fastany1\"");
+                }
             }
         }
 
         private void speedmod_CheckedChanged(object sender, EventArgs e)
         {
-            if (speedmod.Checked) Speedmod.InstallSpeedmod();
+            if (speedmod.Checked) Speedmod.InstallSpeedmod(this);
         }
     }
     class FzzyTreeView : TreeView

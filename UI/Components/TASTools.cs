@@ -91,7 +91,7 @@ namespace FzzyTools.UI.Components
         public void Tick()
         {
             if (FzzyComponent.process == null || FzzyComponent.process.HasExited) return;
-            //if (tasValues["timescale"].Current >= 1 || fzzy.aimbot.AimbotRunning) return;
+            if (tasValues["timescale"].Current >= 1 || fzzy.aimbot.AimbotRunning) return;
 
             float velocity = (float)Math.Sqrt(Math.Pow(tasValues["velX"].Current, 2) + Math.Pow(tasValues["velY"].Current, 2));
             var oldvelocity = Math.Sqrt(Math.Pow(tasValues["velX"].Old, 2) + Math.Pow(tasValues["velY"].Old, 2));

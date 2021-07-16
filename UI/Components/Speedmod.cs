@@ -21,11 +21,13 @@ namespace FzzyTools.UI.Components
         private bool _allowB3Load = false;
 
         private static string titanfallInstall;
-        private static string cfg { 
+        private static string cfg
+        {
             get
             {
+                if (titanfallInstall == null) return null;
                 return Path.Combine(titanfallInstall, "r2\\cfg\\autosplitter.cfg");
-            } 
+            }
         }
 
         public Speedmod(FzzyComponent fzzy)
@@ -48,30 +50,29 @@ namespace FzzyTools.UI.Components
 
         private string lastNonLoadLevel = "";
         private bool levelLoadedFromMenu = false;
-
         public void Tick()
         {
             if (cfg == null) return;
             if (!fzzy.Settings.SpeedmodEnabled)
             {
-                if (!fzzy.isLoading)
+                if (IsSpeedmodEnabled())
                 {
-                    if (IsSpeedmodEnabled())
-                    {
-                        DisableSpeedmod();
-                    }
+                    DisableSpeedmod();
                 }
             }
             else
             {
+                if (!IsSpeedmodEnabled())
+                {
+                    EnableSpeedmod();
+                }
                 if (!fzzy.isLoading)
                 {
-                    if (!IsSpeedmodEnabled())
-                    {
-                        EnableSpeedmod();
-                    }
                     fzzy.values["airAcceleration"].Current = 10000f;
                     fzzy.values["airSpeed"].Current = 40f;
+                    fzzy.values["lurchMax"].Current = 0f;
+                    fzzy.values["slideStepVelocityReduction"].Current = 0f;
+                    fzzy.values["slideBoostCooldown"].Current = 0f;
                 }
 
                 if (fzzy.values["inLoadingScreen"].Current && !fzzy.values["inLoadingScreen"].Old)
@@ -89,7 +90,7 @@ namespace FzzyTools.UI.Components
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_boomtown_end")) Load("speedmod5");
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_timeshift_spoke02")) Load("speedmod7");
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_beacon_spoke0")) Load("speedmod8");
-                    //if (fzzy.values["currentLevel"].Current.StartsWith("sp_beacon")) Load("speedmod9");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_beacon")) Load("speedmod9");
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_tday")) Load("speedmod10");
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_skyway_v1")) Load("speedmod11");
                 }
@@ -98,7 +99,7 @@ namespace FzzyTools.UI.Components
                 {
                     _allowGauntletLoad = false;
                 }
-                if (fzzy.values["lastLevel"].Current == "sp_training")
+                if (fzzy.values["lastLevel"].Current == "sp_training" && !fzzy.isLoading)
                 {
                     if (DistanceSquared(880, 6770, 466) < 1000 * 1000) _allowGauntletLoad = true;
 
@@ -111,7 +112,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_crashsite")
+                if (fzzy.values["lastLevel"].Current == "sp_crashsite" && !fzzy.isLoading)
                 {
                     if (DistanceSquared(-445, -383, 112) < 25)
                     {
@@ -119,7 +120,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_sewers1")
+                if (fzzy.values["lastLevel"].Current == "sp_sewers1" && !fzzy.isLoading)
                 {
                     if (DistanceSquared(-9138, -6732, 2605) < 500 * 500 && fzzy.values["inCutscene"].Current == 1)
                     {
@@ -127,7 +128,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_boomtown")
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown" && !fzzy.isLoading)
                 {
                     float xDistance = fzzy.values["x"].Current - 8167;
                     float yDistance = fzzy.values["y"].Current + 3583;
@@ -138,7 +139,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_boomtown_end")
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && !fzzy.isLoading)
                 {
                     if (DistanceSquared(8644, 1097, -2621) < 7000 * 7000 && fzzy.values["inCutscene"].Current == 1 && fzzy.values["rodeo"].Current == fzzy.values["rodeo"].Old)
                     {
@@ -146,7 +147,7 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift")
+                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && !fzzy.isLoading)
                 {
                     if (Math.Abs(fzzy.values["x"].Current - 1112.845) < 1 && Math.Abs(fzzy.values["y"].Current + 2741) < 100 && Math.Abs(fzzy.values["z"].Current + 859) < 1000)
                     {
@@ -154,14 +155,14 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" &&
+                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && !fzzy.isLoading &&
                    fzzy.values["inCutscene"].Current == 1 && fzzy.values["inCutscene"].Old == 0 &&
                    DistanceSquared(-1108, 6017, -10596) < 1000 * 1000)
                 {
                     Load("speedmod8");
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0")
+                if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0" && !fzzy.isLoading)
                 {
                     if (fzzy.values["y"].Current > 3000) _allowB3Load = true;
 
@@ -178,21 +179,21 @@ namespace FzzyTools.UI.Components
                     _allowB3Load = false;
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_beacon" &&
+                if (fzzy.values["lastLevel"].Current == "sp_beacon" && !fzzy.isLoading &&
                     fzzy.values["b3Fight"].Current > 0 &&
                     fzzy.values["inCutscene"].Current == 2)
                 {
                     Load("speedmod10");
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_tday" &&
+                if (fzzy.values["lastLevel"].Current == "sp_tday" && !fzzy.isLoading &&
                     DistanceSquared(6738, 12395, 2573) < 1000 * 1000 &&
                     fzzy.values["inCutscene"].Current == 1)
                 {
                     Load("speedmod11");
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" &&
+                if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && !fzzy.isLoading &&
                     DistanceSquared(9023, 12180, 5693) < 1000 * 1000 &&
                     fzzy.values["inCutscene"].Current == 1)
                 {
@@ -227,13 +228,6 @@ namespace FzzyTools.UI.Components
             if (IsSpeedmodEnabled()) return;
             try
             {
-                //InstallSpeedmod();
-                fzzy.values["airAcceleration"].Current = 10000f;
-                fzzy.values["airSpeed"].Current = 40f;
-                fzzy.values["lurchMax"].Current = 0f;
-                fzzy.values["slideStepVelocityReduction"].Current = 0f;
-                //fzzy.values["repelEnable"].Current = false;
-                fzzy.values["slideBoostCooldown"].Current = 0f;
                 RemoveWallFriction();
                 MakeAlliesInvincible();
             }
@@ -243,21 +237,28 @@ namespace FzzyTools.UI.Components
         }
 
         private static string speedmodSavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installspeedmodsaves.exe");
-        public static void InstallSpeedmod()
+        public static void InstallSpeedmod(FzzySettings settings)
         {
             if (titanfallInstall == null || !File.Exists(Path.Combine(titanfallInstall, "Titanfall2.exe")))
             {
                 string directory = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Titanfall2";
                 ShowInputDialog("Install Directory", "Titanfall 2 Install Directory not Available!\nPlease enter where you have titanfall 2 installed\n(The folder that contains Titanfall2.exe)", ref directory);
-                Log.Info(directory);
+                settings.TitanfallInstallDirectoryOverride = directory;
                 return;
             }
-            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
-            if (!settingscfg.Contains("\nbind \"F11\" \"exec autosplitter.cfg\""))
-            {
-                File.AppendAllText(settingscfg, "\nbind \"F11\" \"exec autosplitter.cfg\"");
 
-                if (FzzyComponent.process != null) MessageBox.Show("Speedmod Installed!\nRestart your game for it to take effect.");
+            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
+            string settingscontent = File.ReadAllText(settingscfg);
+            if (!settingscontent.Contains("\nbind \"F11\" \"exec autosplitter.cfg\""))
+            {
+                if (FzzyComponent.process != null)
+                {
+                    FzzyComponent.AddToSettingsOnClose("\nbind \"F11\" \"exec autosplitter.cfg\"");
+                    MessageBox.Show("Speedmod Installed!\nRestart your game for it to take effect.");
+                } else
+                {
+                    File.AppendAllText(settingscfg, "\nbind \"F11\" \"exec autosplitter.cfg\"");
+                }
             }
             if (FzzySettings.AreSpeedmodSavesInstalled()) return;
             using (WebClient webClient = new WebClient())
@@ -331,7 +332,6 @@ namespace FzzyTools.UI.Components
                 fzzy.values["airSpeed"].Current = 60f;
                 fzzy.values["lurchMax"].Current = 0.7f;
                 fzzy.values["slideStepVelocityReduction"].Current = 10f;
-                //fzzy.values["repelEnable"].Current = true;
                 fzzy.values["slideBoostCooldown"].Current = 2f;
                 RestoreWallFriction();
                 MakeAlliesKillable();

@@ -93,7 +93,7 @@ namespace FzzyTools.UI.Components
             {
                 return true;
             }
-            if (settings["loadReset"] && fzzy.wasLoading && !fzzy.isLoading)
+            if (settings["loadReset"] && fzzy.isLoading && !fzzy.wasLoading)
             {
                 return true;
             }

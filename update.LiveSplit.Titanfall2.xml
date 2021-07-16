@@ -171,4 +171,15 @@
       <change>Load remover works on unpacked exe</change>
     </changelog>
   </update>
+  <update version="1.7.1">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>IL load screen reset now resets when the load screen starts not when it ends</change>
+      <change>Directory prompt now actually works, silly me i didnt plug it in :P</change>
+      <change>TAS tools no longer run on 1 timescale</change>
+      <change>Reworked some speedmod stuff should be more stable</change>
+    </changelog>
+  </update>
 </updates>
