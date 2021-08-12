@@ -479,7 +479,7 @@ namespace FzzyTools.UI.Components
                 // Secure beacon objective
                 if (settings["b3SecureBeacon"])
                 {
-                    if (fzzy.values["b3SecureBeaconObjective"].Current && !fzzy.values["b3SecureBeaconObjective"].Old && DistanceSquared(-3007, -1177) < 1000 * 1000)
+                    if (fzzy.values["b3SecureBeaconObjective"].Current != fzzy.values["b3SecureBeaconObjective"].Old && DistanceSquared(-3007, -1177) < 1000 * 1000)
                     {
                         DoSingleSplit("b3SecureBeacon");
                     }

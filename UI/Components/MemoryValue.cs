@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using LiveSplit.ComponentUtil;
+using LiveSplit.Options;
 using LiveSplit.UI.Components;
 
 namespace FzzyTools.UI.Components
@@ -8,7 +11,24 @@ namespace FzzyTools.UI.Components
     class MemoryValue
     {
 
-        private DeepPointer pointer;
+        public static IntPtr SigScan(string target)
+        {
+            var scantarget = new SigScanTarget(target);
+            IntPtr scan = IntPtr.Zero;
+            foreach (var page in FzzyComponent.process.MemoryPages(true).Reverse())
+            {
+                var scanner = new SignatureScanner(FzzyComponent.process, page.BaseAddress, (int)page.RegionSize);
+                var s = scanner.Scan(scantarget);
+                if (s != IntPtr.Zero)
+                {
+                    scan = s;
+                    break;
+                }
+            }
+            return scan;
+        }
+
+        public DeepPointer pointer;
         private string type;
         private bool fromThisTick;
 

@@ -148,6 +148,13 @@ namespace LiveSplit.UI.Components
             values["inCutscene"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E1B58, new int[] { }));
             values["flag"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E1B60));
 
+            values["abyss2Helmet1HitboxX"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x490 }));
+            values["abyss2Helmet1HitboxY"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x494 }));
+            values["abyss2Helmet1HitboxZ"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x498 }));
+            values["abyss2Helmet1VisualX"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x5A4 }));
+            values["abyss2Helmet1VisualY"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x5A8 }));
+            values["abyss2Helmet1VisualZ"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x5AC }));
+
             values["menuText"] = new MemoryValue("string20", new DeepPointer("client.dll", 0x22BC680));
             values["thing"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC26B04));
             values["angle"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x7B666C));
@@ -290,7 +297,7 @@ namespace LiveSplit.UI.Components
             {
                 tasTools.Stop();
             }
-            aimbot.Tick();
+            //aimbot.Tick();
 
             if (Settings.AutoLoadNCS && !Settings.SpeedmodEnabled) _ncsAutoLoader.Tick();
 

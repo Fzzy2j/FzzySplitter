@@ -193,4 +193,12 @@
       <change>Added beacon 3 secure beacon objective subsplit, very untested, use with caution</change>
     </changelog>
   </update>
+  <update version="1.7.6">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Fixed infinite loop with b3 secure beacon sub split</change>
+    </changelog>
+  </update>
 </updates>
