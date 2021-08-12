@@ -182,4 +182,15 @@
       <change>Reworked some speedmod stuff should be more stable</change>
     </changelog>
   </update>
+  <update version="1.7.5">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Huge speedmod changes (big)</change>
+      <change>Fixed a long standing bug with opening the game after opening livesplit</change>
+      <change>Will no longer split on level change if the level you're going to is gauntlet</change>
+      <change>Added beacon 3 secure beacon objective subsplit, very untested, use with caution</change>
+    </changelog>
+  </update>
 </updates>

@@ -22,8 +22,6 @@ namespace LiveSplit.UI.Components
         //public bool TASAimbot { get; set; }
         public bool AutoLoad18HourSave { get; set; }
 
-        public string TitanfallInstallDirectoryOverride { get; set; }
-
         private Dictionary<string, bool> _state;
         public ASLSettings aslsettings;
 
@@ -52,7 +50,6 @@ namespace LiveSplit.UI.Components
                 AutoLoadNCS = SettingsHelper.ParseBool(element["autoLoadNCS"]);
                 SpeedmodEnabled = SettingsHelper.ParseBool(element["speedmod"]);
                 AutoLoad18HourSave = SettingsHelper.ParseBool(element["btSave"]);
-                TitanfallInstallDirectoryOverride = SettingsHelper.ParseString(element["installDir"]);
                 //TASAimbot = SettingsHelper.ParseBool(element["tasAimbot"]);
 
                 ParseSettingsFromXml(element);
@@ -68,7 +65,6 @@ namespace LiveSplit.UI.Components
             SettingsHelper.CreateSetting(document, node, "autoLoadNCS", AutoLoadNCS);
             SettingsHelper.CreateSetting(document, node, "speedmod", SpeedmodEnabled);
             SettingsHelper.CreateSetting(document, node, "btSave", AutoLoad18HourSave);
-            SettingsHelper.CreateSetting(document, node, "installDir", TitanfallInstallDirectoryOverride);
             //SettingsHelper.CreateSetting(document, node, "tasAimbot", TASAimbot);
 
             return node;

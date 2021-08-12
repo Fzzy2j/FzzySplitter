@@ -26,7 +26,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\..\bin\Release\Components\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -85,6 +85,13 @@
     <Compile Include="UI\Components\Keyboard.cs" />
     <Compile Include="UI\Components\Speedmod.cs" />
     <Compile Include="UI\Components\FzzySplitter.cs" />
+    <Compile Include="UI\Components\Syringe\CustomMarshal.cs" />
+    <Compile Include="UI\Components\Syringe\CustomMarshalAsAttribute.cs" />
+    <Compile Include="UI\Components\Syringe\CustomMarshalAttribute.cs" />
+    <Compile Include="UI\Components\Syringe\Injector.cs" />
+    <Compile Include="UI\Components\Syringe\Win32\Enums.cs" />
+    <Compile Include="UI\Components\Syringe\Win32\Imports.cs" />
+    <Compile Include="UI\Components\Syringe\Win32\Structs.cs" />
     <Compile Include="UI\Components\TASTools.cs" />
   </ItemGroup>
   <ItemGroup>

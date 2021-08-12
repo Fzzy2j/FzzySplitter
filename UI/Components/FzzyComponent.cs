@@ -4,11 +4,17 @@ using LiveSplit.ComponentUtil;
 using LiveSplit.Model;
 using LiveSplit.Options;
 using Microsoft.Win32;
+using Syringe;
+using Syringe.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -17,11 +23,40 @@ namespace LiveSplit.UI.Components
     class FzzyComponent : LogicComponent
     {
 
+        [StructLayout(LayoutKind.Sequential, Pack = 8)]
+        struct ConsoleCommand
+        {
+            [CustomMarshalAs(CustomUnmanagedType.LPStr)] public string Cmd;
+        };
+
+        public void RunGameCommand(string cmd)
+        {
+            if (process == null) return;
+
+            if (!File.Exists(Directory.GetCurrentDirectory() + "\\Components\\TitanfallInjection.dll"))
+            {
+                using (WebClient webClient = new WebClient())
+                {
+                    webClient.DownloadFileAsync(new Uri(INJECTION_DLL_LINK), Directory.GetCurrentDirectory() + "\\Components\\TitanfallInjection.dll");
+                }
+                return;
+            }
+
+            Injector syringe = new Injector(process);
+            syringe.InjectLibrary(Directory.GetCurrentDirectory() + "\\Components\\TitanfallInjection.dll");
+            //syringe.DetectLibrary(Directory.GetCurrentDirectory() + "\\Components\\TitanfallInjection.dll");
+
+            ConsoleCommand consolecmd = new ConsoleCommand();
+            consolecmd.Cmd = cmd;
+            syringe.CallExport("TitanfallInjection.dll", "FzzyConsoleCommand", consolecmd);
+        }
+
         public const string MENU_MOD_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/Enhanced.Menu.exe";
         public const string MENU_MOD_UNINSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/uninstallmenumod.exe";
         public const string FASTANY_SAVES_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installsaves.exe";
         public const string SPEEDMOD_SAVES_INSTALLER_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installspeedmodsaves.exe";
         public const string FASTANY1_SAVE_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/fastany1.sav";
+        public const string INJECTION_DLL_LINK = "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/TitanfallInjection.dll";
 
         public FzzySettings Settings { get; set; }
 
@@ -90,6 +125,7 @@ namespace LiveSplit.UI.Components
             aslSettings.AddSetting("b3Splits", true, "The Beacon 3", "subSplits");
             aslSettings.AddSetting("b3Module1", true, "Split on retrieve module", "b3Splits");
             aslSettings.AddSetting("b3Module2", true, "Split on insert module", "b3Splits");
+            aslSettings.AddSetting("b3SecureBeacon", true, "Split on secure beacon objective", "b3Splits");
 
             aslSettings.AddSetting("tbfSplits", true, "Trial by Fire Elevator", "subSplits");
 
@@ -136,6 +172,8 @@ namespace LiveSplit.UI.Components
             values["currentLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x12A53D55, new int[] { }));
             values["inLoadingScreen"] = new MemoryValue("bool", new DeepPointer("client.dll", 0xB38C5C, new int[] { }));
             values["inPressSpaceToContinue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x290C0A8, new int[] { }));
+            values["lastCommand"] = new MemoryValue("byte300", new DeepPointer("engine.dll", 0x130D9AF0, new int[] { }));
+            values["sp_unlocks_level_8"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0911C, new int[] { }));
 
             values["x"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2172FF8, new int[] { 0xDEC }));
             values["y"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2173B48, new int[] { 0x2A0 }));
@@ -152,7 +190,7 @@ namespace LiveSplit.UI.Components
             values["onWall"] = new MemoryValue("int", new DeepPointer("server.dll", 0x1211270, new int[] { }));
             values["inCutscene"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E1B58, new int[] { }));
             values["clFrames"] = new MemoryValue("int", new DeepPointer("materialsystem_dx11.dll", 0x1A9F4A8, new int[] { 0x58C }));
-            values["b3Fight"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC28754, new int[] { }));
+            values["b3SecureBeaconObjective"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x139AECEC, new int[] { }));
             values["airAcceleration"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x13084248, new int[] { 0x2564 }));
             values["airSpeed"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x13084248, new int[] { 0xEA8, 0x1008, 0x1038, 0x390, 0x48, 0x18, 0xA30, 0x10, 0x2218 }));
             values["maxHealth"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x13084248, new int[] { 0xA90, 0x18, 0xED8, 0x48, 0xA40, 0x10, 0xCB0, 0x4D0 }));
@@ -171,6 +209,14 @@ namespace LiveSplit.UI.Components
             values["timescale"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x1315A2C8, new int[] { }));
 
             state.CurrentTimingMethod = TimingMethod.GameTime;
+
+            if (!File.Exists(Directory.GetCurrentDirectory() + "\\Components\\TitanfallInjection.dll"))
+            {
+                using (WebClient webClient = new WebClient())
+                {
+                    webClient.DownloadFileAsync(new Uri(INJECTION_DLL_LINK), Directory.GetCurrentDirectory() + "\\Components\\TitanfallInjection.dll");
+                }
+            }
 
             _ncsAutoLoader = new NCSAutoLoader(this);
             _speedmod = new Speedmod(this);
@@ -216,11 +262,12 @@ namespace LiveSplit.UI.Components
                     addToSettingsOnClose = false;
                 }
                 process = Process.GetProcessesByName("Titanfall2").OrderByDescending(x => x.StartTime).FirstOrDefault(x => !x.HasExited);
+
                 return;
             }
             else
             {
-                if (process.HasExited)
+                if (process.HasExited || process.Modules.Count < 127)
                 {
                     process = null;
                     return;
@@ -232,6 +279,7 @@ namespace LiveSplit.UI.Components
             wasLoading = isLoading;
             //isLoading = values["inLoadingScreen"].Current;
             isLoading = values["clFrames"].Current <= 0 || values["inLoadingScreen"].Current || values["inPressSpaceToContinue"].Current != 0;
+            //Log.Info(values["clFrames"].Current + "");
             //Log.Info(isLoading + "cl: " + values["clFrames"].Current + "   thing: " + values["thing"].Current);
 
             if (Settings.TASToolsEnabled && !tasTools.IsStarted)
@@ -242,7 +290,7 @@ namespace LiveSplit.UI.Components
             {
                 tasTools.Stop();
             }
-            //aimbot.Tick();
+            aimbot.Tick();
 
             if (Settings.AutoLoadNCS && !Settings.SpeedmodEnabled) _ncsAutoLoader.Tick();
 
@@ -262,12 +310,6 @@ namespace LiveSplit.UI.Components
         }
         public static string GetTitanfallInstallDirectory(FzzySettings settings)
         {
-            if (settings.TitanfallInstallDirectoryOverride != null 
-                && settings.TitanfallInstallDirectoryOverride.Length > 0 
-                && File.Exists(Path.Combine(settings.TitanfallInstallDirectoryOverride, "Titanfall2.exe")))
-            {
-                return settings.TitanfallInstallDirectoryOverride;
-            }
             string titanfallInstallDirectory = "";
 
             string originInstall = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Respawn\\Titanfall2", "Install Dir", null);

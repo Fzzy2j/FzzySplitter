@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Windows.Forms;
 
 namespace FzzyTools.UI.Components
@@ -18,41 +19,49 @@ namespace FzzyTools.UI.Components
         private long _previousTickCount;
 
         private bool _allowGauntletLoad = false;
-        private bool _allowB3Load = false;
-
-        private static string titanfallInstall;
-        private static string cfg
-        {
-            get
-            {
-                if (titanfallInstall == null) return null;
-                return Path.Combine(titanfallInstall, "r2\\cfg\\autosplitter.cfg");
-            }
-        }
 
         public Speedmod(FzzyComponent fzzy)
         {
             this.fzzy = fzzy;
-            try
-            {
-                titanfallInstall = fzzy.GetTitanfallInstallDirectory();
-            }
-            catch (Exception)
-            {
-            }
         }
 
-        private void Load(string save)
+        private string _delayedLoadSave;
+        private float _delayedLoadMillis;
+
+        private void Load(string save, long delay = 0)
         {
-            Log.Info("Load into " + save);
-            RunCommand("load " + save + "; set_loading_progress_detente #INTROSCREEN_HINT_PC #INTROSCREEN_HINT_CONSOLE");
+            if (delay == 0)
+            {
+                Log.Info("Load into " + save);
+                if (save == "speedmod9")
+                {
+                    fzzy.values["sp_unlocks_level_8"].Current = 0;
+                }
+                fzzy.RunGameCommand("load " + save + "; set_loading_progress_detente #INTROSCREEN_HINT_PC #INTROSCREEN_HINT_CONSOLE");
+            } else
+            {
+                if (_delayedLoadMillis > 0) return;
+                _delayedLoadSave = save;
+                _delayedLoadMillis = delay;
+            }
         }
 
         private string lastNonLoadLevel = "";
         private bool levelLoadedFromMenu = false;
+
+        private long _previousTimestamp;
         public void Tick()
         {
-            if (cfg == null) return;
+            var timeElapsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _previousTimestamp;
+            if (_delayedLoadMillis > 0)
+            {
+                _delayedLoadMillis -= timeElapsed;
+                if (_delayedLoadMillis <= 0)
+                {
+                    Load(_delayedLoadSave);
+                }
+            }
+            _previousTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (!fzzy.Settings.SpeedmodEnabled)
             {
                 if (IsSpeedmodEnabled())
@@ -90,7 +99,7 @@ namespace FzzyTools.UI.Components
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_boomtown_end")) Load("speedmod5");
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_timeshift_spoke02")) Load("speedmod7");
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_beacon_spoke0")) Load("speedmod8");
-                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_beacon")) Load("speedmod9");
+                    if (fzzy.values["currentLevel"].Current.StartsWith("sp_beacon") && !fzzy.values["currentLevel"].Current.StartsWith("sp_beacon_spoke0")) Load("speedmod9");
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_tday")) Load("speedmod10");
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_skyway_v1")) Load("speedmod11");
                 }
@@ -114,7 +123,7 @@ namespace FzzyTools.UI.Components
 
                 if (fzzy.values["lastLevel"].Current == "sp_crashsite" && !fzzy.isLoading)
                 {
-                    if (DistanceSquared(-445, -383, 112) < 25)
+                    if (DistanceSquared(-3435, 4201, 2357) < 180 * 180)
                     {
                         Load("speedmod3");
                     }
@@ -162,28 +171,42 @@ namespace FzzyTools.UI.Components
                     Load("speedmod8");
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0" && !fzzy.isLoading)
+                if (fzzy.values["lastLevel"].Old == "sp_beacon_spoke0" && fzzy.values["lastLevel"].Current == "sp_beacon")
                 {
-                    if (fzzy.values["y"].Current > 3000) _allowB3Load = true;
+                    Load("speedmod9");
+                }
 
-                    if (_allowB3Load &&
-                        fzzy.values["clFrames"].Current <= 0 && fzzy.values["clFrames"].Old > 0 &&
-                        fzzy.values["y"].Current < -500)
+                if (fzzy.values["lastLevel"].Current == "sp_beacon" && !fzzy.isLoading)
+                {
+                    for (int i = 0; i < 100; i++)
                     {
-                        Load("speedmod9");
-                        _allowB3Load = false;
-                    }
-                }
-                if (fzzy.values["clFrames"].Current <= 0)
-                {
-                    _allowB3Load = false;
-                }
+                        var baseAdr = 0x01064698;
+                        var offset = 0x8 * i;
+                        var health = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x4D4 }).Deref<int>(FzzyComponent.process);
+                        if (health == 0) continue;
+                        var isAlive = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x3B0 }).Deref<int>(FzzyComponent.process) == 16;
 
-                if (fzzy.values["lastLevel"].Current == "sp_beacon" && !fzzy.isLoading &&
-                    fzzy.values["b3Fight"].Current > 0 &&
-                    fzzy.values["inCutscene"].Current == 2)
-                {
-                    Load("speedmod10");
+                        var type = new MemoryValue("string30", new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x70, 0x0 }));
+
+                        if (type.Current == "npc_super_spectre")
+                        {
+                            var x = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x490 }).Deref<float>(FzzyComponent.process);
+                            var y = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x494 }).Deref<float>(FzzyComponent.process);
+
+                            var compareX = 2125;
+                            var compareY = -2114;
+                            var dis = Math.Sqrt(Math.Pow(x - compareX, 2) + Math.Pow(y - compareY, 2));
+
+                            if (dis < 2500 && !isAlive && health != 3000)
+                            {
+                                Load("speedmod10", 500);
+                            }
+                        }
+                    }
+                    if (fzzy.values["sp_unlocks_level_8"].Current == 511)
+                    {
+                        Load("speedmod10", 500);
+                    }
                 }
 
                 if (fzzy.values["lastLevel"].Current == "sp_tday" && !fzzy.isLoading &&
@@ -226,6 +249,7 @@ namespace FzzyTools.UI.Components
         {
             if (FzzyComponent.process == null) return;
             if (IsSpeedmodEnabled()) return;
+            InstallSpeedmod(fzzy.Settings);
             try
             {
                 RemoveWallFriction();
@@ -239,81 +263,20 @@ namespace FzzyTools.UI.Components
         private static string speedmodSavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installspeedmodsaves.exe");
         public static void InstallSpeedmod(FzzySettings settings)
         {
-            if (titanfallInstall == null || !File.Exists(Path.Combine(titanfallInstall, "Titanfall2.exe")))
-            {
-                string directory = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Titanfall2";
-                ShowInputDialog("Install Directory", "Titanfall 2 Install Directory not Available!\nPlease enter where you have titanfall 2 installed\n(The folder that contains Titanfall2.exe)", ref directory);
-                settings.TitanfallInstallDirectoryOverride = directory;
-                return;
-            }
-
-            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
-            string settingscontent = File.ReadAllText(settingscfg);
-            if (!settingscontent.Contains("\nbind \"F11\" \"exec autosplitter.cfg\""))
-            {
-                if (FzzyComponent.process != null)
-                {
-                    FzzyComponent.AddToSettingsOnClose("\nbind \"F11\" \"exec autosplitter.cfg\"");
-                    MessageBox.Show("Speedmod Installed!\nRestart your game for it to take effect.");
-                } else
-                {
-                    File.AppendAllText(settingscfg, "\nbind \"F11\" \"exec autosplitter.cfg\"");
-                }
-            }
             if (FzzySettings.AreSpeedmodSavesInstalled()) return;
+            if (downloadInProgress) return;
             using (WebClient webClient = new WebClient())
             {
                 webClient.DownloadFileAsync(new Uri(FzzyComponent.SPEEDMOD_SAVES_INSTALLER_LINK), speedmodSavesInstaller);
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(SpeedmodSavesDownloadCompleted);
+                downloadInProgress = true;
             }
         }
-        private static DialogResult ShowInputDialog(string name, string message, ref string input)
-        {
-            System.Drawing.Size size = new System.Drawing.Size(350, 120);
-            Form inputBox = new Form();
-
-            inputBox.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            inputBox.ClientSize = size;
-            inputBox.Text = name;
-
-            System.Windows.Forms.Label label = new Label();
-            label.Size = new System.Drawing.Size(size.Width - 10, 39);
-            label.Location = new System.Drawing.Point(5, 5);
-            label.Text = message;
-            inputBox.Controls.Add(label);
-
-            System.Windows.Forms.TextBox textBox = new TextBox();
-            textBox.Size = new System.Drawing.Size(size.Width - 10, 23);
-            textBox.Location = new System.Drawing.Point(5, 50);
-            textBox.Text = input;
-            inputBox.Controls.Add(textBox);
-
-            Button okButton = new Button();
-            okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            okButton.Name = "okButton";
-            okButton.Size = new System.Drawing.Size(75, 23);
-            okButton.Text = "&OK";
-            okButton.Location = new System.Drawing.Point(size.Width - 80 - 80, size.Height - 30);
-            inputBox.Controls.Add(okButton);
-
-            Button cancelButton = new Button();
-            cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            cancelButton.Name = "cancelButton";
-            cancelButton.Size = new System.Drawing.Size(75, 23);
-            cancelButton.Text = "&Cancel";
-            cancelButton.Location = new System.Drawing.Point(size.Width - 80, size.Height - 30);
-            inputBox.Controls.Add(cancelButton);
-
-            inputBox.AcceptButton = okButton;
-            inputBox.CancelButton = cancelButton;
-
-            DialogResult result = inputBox.ShowDialog();
-            input = textBox.Text;
-            return result;
-        }
+        private static bool downloadInProgress = false;
 
         private static void SpeedmodSavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
         {
+            downloadInProgress = false;
             var startInfo = new ProcessStartInfo
             {
                 WorkingDirectory = Directory.GetParent(speedmodSavesInstaller).FullName,
@@ -343,24 +306,10 @@ namespace FzzyTools.UI.Components
 
         private void MakeAlliesInvincible()
         {
-            foreach (ProcessModule m in FzzyComponent.process.Modules)
-            {
-                if (m.ModuleName == "server.dll")
-                {
-                    var code = new byte[] { 0x83, 0xBB, 0x10, 0x01, 0x00, 0x00, 0x03, 0x74, 0x02, 0x89, 0x3B, 0x48, 0x8B, 0x5C, 0x24, 0x30, 0x48, 0x83, 0xC4, 0x20, 0x5F, 0xC3 };
-                    FzzyComponent.process.WriteBytes(m.BaseAddress + 0x43373A, code);
-                    var jmp = new byte[] { 0x74, 0x1E };
-                    FzzyComponent.process.WriteBytes(m.BaseAddress + 0x433725, jmp);
-                    break;
-                }
-            }
-        }
-
-        private void RunCommand(string cmd)
-        {
-            File.WriteAllText(cfg, cmd);
-            Log.Info("running command: " + cmd);
-            fzzy.board.Send(Keyboard.ScanCodeShort.F11);
+            var code = new byte[] { 0x83, 0xBB, 0x10, 0x01, 0x00, 0x00, 0x03, 0x74, 0x02, 0x89, 0x3B, 0x48, 0x8B, 0x5C, 0x24, 0x30, 0x48, 0x83, 0xC4, 0x20, 0x5F, 0xC3 };
+            Write(new DeepPointer("server.dll", 0x43373A), code);
+            var jmp = new byte[] { 0x74, 0x1E };
+            Write(new DeepPointer("server.dll", 0x433725), jmp);
         }
 
         private void MakeAlliesKillable()

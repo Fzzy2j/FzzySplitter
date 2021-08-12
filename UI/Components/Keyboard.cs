@@ -12,6 +12,19 @@ namespace LiveSplit.UI.Components
             Unpress(a);
         }
 
+        public void PressMouse(MOUSEEVENTF m)
+        {
+            if (GetWindowInFocus().StartsWith("Titanfall 2"))
+            {
+                INPUT[] Inputs = new INPUT[1];
+                INPUT Input = new INPUT();
+                Input.type = 0; // 0 = Mouse Input
+                Input.U.mi.dwFlags = m;
+                Inputs[0] = Input;
+                SendInput(1, Inputs, INPUT.Size);
+            }
+        }
+
         public void Press(ScanCodeShort a)
         {
             if (GetWindowInFocus().StartsWith("Titanfall 2"))

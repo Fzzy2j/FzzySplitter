@@ -1,10 +1,14 @@
 ﻿using LiveSplit.ASL;
 using LiveSplit.ComponentUtil;
+using LiveSplit.Model;
 using LiveSplit.Options;
 using LiveSplit.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
 
 namespace FzzyTools.UI.Components
 {
@@ -41,6 +45,7 @@ namespace FzzyTools.UI.Components
                 return fzzy.values["z"].Current;
             }
         }
+        private bool ResetMessageShown;
 
         public void Tick()
         {
@@ -54,7 +59,20 @@ namespace FzzyTools.UI.Components
                 fzzy.state.IsGameTimePaused = IsLoading(settings);
                 if (Reset(settings))
                 {
-                    fzzy.timer.Reset();
+                    if (!ResetMessageShown)
+                    {
+                        var result = DialogResult.Yes;
+                        if (fzzy.state.Settings.WarnOnReset)
+                        {
+                            ResetMessageShown = true;
+                            result = WarnAboutResetting();
+                        }
+                        if (result == DialogResult.Yes)
+                            fzzy.timer.Reset();
+                        else if (result == DialogResult.No)
+                            fzzy.timer.Reset(false);
+                        ResetMessageShown = false;
+                    }
                 }
                 Split(settings);
             }
@@ -93,11 +111,32 @@ namespace FzzyTools.UI.Components
             {
                 return true;
             }
-            if (settings["loadReset"] && fzzy.isLoading && !fzzy.wasLoading)
+            if (settings["loadReset"] && fzzy.values["inPressSpaceToContinue"].Current > 0 && fzzy.values["inPressSpaceToContinue"].Old <= 0)
             {
                 return true;
             }
             return false;
+        }
+
+        private DialogResult WarnAboutResetting()
+        {
+            var warnUser = false;
+            for (var index = 0; index < fzzy.state.Run.Count; index++)
+            {
+                if (LiveSplitStateHelper.CheckBestSegment(fzzy.state, index, fzzy.state.CurrentTimingMethod))
+                {
+                    warnUser = true;
+                    break;
+                }
+            }
+            if (!warnUser && (fzzy.state.Run.Last().SplitTime[fzzy.state.CurrentTimingMethod] != null && fzzy.state.Run.Last().PersonalBestSplitTime[fzzy.state.CurrentTimingMethod] == null) || fzzy.state.Run.Last().SplitTime[fzzy.state.CurrentTimingMethod] < fzzy.state.Run.Last().PersonalBestSplitTime[fzzy.state.CurrentTimingMethod])
+                warnUser = true;
+            if (warnUser)
+            {
+                var result = MessageBox.Show("You have beaten some of your best times.\r\nDo you want to update them?", "Update Times?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                return result;
+            }
+            return DialogResult.Yes;
         }
 
         private bool IsLoading(ASLSettingsReader settings)
@@ -211,6 +250,7 @@ namespace FzzyTools.UI.Components
                     fzzy.board.Send(Keyboard.ScanCodeShort.F1);
                     fzzy.state.AdjustedStartTime -= new TimeSpan(0, 0, 3, 22, 217);
                 }
+                if (fzzy.isLoading) btSaveDelay = 0;
             }
             previousTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
@@ -229,16 +269,19 @@ namespace FzzyTools.UI.Components
             }
 
             // Level change
-            if (fzzy.values["lastLevel"].Current.Length > 0 && fzzy.values["lastLevel"].Current != fzzy.values["lastLevel"].Old && settings["levelChangeSplit"])
+            if (fzzy.values["lastLevel"].Current.Length > 0 && fzzy.values["lastLevel"].Current != fzzy.values["lastLevel"].Old && settings["levelChangeSplit"] && fzzy.values["lastLevel"].Current != "sp_training")
             {
                 var level = fzzy.values["lastLevel"].Current;
-                if (level == "sp_beacon" || level == "sp_hub_timeshift")
+                if (level != "sp_training")
                 {
-                    fzzy.timer.Split();
-                }
-                else
-                {
-                    DoSingleSplit(level);
+                    if (level == "sp_beacon" || level == "sp_hub_timeshift")
+                    {
+                        fzzy.timer.Split();
+                    }
+                    else
+                    {
+                        DoSingleSplit(level);
+                    }
                 }
             }
 
@@ -432,6 +475,15 @@ namespace FzzyTools.UI.Components
                         DoSingleSplit("b3Module2", 1850);
                     }
                 }
+
+                // Secure beacon objective
+                if (settings["b3SecureBeacon"])
+                {
+                    if (fzzy.values["b3SecureBeaconObjective"].Current && !fzzy.values["b3SecureBeaconObjective"].Old && DistanceSquared(-3007, -1177) < 1000 * 1000)
+                    {
+                        DoSingleSplit("b3SecureBeacon");
+                    }
+                }
             }
 
             // TBF Elevator
@@ -495,8 +547,16 @@ namespace FzzyTools.UI.Components
 
         private bool Start(ASLSettingsReader settings)
         {
+            var last = fzzy.values["lastCommand"].Current;
+            var nonull = new byte[last.Length];
+            for (int i = 0; i < last.Length; i++)
+            {
+                nonull[i] = last[i];
+                if (last[i] == 0) nonull[i] = 0x20;
+            }
+            var commandHistory = Encoding.UTF8.GetString(nonull);
             if (settings["flagSplit"] && fzzy.values["flag"].Current == 1 && fzzy.values["flag"].Old == 0) return true;
-            if (fzzy.values["inPressSpaceToContinue"].Old > 0 && fzzy.values["inPressSpaceToContinue"].Current <= 0)
+            if (fzzy.wasLoading && !fzzy.isLoading && commandHistory.Contains("#INTROSCREEN_HINT_PC"))
             {
                 return true;
             }
