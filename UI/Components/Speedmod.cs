@@ -153,11 +153,11 @@ namespace FzzyTools.UI.Components
                 {
                     if (fzzy.isLoading)
                     {
-                        fzzy.values["sp_unlocks_level_abyss2"].Current = 5;
+                        fzzy.values["sp_unlocks_level_4"].Current = 5;
                     }
                     if (!fzzy.isLoading)
                     {
-                        if (fzzy.values["sp_unlocks_level_abyss2"].Current == 7)
+                        if (fzzy.values["sp_unlocks_level_4"].Current == 7)
                         {
                             Load("speedmod5", 500);
                         }
