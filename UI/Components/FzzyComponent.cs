@@ -145,6 +145,7 @@ namespace LiveSplit.UI.Components
             Settings.InitASLSettings(aslSettings);
 
             values["radioSpeaking"] = new MemoryValue("int", new DeepPointer("client.dll", 0x2A98128));
+            values["dialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x2A9612C, new int[] { }));
             values["dialogOption"] = new MemoryValue("int", new DeepPointer("client.dll", 0x27B7210, new int[] { }));
             values["inCutscene"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E1B58, new int[] { }));
             values["flag"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E1B60));

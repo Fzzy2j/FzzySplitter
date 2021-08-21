@@ -211,4 +211,12 @@
       <change>Fixed restart commands longer than 300 bytes not triggering auto start</change>
     </changelog>
   </update>
+  <update version="1.7.8">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Quick stick lick trick</change>
+    </changelog>
+  </update>
 </updates>
