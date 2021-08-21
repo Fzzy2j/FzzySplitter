@@ -137,23 +137,17 @@ namespace LiveSplit.UI.Components
             aslSettings.AddSetting("foldDataCore", true, "Split when you insert the data core", "foldSplits");
             aslSettings.AddSetting("foldEscape", true, "Split when escape starts", "foldSplits");
 
-            aslSettings.AddSetting("ilSettings", false, "IL Settings", null);
-            aslSettings.AddSetting("BnRpause", false, "Blood and Rust IL pause", "ilSettings");
-            aslSettings.AddSetting("enc3pause", false, "Effect and Cause 3 IL pause", "ilSettings");
-            aslSettings.AddSetting("loadReset", false, "Reset after load screens", "ilSettings");
+            aslSettings.AddSetting("miscSettings", false, "Misc. Settings", null);
+            aslSettings.AddSetting("BnRpause", false, "Blood and Rust IL pause", "miscSettings");
+            aslSettings.AddSetting("enc3pause", false, "Effect and Cause 3 IL pause", "miscSettings");
+            aslSettings.AddSetting("loadReset", false, "Reset after load screens", "miscSettings");
+            aslSettings.AddSetting("cheatsTimerLink", false, "Tie sv_cheats with if the timer is started or not", "miscSettings");
             Settings.InitASLSettings(aslSettings);
 
             values["radioSpeaking"] = new MemoryValue("int", new DeepPointer("client.dll", 0x2A98128));
-            values["dialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x2A9612C, new int[] { }));
+            values["dialogOption"] = new MemoryValue("int", new DeepPointer("client.dll", 0x27B7210, new int[] { }));
             values["inCutscene"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E1B58, new int[] { }));
             values["flag"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E1B60));
-
-            values["abyss2Helmet1HitboxX"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x490 }));
-            values["abyss2Helmet1HitboxY"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x494 }));
-            values["abyss2Helmet1HitboxZ"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x498 }));
-            values["abyss2Helmet1VisualX"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x5A4 }));
-            values["abyss2Helmet1VisualY"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x5A8 }));
-            values["abyss2Helmet1VisualZ"] = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x5AC }));
 
             values["menuText"] = new MemoryValue("string20", new DeepPointer("client.dll", 0x22BC680));
             values["thing"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC26B04));
@@ -179,8 +173,9 @@ namespace LiveSplit.UI.Components
             values["currentLevel"] = new MemoryValue("string20", new DeepPointer("engine.dll", 0x12A53D55, new int[] { }));
             values["inLoadingScreen"] = new MemoryValue("bool", new DeepPointer("client.dll", 0xB38C5C, new int[] { }));
             values["inPressSpaceToContinue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x290C0A8, new int[] { }));
-            values["lastCommand"] = new MemoryValue("byte300", new DeepPointer("engine.dll", 0x130D9AF0, new int[] { }));
+            values["lastCommand"] = new MemoryValue("byte1000", new DeepPointer("engine.dll", 0x130D9AF0, new int[] { }));
             values["sp_unlocks_level_8"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0911C, new int[] { }));
+            values["sp_unlocks_level_abyss2"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC09A2C, new int[] { }));
 
             values["x"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2172FF8, new int[] { 0xDEC }));
             values["y"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2173B48, new int[] { 0x2A0 }));
@@ -213,7 +208,8 @@ namespace LiveSplit.UI.Components
             values["recoilHorizontal"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00B188C0, new int[] { 0xD8, 0x1A40 }));
             values["holdingM3"] = new MemoryValue("bool", new DeepPointer("engine.dll", 0x1396CC98, new int[] { }));
 
-            values["timescale"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x1315A2C8, new int[] { }));
+            values["timescale"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x1315A2C8));
+            values["sv_cheats"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x12A50EEC));
 
             state.CurrentTimingMethod = TimingMethod.GameTime;
 
@@ -284,10 +280,20 @@ namespace LiveSplit.UI.Components
             if (timer == null) timer = new TimerModel() { CurrentState = state };
 
             wasLoading = isLoading;
-            //isLoading = values["inLoadingScreen"].Current;
             isLoading = values["clFrames"].Current <= 0 || values["inLoadingScreen"].Current || values["inPressSpaceToContinue"].Current != 0;
-            //Log.Info(values["clFrames"].Current + "");
-            //Log.Info(isLoading + "cl: " + values["clFrames"].Current + "   thing: " + values["thing"].Current);
+
+            var settings = Settings.aslsettings.Reader;
+            if (settings["cheatsTimerLink"])
+            {
+                if (state.CurrentPhase == TimerPhase.Running && values["sv_cheats"].Current == 1)
+                {
+                    RunGameCommand("sv_cheats 0");
+                }
+                if (state.CurrentPhase != TimerPhase.Running && values["sv_cheats"].Current == 0)
+                {
+                    RunGameCommand("sv_cheats 1");
+                }
+            }
 
             if (Settings.TASToolsEnabled && !tasTools.IsStarted)
             {

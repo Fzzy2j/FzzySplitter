@@ -201,4 +201,14 @@
       <change>Fixed infinite loop with b3 secure beacon sub split</change>
     </changelog>
   </update>
+  <update version="1.7.7">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Speedmod updates</change>
+      <change>Option to tie sv_cheats to timer added</change>
+      <change>Fixed restart commands longer than 300 bytes not triggering auto start</change>
+    </changelog>
+  </update>
 </updates>

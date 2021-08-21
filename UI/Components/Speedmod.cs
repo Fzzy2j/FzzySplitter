@@ -33,11 +33,8 @@ namespace FzzyTools.UI.Components
             if (delay == 0)
             {
                 Log.Info("Load into " + save);
-                if (save == "speedmod9")
-                {
-                    fzzy.values["sp_unlocks_level_8"].Current = 0;
-                }
                 fzzy.RunGameCommand("load " + save + "; set_loading_progress_detente #INTROSCREEN_HINT_PC #INTROSCREEN_HINT_CONSOLE");
+                levelLoaded = 1f;
             }
             else
             {
@@ -47,8 +44,7 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private string lastNonLoadLevel = "";
-        private bool levelLoadedFromMenu = false;
+        private float levelLoaded = 0;
 
         private long _previousTimestamp;
         public void Tick()
@@ -85,13 +81,28 @@ namespace FzzyTools.UI.Components
                     fzzy.values["slideBoostCooldown"].Current = 0f;
                 }
 
-                if (fzzy.values["inLoadingScreen"].Current && !fzzy.values["inLoadingScreen"].Old)
+                /*if (fzzy.values["inLoadingScreen"].Current && !fzzy.values["inLoadingScreen"].Old)
                 {
                     levelLoadedFromMenu = lastNonLoadLevel == "";
-                }
-                if (!fzzy.values["inLoadingScreen"].Current) lastNonLoadLevel = fzzy.values["currentLevel"].Current;
+                }*/
+                //if (!fzzy.values["inLoadingScreen"].Current) lastNonLoadLevel = fzzy.values["currentLevel"].Current;
 
-                if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old && levelLoadedFromMenu)
+                var last = fzzy.values["lastCommand"].Current;
+                var nonull = new byte[last.Length];
+                for (int i = 0; i < last.Length; i++)
+                {
+                    nonull[i] = last[i];
+                    if (last[i] == 0) nonull[i] = 0x20;
+                }
+                var commandHistory = Encoding.UTF8.GetString(nonull);
+                if (!fzzy.isLoading)
+                {
+                    if (levelLoaded > 0) levelLoaded -= timeElapsed / 1000f;
+                } else
+                {
+                    if (levelLoaded > 0) levelLoaded = 1f;
+                }
+                if (fzzy.isLoading && commandHistory.Contains("#INTROSCREEN_HINT_PC") && levelLoaded <= 0)
                 {
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_training")) Load("speedmod1");
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_crashsite")) Load("speedmod2");
@@ -115,7 +126,7 @@ namespace FzzyTools.UI.Components
 
                     float projection = 0.866049f * fzzy.values["x"].Current + 0.499959f * fzzy.values["y"].Current;
 
-                    if ((Math.Abs(projection + 3888.9) < 1 || Math.Abs(projection - 6622) < 1) && _allowGauntletLoad)
+                    if ((Math.Abs(projection + 3888.9) < 10 || Math.Abs(projection - 6622) < 10) && _allowGauntletLoad)
                     {
                         Load("speedmod2");
                         _allowGauntletLoad = false;
@@ -138,44 +149,25 @@ namespace FzzyTools.UI.Components
                     }
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_boomtown" && !fzzy.isLoading)
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown")
                 {
-                    /*var helmet1 = new MemoryValue("float", new DeepPointer("server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x5A4 }));
-                    if (helmet1.Current == -8871.5)
+                    if (fzzy.isLoading)
                     {
-                        MoveHelmet(-2214.9f, 11966.58f, 2460.8f, "server.dll", 0x00C70748, new int[] { 0x10, 0x6D8, 0x250, 0x10, 0x698, 0x248, 0x5D0, 0x5A4 });
+                        fzzy.values["sp_unlocks_level_abyss2"].Current = 5;
                     }
-
-                    IntPtr ptr = MemoryValue.SigScan("43 00 00 00 40 87 F7 45 C0 70 AB 45 00 D4 47 45 00 00 00 00");
-                    if (ptr != IntPtr.Zero)
+                    if (!fzzy.isLoading)
                     {
-                        var helmetVisualX = new MemoryValue("float", new DeepPointer(ptr + 0x04));
-                        var helmetVisualY = new MemoryValue("float", new DeepPointer(ptr + 0x04 + 0x04));
-                        var helmetVisualZ = new MemoryValue("float", new DeepPointer(ptr + 0x04 + 0x08));
-
-                        var helmetHitboxX = new MemoryValue("float", new DeepPointer(ptr - 0x110));
-                        var helmetHitboxY = new MemoryValue("float", new DeepPointer(ptr - 0x110 + 0x04));
-                        var helmetHitboxZ = new MemoryValue("float", new DeepPointer(ptr - 0x110 + 0x08));
-
-                        Log.Info("x: " + helmetVisualX.Current);
-                        if (helmetVisualX.Current == 7920.90625f)
+                        if (fzzy.values["sp_unlocks_level_abyss2"].Current == 7)
                         {
-                            Log.Info("move");
-                            helmetVisualX.Current = 8351.46f;
-                            helmetVisualY.Current = 7640.13f;
-                            helmetVisualZ.Current = 2220f;
-
-                            helmetHitboxX.Current = 8351.46f;
-                            helmetHitboxY.Current = 7640.13f;
-                            helmetHitboxZ.Current = 2220f;
+                            Load("speedmod5", 500);
                         }
-                    }*/
-                    float xDistance = fzzy.values["x"].Current - 8167;
-                    float yDistance = fzzy.values["y"].Current + 3583;
-                    double distance = Math.Sqrt(xDistance * xDistance + yDistance * yDistance);
-                    if (distance < 76)
-                    {
-                        Load("speedmod5");
+                        /*float xDistance = fzzy.values["x"].Current - 8167;
+                        float yDistance = fzzy.values["y"].Current + 3583;
+                        double distance = Math.Sqrt(xDistance * xDistance + yDistance * yDistance);
+                        if (distance < 76)
+                        {
+                            Load("speedmod5");
+                        }*/
                     }
                 }
 
@@ -207,9 +199,9 @@ namespace FzzyTools.UI.Components
                     Load("speedmod9");
                 }
 
-                if (fzzy.values["lastLevel"].Current == "sp_beacon" && !fzzy.isLoading)
+                if (fzzy.values["lastLevel"].Current == "sp_beacon")
                 {
-                    for (int i = 0; i < 100; i++)
+                    /*for (int i = 0; i < 100; i++)
                     {
                         var baseAdr = 0x01064698;
                         var offset = 0x8 * i;
@@ -233,8 +225,12 @@ namespace FzzyTools.UI.Components
                                 Load("speedmod10", 500);
                             }
                         }
+                    }*/
+                    if (fzzy.isLoading)
+                    {
+                        fzzy.values["sp_unlocks_level_8"].Current = 25;
                     }
-                    if (fzzy.values["sp_unlocks_level_8"].Current == 511)
+                    if (!fzzy.isLoading && fzzy.values["sp_unlocks_level_8"].Current == 511)
                     {
                         Load("speedmod10", 500);
                     }
@@ -261,18 +257,18 @@ namespace FzzyTools.UI.Components
         private void MoveHelmet(float newX, float newY, float newZ, string module, int base_, params int[] offsets)
         {
             offsets[offsets.Length - 1] = 0x490;
-            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = -2214.9f;
+            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = newX;
             offsets[offsets.Length - 1] = 0x494;
-            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = 11966.58f;
+            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = newY;
             offsets[offsets.Length - 1] = 0x498;
-            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = 2460.8f;
+            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = newZ;
 
             offsets[offsets.Length - 1] = 0x5A4;
-            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = -2214.9f;
+            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = newX;
             offsets[offsets.Length - 1] = 0x5A8;
-            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = 11966.58f;
+            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = newY;
             offsets[offsets.Length - 1] = 0x5AC;
-            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = 2460.8f;
+            new MemoryValue("float", new DeepPointer(module, base_, offsets)).Current = newZ;
         }
 
         private float DistanceSquared(float x, float y, float z)

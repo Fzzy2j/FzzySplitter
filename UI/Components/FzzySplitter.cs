@@ -537,7 +537,7 @@ namespace FzzyTools.UI.Components
                 // Escape land
                 if (settings["foldEscape"])
                 {
-                    if (DistanceSquared(535, 6549) < 25000 && fzzy.values["angle"].Old == 0 && fzzy.values["angle"].Current != 0)
+                    if (DistanceSquared(535, 6549) < 25000 && fzzy.values["inCutscene"].Current == 1)
                     {
                         DoSingleSplit("escape");
                     }
