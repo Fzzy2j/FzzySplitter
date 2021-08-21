@@ -90,7 +90,7 @@ namespace LiveSplit.UI.Components
             aslSettings = new ASLSettings();
             aslSettings.AddSetting("flagSplit", false, "Start timer on flag pickup, split on flag capture, and pause when not holding flag", null);
             aslSettings.AddSetting("levelChangeSplit", true, "Split on level change", null);
-            aslSettings.AddSetting("helmetSplit", false, "Split on helmet pickup", null);
+
             aslSettings.AddSetting("endSplit", true, "Split at the end of escape (end of run)", null);
             aslSettings.AddSetting("removeLoads", true, "Remove Loads", null);
 
@@ -100,7 +100,7 @@ namespace LiveSplit.UI.Components
             aslSettings.AddSetting("btBattery1", true, "Split on first battery", "btSplits");
             aslSettings.AddSetting("btBattery2", true, "Split on second battery", "btSplits");
 
-            aslSettings.AddSetting("bnrSplits", true, "Blood and Rust", "subSplits");
+            aslSettings.AddSetting("bnrSplits", true, "Blood & Rust", "subSplits");
             aslSettings.AddSetting("bnrButton1", true, "Split on first button", "bnrSplits");
             aslSettings.AddSetting("bnrDoor", true, "Split at door", "bnrSplits");
             aslSettings.AddSetting("bnrButton2", true, "Split on second button", "bnrSplits");
@@ -108,9 +108,9 @@ namespace LiveSplit.UI.Components
 
             aslSettings.AddSetting("ita3Splits", true, "Into the Abyss 3 Embark", "subSplits");
 
-            aslSettings.AddSetting("enc1Splits", true, "Effect and Cause 1 Cutscene", "subSplits");
+            aslSettings.AddSetting("enc1Splits", true, "Effect & Cause 1 Cutscene", "subSplits");
 
-            aslSettings.AddSetting("enc2Splits", true, "Effect and Cause 2", "subSplits");
+            aslSettings.AddSetting("enc2Splits", true, "Effect & Cause 2", "subSplits");
             aslSettings.AddSetting("enc2Button1", true, "Split on button 1", "enc2Splits");
             aslSettings.AddSetting("enc2Button2", true, "Split on button 2", "enc2Splits");
             aslSettings.AddSetting("enc2Dialogue", true, "Split during second dialogue", "enc2Splits");
@@ -139,9 +139,26 @@ namespace LiveSplit.UI.Components
 
             aslSettings.AddSetting("miscSettings", false, "Misc. Settings", null);
             aslSettings.AddSetting("BnRpause", false, "Blood and Rust IL pause", "miscSettings");
-            aslSettings.AddSetting("enc3pause", false, "Effect and Cause 3 IL pause", "miscSettings");
+            aslSettings.AddSetting("enc3pause", false, "Effect & Cause 3 IL pause", "miscSettings");
             aslSettings.AddSetting("loadReset", false, "Reset after load screens", "miscSettings");
             aslSettings.AddSetting("cheatsTimerLink", false, "Tie sv_cheats with if the timer is started or not", "miscSettings");
+
+            aslSettings.AddSetting("helmetSplit", false, "Helmet splits", null);
+            aslSettings.AddSetting("gauntletHelmetSplit", true, "Gauntlet", "helmetSplit");
+            aslSettings.AddSetting("btHelmetSplit", true, "BT-7274", "helmetSplit");
+            aslSettings.AddSetting("bnrHelmetSplit", true, "Blood & Rust", "helmetSplit");
+            aslSettings.AddSetting("ita1HelmetSplit", true, "Into the Abyss 1", "helmetSplit");
+            aslSettings.AddSetting("ita2HelmetSplit", false, "Into the Abyss 2", "helmetSplit");
+            aslSettings.AddSetting("ita3HelmetSplit", true, "Into the Abyss 3", "helmetSplit");
+            aslSettings.AddSetting("enc1HelmetSplit", false, "Effect & Cause 1", "helmetSplit");
+            aslSettings.AddSetting("enc2HelmetSplit", true, "Effect & Cause 2", "helmetSplit");
+            aslSettings.AddSetting("enc3HelmetSplit", false, "Effect & Cause 3", "helmetSplit");
+            aslSettings.AddSetting("b1HelmetSplit", true, "The Beacon 1", "helmetSplit");
+            aslSettings.AddSetting("b2HelmetSplit", true, "The Beacon 2", "helmetSplit");
+            aslSettings.AddSetting("b3HelmetSplit", true, "The Beacon 3", "helmetSplit");
+            aslSettings.AddSetting("tbfHelmetSplit", true, "Trial by Fire", "helmetSplit");
+            aslSettings.AddSetting("arkHelmetSplit", true, "The Ark", "helmetSplit");
+            aslSettings.AddSetting("foldHelmetSplit", true, "The Fold Weapon", "helmetSplit");
             Settings.InitASLSettings(aslSettings);
 
             values["radioSpeaking"] = new MemoryValue("int", new DeepPointer("client.dll", 0x2A98128));
@@ -175,8 +192,21 @@ namespace LiveSplit.UI.Components
             values["inLoadingScreen"] = new MemoryValue("bool", new DeepPointer("client.dll", 0xB38C5C, new int[] { }));
             values["inPressSpaceToContinue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x290C0A8, new int[] { }));
             values["lastCommand"] = new MemoryValue("byte1000", new DeepPointer("engine.dll", 0x130D9AF0, new int[] { }));
-            values["sp_unlocks_level_8"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0911C, new int[] { }));
-            values["sp_unlocks_level_abyss2"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC09A2C, new int[] { }));
+
+            // helmet unlocks for each level
+            values["sp_unlocks_level_0"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0A1BC)); // gauntlet
+            values["sp_unlocks_level_1"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0A3FC)); // bt
+            values["sp_unlocks_level_2"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0C49C)); // bnr
+            values["sp_unlocks_level_3"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0C88C)); // ita1
+            values["sp_unlocks_level_4"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC09A2C, new int[] { })); // ita2
+            values["sp_unlocks_level_5"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC08FFC)); // ita3
+            values["sp_unlocks_level_6"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0923C)); // enc1/3
+            values["sp_unlocks_level_7"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0A48C)); // enc2
+            values["sp_unlocks_level_8"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0911C, new int[] { })); // b1/3
+            values["sp_unlocks_level_9"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC09DDC)); // b2
+            values["sp_unlocks_level_10"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0A36C)); // tbf
+            values["sp_unlocks_level_11"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0C7FC)); // ark
+            values["sp_unlocks_level_12"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0987C)); // fold
 
             values["x"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2172FF8, new int[] { 0xDEC }));
             values["y"] = new MemoryValue("float", new DeepPointer("client.dll", 0x2173B48, new int[] { 0x2A0 }));
@@ -211,6 +241,7 @@ namespace LiveSplit.UI.Components
 
             values["timescale"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x1315A2C8));
             values["sv_cheats"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x12A50EEC));
+            values["sp_startpoint"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0C6DC));
 
             state.CurrentTimingMethod = TimingMethod.GameTime;
 

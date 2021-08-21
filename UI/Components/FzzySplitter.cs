@@ -222,7 +222,25 @@ namespace FzzyTools.UI.Components
             if (settings["flagSplit"] && fzzy.values["flag"].Old == 1 && fzzy.values["flag"].Current == 0) fzzy.timer.Split();
 
             if (settings["helmetSplit"] && (fzzy.values["menuText"].Current.StartsWith("Found ") || fzzy.values["menuText"].Current.StartsWith("尋獲 ")) &&
-                fzzy.values["menuText"].Current != fzzy.values["menuText"].Old) fzzy.timer.Split();
+                fzzy.values["menuText"].Current != fzzy.values["menuText"].Old)
+            {
+                // separates helmet splits into every level
+                if (fzzy.values["lastLevel"].Current == "sp_training" && settings["gauntletHelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_crashsite" && settings["btHelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_sewers1" && settings["bnrHelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown_start" && settings["ita1HelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown" && settings["ita2HelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && settings["ita3HelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && fzzy.values["sp_startpoint"].Current == 0 && settings["enc1HelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_timeshift_spoke02" && settings["enc2HelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && fzzy.values["sp_startpoint"].Current == 7 && settings["enc3HelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_beacon" && fzzy.values["sp_startpoint"].Current == 0 && settings["b1HelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0" && settings["b2HelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_beacon" && fzzy.values["sp_startpoint"].Current == 2 && settings["b3HelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_tday" && settings["tbfHelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_s2s" && settings["arkHelmetSplit"]) fzzy.timer.Split();
+                if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && settings["foldHelmetSplit"]) fzzy.timer.Split();
+            }
 
             if (fzzy.isLoading) lastLoadingTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
