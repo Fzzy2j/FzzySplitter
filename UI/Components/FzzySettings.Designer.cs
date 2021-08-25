@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LiveSplit.UI.Components
+﻿namespace FzzyTools.UI.Components
 {
     partial class FzzySettings
     {
@@ -61,7 +55,7 @@ namespace LiveSplit.UI.Components
             this.speedmod = new System.Windows.Forms.CheckBox();
             this.btSave = new System.Windows.Forms.CheckBox();
             this.uninstallMenuModButton = new System.Windows.Forms.Button();
-            this.settingsTree = new LiveSplit.UI.Components.FzzyTreeView();
+            this.settingsTree = new FzzyTreeView();
             this.treeContextMenu.SuspendLayout();
             this.treeContextMenu2.SuspendLayout();
             this.SuspendLayout();

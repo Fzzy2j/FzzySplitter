@@ -1,28 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using System.Xml;
-using System.IO;
 using LiveSplit.ASL;
-using System.Diagnostics;
-using System.Net;
-using System.ComponentModel;
-using LiveSplit.Model.Input;
-using FzzyTools.UI.Components;
+using LiveSplit.UI;
 
-namespace LiveSplit.UI.Components
+namespace FzzyTools.UI.Components
 {
     public partial class FzzySettings : UserControl
     {
         //public CompositeHook Hook { get; set; }
-        public bool TASToolsEnabled { get; set; }
-        public bool AutoLoadNCS { get; set; }
+        public bool TasToolsEnabled { get; set; }
+        public bool AutoLoadNcs { get; set; }
+
         public bool SpeedmodEnabled { get; set; }
+
         //public bool TASAimbot { get; set; }
         public bool AutoLoad18HourSave { get; set; }
 
-        private Dictionary<string, bool> _state;
+        private Dictionary<string, bool> state;
         public ASLSettings aslsettings;
 
         public FzzySettings()
@@ -31,23 +33,23 @@ namespace LiveSplit.UI.Components
 
             //Hook = new CompositeHook();
 
-            TASToolsEnabled = false;
-            AutoLoadNCS = false;
+            TasToolsEnabled = false;
+            AutoLoadNcs = false;
             SpeedmodEnabled = false;
             //TASAimbot = false;
             AutoLoad18HourSave = false;
 
-            _state = new Dictionary<string, bool>();
+            state = new Dictionary<string, bool>();
         }
 
         public void SetSettings(XmlNode node)
         {
-            var element = (XmlElement)node;
+            var element = (XmlElement) node;
 
             if (!element.IsEmpty)
             {
-                TASToolsEnabled = SettingsHelper.ParseBool(element["tasToolsEnabled"]);
-                AutoLoadNCS = SettingsHelper.ParseBool(element["autoLoadNCS"]);
+                TasToolsEnabled = SettingsHelper.ParseBool(element["tasToolsEnabled"]);
+                AutoLoadNcs = SettingsHelper.ParseBool(element["autoLoadNCS"]);
                 SpeedmodEnabled = SettingsHelper.ParseBool(element["speedmod"]);
                 AutoLoad18HourSave = SettingsHelper.ParseBool(element["btSave"]);
                 //TASAimbot = SettingsHelper.ParseBool(element["tasAimbot"]);
@@ -61,8 +63,8 @@ namespace LiveSplit.UI.Components
             var node = document.CreateElement("Settings");
 
             AppendSettingsToXml(document, node);
-            SettingsHelper.CreateSetting(document, node, "tasToolsEnabled", TASToolsEnabled);
-            SettingsHelper.CreateSetting(document, node, "autoLoadNCS", AutoLoadNCS);
+            SettingsHelper.CreateSetting(document, node, "tasToolsEnabled", TasToolsEnabled);
+            SettingsHelper.CreateSetting(document, node, "autoLoadNCS", AutoLoadNcs);
             SettingsHelper.CreateSetting(document, node, "speedmod", SpeedmodEnabled);
             SettingsHelper.CreateSetting(document, node, "btSave", AutoLoad18HourSave);
             //SettingsHelper.CreateSetting(document, node, "tasAimbot", TASAimbot);
@@ -82,11 +84,11 @@ namespace LiveSplit.UI.Components
             // Store temporary for easier lookup of parent nodes
             var flat = new Dictionary<string, TreeNode>();
 
-            foreach (ASLSetting setting in settings.OrderedSettings)
+            foreach (var setting in settings.OrderedSettings)
             {
                 var value = setting.Value;
-                if (_state.ContainsKey(setting.Id))
-                    value = _state[setting.Id];
+                if (state.ContainsKey(setting.Id))
+                    value = state[setting.Id];
 
                 var node = new TreeNode(setting.Label)
                 {
@@ -112,19 +114,16 @@ namespace LiveSplit.UI.Components
             }
 
             // Gray out deactivated nodes after all have been added
-            foreach (var item in flat)
+            foreach (var item in flat.Where(item => !item.Value.Checked))
             {
-                if (!item.Value.Checked)
-                {
-                    UpdateGrayedOut(item.Value);
-                }
+                UpdateGrayedOut(item.Value);
             }
 
             // Only if a script was actually loaded, update current state with current ASL settings
             // (which may be empty if the successfully loaded script has no settings, but shouldn't
             // be empty because the script failed to load, which can happen frequently when working
             // on ASL scripts)
-            _state = values;
+            state = values;
 
             settingsTree.ExpandAll();
             settingsTree.EndUpdate();
@@ -157,30 +156,31 @@ namespace LiveSplit.UI.Components
 
         private void ColorButtonClick(object sender, EventArgs e)
         {
-            SettingsHelper.ColorButtonClick((Button)sender, this);
+            SettingsHelper.ColorButtonClick((Button) sender, this);
         }
 
         private void AppendSettingsToXml(XmlDocument document, XmlNode parent)
         {
-            XmlElement asl_parent = document.CreateElement("CustomSettings");
+            var aslParent = document.CreateElement("CustomSettings");
 
-            foreach (var setting in _state)
+            foreach (var setting in state)
             {
-                XmlElement element = SettingsHelper.ToElement(document, "Setting", setting.Value);
-                XmlAttribute id = SettingsHelper.ToAttribute(document, "id", setting.Key);
+                var element = SettingsHelper.ToElement(document, "Setting", setting.Value);
+                var id = SettingsHelper.ToAttribute(document, "id", setting.Key);
                 // In case there are other setting types in the future
-                XmlAttribute type = SettingsHelper.ToAttribute(document, "type", "bool");
+                var type = SettingsHelper.ToAttribute(document, "type", "bool");
 
                 element.Attributes.Append(id);
                 element.Attributes.Append(type);
-                asl_parent.AppendChild(element);
+                aslParent.AppendChild(element);
             }
 
-            parent.AppendChild(asl_parent);
+            parent.AppendChild(aslParent);
         }
+
         private void ParseSettingsFromXml(XmlElement data)
         {
-            XmlElement custom_settings_node = data["CustomSettings"];
+            var custom_settings_node = data["CustomSettings"];
 
             if (custom_settings_node != null && custom_settings_node.HasChildNodes)
             {
@@ -189,35 +189,33 @@ namespace LiveSplit.UI.Components
                     if (element.Name != "Setting")
                         continue;
 
-                    string id = element.Attributes["id"].Value;
-                    string type = element.Attributes["type"].Value;
+                    var id = element.Attributes["id"].Value;
+                    var type = element.Attributes["type"].Value;
 
-                    if (id != null && type == "bool")
-                    {
-                        bool value = SettingsHelper.ParseBool(element);
-                        _state[id] = value;
-                    }
+                    if (id == null || type != "bool") continue;
+                    var value = SettingsHelper.ParseBool(element);
+                    state[id] = value;
                 }
             }
 
             // Update tree with loaded state (in case the tree is already populated)
-            UpdateNodesCheckedState(_state);
+            UpdateNodesCheckedState(state);
         }
-        private void UpdateNodesCheckedState(Dictionary<string, bool> setting_values, TreeNodeCollection nodes = null)
+
+        private void UpdateNodesCheckedState(IReadOnlyDictionary<string, bool> settingValues,
+            TreeNodeCollection nodes = null)
         {
-            if (setting_values == null)
+            if (settingValues == null)
                 return;
 
             UpdateNodesCheckedState(setting =>
             {
-                string id = setting.Id;
+                var id = setting.Id;
 
-                if (setting_values.ContainsKey(id))
-                    return setting_values[id];
-
-                return setting.Value;
+                return settingValues.ContainsKey(id) ? settingValues[id] : setting.Value;
             }, nodes);
         }
+
         private void UpdateNodesCheckedState(Func<ASLSetting, bool> func, TreeNodeCollection nodes = null)
         {
             if (nodes == null)
@@ -225,7 +223,7 @@ namespace LiveSplit.UI.Components
 
             UpdateNodesInTree(node =>
             {
-                var setting = (ASLSetting)node.Tag;
+                var setting = (ASLSetting) node.Tag;
                 bool check = func(setting);
 
                 if (node.Checked != check)
@@ -234,19 +232,20 @@ namespace LiveSplit.UI.Components
                 return true;
             }, nodes);
         }
-        private void UpdateNodesInTree(Func<TreeNode, bool> func, TreeNodeCollection nodes)
+
+        private static void UpdateNodesInTree(Func<TreeNode, bool> func, TreeNodeCollection nodes)
         {
             foreach (TreeNode node in nodes)
             {
-                bool include_child_nodes = func(node);
+                var include_child_nodes = func(node);
                 if (include_child_nodes)
                     UpdateNodesInTree(func, node.Nodes);
             }
         }
 
-        private void UpdateNodeCheckedState(Func<ASLSetting, bool> func, TreeNode node)
+        private static void UpdateNodeCheckedState(Func<ASLSetting, bool> func, TreeNode node)
         {
-            var setting = (ASLSetting)node.Tag;
+            var setting = (ASLSetting) node.Tag;
             bool check = func(setting);
 
             if (node.Checked != check)
@@ -260,18 +259,22 @@ namespace LiveSplit.UI.Components
             speedmod.DataBindings.Clear();
             btSave.DataBindings.Clear();
 
-            tasTools.DataBindings.Add("Checked", this, "TASToolsEnabled", false, DataSourceUpdateMode.OnPropertyChanged);
+            tasTools.DataBindings.Add("Checked", this, "TASToolsEnabled", false,
+                DataSourceUpdateMode.OnPropertyChanged);
             autoLoadNCS.DataBindings.Add("Checked", this, "AutoLoadNCS", false, DataSourceUpdateMode.OnPropertyChanged);
-            speedmod.DataBindings.Add("Checked", this, "SpeedmodEnabled", false, DataSourceUpdateMode.OnPropertyChanged);
-            btSave.DataBindings.Add("Checked", this, "AutoLoad18HourSave", false, DataSourceUpdateMode.OnPropertyChanged);
+            speedmod.DataBindings.Add("Checked", this, "SpeedmodEnabled", false,
+                DataSourceUpdateMode.OnPropertyChanged);
+            btSave.DataBindings.Add("Checked", this, "AutoLoad18HourSave", false,
+                DataSourceUpdateMode.OnPropertyChanged);
         }
+
         // Custom Setting checked/unchecked (only after initially building the tree)
         private void settingsTree_AfterCheck(object sender, TreeViewEventArgs e)
         {
             // Update value in the ASLSetting object, which also changes it in the ASL script
-            ASLSetting setting = (ASLSetting)e.Node.Tag;
+            var setting = (ASLSetting) e.Node.Tag;
             setting.Value = e.Node.Checked;
-            _state[setting.Id] = setting.Value;
+            state[setting.Id] = setting.Value;
 
             UpdateGrayedOut(e.Node);
         }
@@ -354,23 +357,24 @@ namespace LiveSplit.UI.Components
                 return;
             }
 
-            string titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory(this);
+            var titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory(this);
 
-            if (titanfallInstallDirectory == null || titanfallInstallDirectory.Length == 0)
+            if (string.IsNullOrEmpty(titanfallInstallDirectory))
             {
                 MessageBox.Show("Couldn't find Titanfall 2 install location!");
                 return;
             }
 
-            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
-            string settingscontent = File.ReadAllText(settingscfg);
-            for (int i = 1; i <= 9; i++)
+            var settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "Respawn\\Titanfall2\\local\\settings.cfg");
+            var settingscontent = File.ReadAllText(settingscfg);
+            for (var i = 1; i <= 9; i++)
             {
                 if (settingscontent.Contains("\"load fastany" + i + "\"")) continue;
                 File.AppendAllText(settingscfg, "\nbind \"F" + i + "\" \"load fastany" + i + "\"");
             }
 
-            using (WebClient webClient = new WebClient())
+            using (var webClient = new WebClient())
             {
                 installMenuModButton.Enabled = false;
                 uninstallMenuModButton.Enabled = false;
@@ -393,9 +397,9 @@ namespace LiveSplit.UI.Components
                 return;
             }
 
-            string titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory(this);
+            var titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory(this);
 
-            if (titanfallInstallDirectory == null || titanfallInstallDirectory.Length == 0)
+            if (string.IsNullOrEmpty(titanfallInstallDirectory))
             {
                 MessageBox.Show("Couldn't find Titanfall 2 install location!");
                 return;
@@ -413,9 +417,11 @@ namespace LiveSplit.UI.Components
             }
         }
 
-        private static string fastanySavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installsaves.exe");
+        private static string fastanySavesInstaller =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "Respawn\\Titanfall2\\profile\\savegames\\installsaves.exe");
 
-        public static bool AreFastanySavesInstalled()
+        private static bool AreFastanySavesInstalled()
         {
             var saves = new string[]
             {
@@ -436,6 +442,7 @@ namespace LiveSplit.UI.Components
             };
             return AreSavesInstalled(saves);
         }
+
         public static bool AreSpeedmodSavesInstalled()
         {
             var saves = new string[]
@@ -456,7 +463,7 @@ namespace LiveSplit.UI.Components
             return AreSavesInstalled(saves);
         }
 
-        public static bool AreSavesInstalled(string[] saves)
+        private static bool AreSavesInstalled(string[] saves)
         {
             var savesDirectory = Directory.GetParent(fastanySavesInstaller);
             var files = Directory.GetFiles(savesDirectory.FullName);
@@ -471,14 +478,17 @@ namespace LiveSplit.UI.Components
                         break;
                     }
                 }
+
                 if (!exists) return false;
             }
+
             return true;
         }
-        public static void InstallFastanySaves()
+
+        private static void InstallFastanySaves()
         {
             if (AreFastanySavesInstalled()) return;
-            using (WebClient webClient = new WebClient())
+            using (var webClient = new WebClient())
             {
                 webClient.DownloadFileAsync(new Uri(FzzyComponent.FASTANY_SAVES_INSTALLER_LINK), fastanySavesInstaller);
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(FastanySavesDownloadCompleted);
@@ -521,28 +531,28 @@ namespace LiveSplit.UI.Components
         private void btSave_CheckedChanged(object sender, EventArgs e)
         {
             if (!btSave.Checked) return;
-            if (!AreSavesInstalled(new string[] { "fastany1" }))
+            if (!AreSavesInstalled(new string[] {"fastany1"}))
             {
                 using (WebClient webClient = new WebClient())
                 {
-                    var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\fastany1.sav");
+                    var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                        "Respawn\\Titanfall2\\profile\\savegames\\fastany1.sav");
                     webClient.DownloadFileAsync(new Uri(FzzyComponent.FASTANY1_SAVE_LINK), path);
                 }
             }
 
-            string settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\local\\settings.cfg");
-            string settingscontent = File.ReadAllText(settingscfg);
-            if (!settingscontent.Contains("load fastany1"))
+            var settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "Respawn\\Titanfall2\\local\\settings.cfg");
+            var settingscontent = File.ReadAllText(settingscfg);
+            if (settingscontent.Contains("load fastany1")) return;
+            if (FzzyComponent.process != null)
             {
-                if (FzzyComponent.process != null)
-                {
-                    FzzyComponent.AddToSettingsOnClose("load fastany1");
-                    MessageBox.Show("18 Hour Cutscene Bind Added!\nRestart your game for it to take effect.");
-                }
-                else
-                {
-                    File.AppendAllText(settingscfg, "\nbind \"F1\" \"load fastany1\"");
-                }
+                FzzyComponent.AddToSettingsOnClose("load fastany1");
+                MessageBox.Show("18 Hour Cutscene Bind Added!\nRestart your game for it to take effect.");
+            }
+            else
+            {
+                File.AppendAllText(settingscfg, "\nbind \"F1\" \"load fastany1\"");
             }
         }
 
@@ -551,16 +561,17 @@ namespace LiveSplit.UI.Components
             if (speedmod.Checked) Speedmod.InstallSpeedmod(this);
         }
     }
+
     class FzzyTreeView : TreeView
     {
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == 0x203) // identified double click
             {
-                var local_pos = PointToClient(Cursor.Position);
-                var hit_test_info = HitTest(local_pos);
+                var localPos = PointToClient(Cursor.Position);
+                var hitTestInfo = HitTest(localPos);
 
-                if (hit_test_info.Location == TreeViewHitTestLocations.StateImage)
+                if (hitTestInfo.Location == TreeViewHitTestLocations.StateImage)
                 {
                     m.Msg = 0x201; // if checkbox was clicked, turn into single click
                 }

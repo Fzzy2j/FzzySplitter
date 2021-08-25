@@ -14,38 +14,32 @@ namespace FzzyTools.UI.Components
 {
     class FzzySplitter
     {
-
         private FzzyComponent fzzy;
 
         public FzzySplitter(FzzyComponent fzzy)
         {
             this.fzzy = fzzy;
         }
+
         private bool bnrIlPause;
         private bool enc3IlPause;
 
         private float X
         {
-            get
-            {
-                return fzzy.values["x"].Current;
-            }
+            get { return fzzy.values["x"].Current; }
         }
+
         private float Y
         {
-            get
-            {
-                return fzzy.values["y"].Current;
-            }
+            get { return fzzy.values["y"].Current; }
         }
+
         private float Z
         {
-            get
-            {
-                return fzzy.values["z"].Current;
-            }
+            get { return fzzy.values["z"].Current; }
         }
-        private bool ResetMessageShown;
+
+        private bool resetMessageShown;
 
         public void Tick()
         {
@@ -54,38 +48,41 @@ namespace FzzyTools.UI.Components
             var settings = fzzy.Settings.aslsettings.Reader;
             Update(settings);
             if (!fzzy.state.IsGameTimeInitialized) fzzy.timer.InitializeGameTime();
-            if (fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.Running || fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.Paused)
+            if (fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.Running ||
+                fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.Paused)
             {
                 fzzy.state.IsGameTimePaused = IsLoading(settings);
                 if (Reset(settings))
                 {
-                    if (!ResetMessageShown)
+                    if (!resetMessageShown)
                     {
                         var result = DialogResult.Yes;
                         if (fzzy.state.Settings.WarnOnReset)
                         {
-                            ResetMessageShown = true;
+                            resetMessageShown = true;
                             result = WarnAboutResetting();
                         }
+
                         if (result == DialogResult.Yes)
                             fzzy.timer.Reset();
                         else if (result == DialogResult.No)
                             fzzy.timer.Reset(false);
-                        ResetMessageShown = false;
+                        resetMessageShown = false;
                     }
                 }
+
                 Split(settings);
             }
-            if (fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.NotRunning)
+
+            if (fzzy.state.CurrentPhase != LiveSplit.Model.TimerPhase.NotRunning) return;
+            if (finishedSplits.Count > 0)
             {
-                if (finishedSplits.Count > 0)
-                {
-                    finishedSplits.Clear();
-                }
-                if (Start(settings))
-                {
-                    fzzy.timer.Start();
-                }
+                finishedSplits.Clear();
+            }
+
+            if (Start(settings))
+            {
+                fzzy.timer.Start();
             }
         }
 
@@ -102,19 +99,24 @@ namespace FzzyTools.UI.Components
             {
                 splitTimer = delay;
             }
+
             finishedSplits.Add(key);
         }
 
         private bool Reset(ASLSettingsReader settings)
         {
-            if (fzzy.values["currentLevel"].Current.StartsWith("sp_training") && fzzy.values["inPressSpaceToContinue"].Current > 0 && fzzy.values["inPressSpaceToContinue"].Old <= 0)
+            if (fzzy.values["currentLevel"].Current.StartsWith("sp_training") &&
+                fzzy.values["inPressSpaceToContinue"].Current > 0 && fzzy.values["inPressSpaceToContinue"].Old <= 0)
             {
                 return true;
             }
-            if (settings["loadReset"] && fzzy.values["inPressSpaceToContinue"].Current > 0 && fzzy.values["inPressSpaceToContinue"].Old <= 0)
+
+            if (settings["loadReset"] && fzzy.values["inPressSpaceToContinue"].Current > 0 &&
+                fzzy.values["inPressSpaceToContinue"].Old <= 0)
             {
                 return true;
             }
+
             return false;
         }
 
@@ -123,36 +125,35 @@ namespace FzzyTools.UI.Components
             var warnUser = false;
             for (var index = 0; index < fzzy.state.Run.Count; index++)
             {
-                if (LiveSplitStateHelper.CheckBestSegment(fzzy.state, index, fzzy.state.CurrentTimingMethod))
-                {
-                    warnUser = true;
-                    break;
-                }
-            }
-            if (!warnUser && (fzzy.state.Run.Last().SplitTime[fzzy.state.CurrentTimingMethod] != null && fzzy.state.Run.Last().PersonalBestSplitTime[fzzy.state.CurrentTimingMethod] == null) || fzzy.state.Run.Last().SplitTime[fzzy.state.CurrentTimingMethod] < fzzy.state.Run.Last().PersonalBestSplitTime[fzzy.state.CurrentTimingMethod])
+                if (!LiveSplitStateHelper.CheckBestSegment(fzzy.state, index, fzzy.state.CurrentTimingMethod)) continue;
                 warnUser = true;
-            if (warnUser)
-            {
-                var result = MessageBox.Show("You have beaten some of your best times.\r\nDo you want to update them?", "Update Times?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-                return result;
+                break;
             }
-            return DialogResult.Yes;
+
+            if (!warnUser && (fzzy.state.Run.Last().SplitTime[fzzy.state.CurrentTimingMethod] != null &&
+                              fzzy.state.Run.Last().PersonalBestSplitTime[fzzy.state.CurrentTimingMethod] == null) ||
+                fzzy.state.Run.Last().SplitTime[fzzy.state.CurrentTimingMethod] <
+                fzzy.state.Run.Last().PersonalBestSplitTime[fzzy.state.CurrentTimingMethod])
+                warnUser = true;
+            if (!warnUser) return DialogResult.Yes;
+            var result = MessageBox.Show("You have beaten some of your best times.\r\nDo you want to update them?",
+                "Update Times?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            return result;
         }
 
         private bool IsLoading(ASLSettingsReader settings)
         {
             if (settings["flagSplit"])
             {
-                if (fzzy.values["flag"].Current == 0)
-                    return true;
-                else
-                    return false;
+                return fzzy.values["flag"].Current == 0;
             }
+
             if (fzzy.isLoading)
             {
                 bnrIlPause = false;
                 enc3IlPause = false;
             }
+
             if (settings["BnRpause"])
             {
                 if (fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 &&
@@ -160,35 +161,34 @@ namespace FzzyTools.UI.Components
                     bnrIlPause = true;
                 if (bnrIlPause) return true;
             }
-            if (settings["enc3pause"])
-            {
-                if (fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 &&
-                    fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && fzzy.values["y"].Current > 4000) enc3IlPause = true;
-                if (enc3IlPause) return true;
-            }
-            return fzzy.isLoading;
+
+            if (!settings["enc3pause"]) return fzzy.isLoading;
+            if (fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 &&
+                fzzy.values["lastLevel"].Current == "sp_hub_timeshift" &&
+                fzzy.values["y"].Current > 4000) enc3IlPause = true;
+            return enc3IlPause || fzzy.isLoading;
         }
 
         private void RemoveAltTabPause()
         {
             var deepClient = new DeepPointer("engine.dll", 0x1A1B04, new int[] { });
             deepClient.DerefOffsets(FzzyComponent.process, out IntPtr pointerClient);
-            FzzyComponent.process.WriteBytes(pointerClient, new byte[] { 0x88, 0xA1 });
+            FzzyComponent.process.WriteBytes(pointerClient, new byte[] {0x88, 0xA1});
 
             var deepServer = new DeepPointer("engine.dll", 0x1C8C02, new int[] { });
             deepServer.DerefOffsets(FzzyComponent.process, out IntPtr pointerServer);
-            FzzyComponent.process.WriteBytes(pointerServer, new byte[] { 0xEB });
+            FzzyComponent.process.WriteBytes(pointerServer, new byte[] {0xEB});
         }
 
         private void AddAltTabPause()
         {
             var deepClient = new DeepPointer("engine.dll", 0x1A1B04, new int[] { });
             deepClient.DerefOffsets(FzzyComponent.process, out IntPtr pointerClient);
-            FzzyComponent.process.WriteBytes(pointerClient, new byte[] { 0x88, 0x81 });
+            FzzyComponent.process.WriteBytes(pointerClient, new byte[] {0x88, 0x81});
 
             var deepServer = new DeepPointer("engine.dll", 0x1C8C02, new int[] { });
             deepServer.DerefOffsets(FzzyComponent.process, out IntPtr pointerServer);
-            FzzyComponent.process.WriteBytes(pointerServer, new byte[] { 0x75 });
+            FzzyComponent.process.WriteBytes(pointerServer, new byte[] {0x75});
         }
 
         private string lastNonLoadLevel = "";
@@ -201,12 +201,11 @@ namespace FzzyTools.UI.Components
             {
                 levelLoadedFromMenu = lastNonLoadLevel == "";
             }
+
             if (!fzzy.values["inLoadingScreen"].Current) lastNonLoadLevel = fzzy.values["currentLevel"].Current;
-            if (fzzy.isLoading)
-            {
-                bnrIlPause = false;
-                enc3IlPause = false;
-            }
+            if (!fzzy.isLoading) return;
+            bnrIlPause = false;
+            enc3IlPause = false;
         }
 
         
@@ -221,7 +220,8 @@ namespace FzzyTools.UI.Components
 
         private void Split(ASLSettingsReader settings)
         {
-            if (settings["flagSplit"] && fzzy.values["flag"].Old == 1 && fzzy.values["flag"].Current == 0) fzzy.timer.Split();
+            if (settings["flagSplit"] && fzzy.values["flag"].Old == 1 && fzzy.values["flag"].Current == 0)
+                fzzy.timer.Split();
 
             bool helmetCollected(int level, int helmet, int helmetPos)
             {
@@ -362,7 +362,6 @@ namespace FzzyTools.UI.Components
                     if (helmetCollected(12, 2, 0b010)) fzzy.timer.Split();
                     if (helmetCollected(12, 3, 0b100)) fzzy.timer.Split();
                 }
-            }
 
             if (fzzy.isLoading) lastLoadingTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
@@ -390,11 +389,14 @@ namespace FzzyTools.UI.Components
                     fzzy.board.Send(Keyboard.ScanCodeShort.F1);
                     fzzy.state.AdjustedStartTime -= new TimeSpan(0, 0, 3, 22, 217);
                 }
+
                 if (fzzy.isLoading) btSaveDelay = 0;
             }
+
             previousTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-            if (fzzy.Settings.AutoLoad18HourSave && fzzy.values["lastLevel"].Current == "sp_crashsite" && DistanceSquared(68, -21, -12216) < 500 * 500)
+            if (fzzy.Settings.AutoLoad18HourSave && fzzy.values["lastLevel"].Current == "sp_crashsite" &&
+                DistanceSquared(68, -21, -12216) < 500 * 500)
             {
                 if (fzzy.values["inCutscene"].Current == 1 && fzzy.values["inCutscene"].Old == 0)
                 {
@@ -403,13 +405,16 @@ namespace FzzyTools.UI.Components
             }
 
             // End of game
-            if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && X < -10000 && Y > 0 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 && settings["endSplit"])
+            if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && X < -10000 && Y > 0 &&
+                fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1 && settings["endSplit"])
             {
                 DoSingleSplit("runEnd");
             }
 
             // Level change
-            if (fzzy.values["lastLevel"].Current.Length > 0 && fzzy.values["lastLevel"].Current != fzzy.values["lastLevel"].Old && settings["levelChangeSplit"] && fzzy.values["lastLevel"].Current != "sp_training")
+            if (fzzy.values["lastLevel"].Current.Length > 0 &&
+                fzzy.values["lastLevel"].Current != fzzy.values["lastLevel"].Old && settings["levelChangeSplit"] &&
+                fzzy.values["lastLevel"].Current != "sp_training")
             {
                 var level = fzzy.values["lastLevel"].Current;
                 if (level != "sp_training")
@@ -428,11 +433,11 @@ namespace FzzyTools.UI.Components
             // BT-7274
             if (fzzy.values["lastLevel"].Current == "sp_crashsite" && settings["btSplits"])
             {
-
                 // Battery 1
                 if (settings["btBattery1"])
                 {
-                    if (DistanceSquared(-4568, -3669) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    if (DistanceSquared(-4568, -3669) < 25000 && fzzy.values["inCutscene"].Old == 0 &&
+                        fzzy.values["inCutscene"].Current == 1)
                     {
                         DoSingleSplit("btBattery1");
                     }
@@ -441,7 +446,8 @@ namespace FzzyTools.UI.Components
                 // Battery 2
                 if (settings["btBattery2"])
                 {
-                    if (DistanceSquared(-4111, 4583) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    if (DistanceSquared(-4111, 4583) < 25000 && fzzy.values["inCutscene"].Old == 0 &&
+                        fzzy.values["inCutscene"].Current == 1)
                     {
                         DoSingleSplit("btBattery2");
                     }
@@ -451,7 +457,6 @@ namespace FzzyTools.UI.Components
             // Blood and Rust
             if (fzzy.values["lastLevel"].Current == "sp_sewers1" && settings["bnrSplits"])
             {
-
                 // Button 1
                 if (settings["bnrButton1"])
                 {
@@ -501,7 +506,8 @@ namespace FzzyTools.UI.Components
             // Helmet on E&C1
             if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && settings["enc1Splits"])
             {
-                if (DistanceSquared(997, -2718) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                if (DistanceSquared(997, -2718) < 25000 && fzzy.values["inCutscene"].Old == 0 &&
+                    fzzy.values["inCutscene"].Current == 1)
                 {
                     DoSingleSplit("enc1Helmet", 1800);
                 }
@@ -510,7 +516,6 @@ namespace FzzyTools.UI.Components
             // E&C 2
             if (fzzy.values["lastLevel"].Current == "sp_timeshift_spoke02" && settings["enc2Splits"])
             {
-
                 if (settings["enc2Dialogue"])
                 {
                     if (X > 8755 && X < 9655 && Y < -4528 && Z > 5000)
@@ -522,7 +527,8 @@ namespace FzzyTools.UI.Components
                 // Button 1
                 if (settings["enc2Button1"])
                 {
-                    if (DistanceSquared(2805, -3363) < Math.Pow(200, 2) && fzzy.values["enc2button1"].Old + 8 == fzzy.values["enc2button1"].Current && !fzzy.isLoading)
+                    if (DistanceSquared(2805, -3363) < Math.Pow(200, 2) &&
+                        fzzy.values["enc2button1"].Old + 8 == fzzy.values["enc2button1"].Current && !fzzy.isLoading)
                     {
                         DoSingleSplit("enc2Button1");
                     }
@@ -531,7 +537,8 @@ namespace FzzyTools.UI.Components
                 // Button 2
                 if (settings["enc2Button2"])
                 {
-                    if (DistanceSquared(6271, -3552) < Math.Pow(200, 2) && fzzy.values["enc2button2"].Old + 8 == fzzy.values["enc2button2"].Current && !fzzy.isLoading)
+                    if (DistanceSquared(6271, -3552) < Math.Pow(200, 2) &&
+                        fzzy.values["enc2button2"].Old + 8 == fzzy.values["enc2button2"].Current && !fzzy.isLoading)
                     {
                         DoSingleSplit("enc2Button2");
                     }
@@ -549,7 +556,8 @@ namespace FzzyTools.UI.Components
                 // Vents
                 if (settings["enc2Vent"])
                 {
-                    if (fzzy.values["z"].Current < -1200 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    if (fzzy.values["z"].Current < -1200 && fzzy.values["inCutscene"].Old == 0 &&
+                        fzzy.values["inCutscene"].Current == 1)
                     {
                         DoSingleSplit("enc2Vent");
                     }
@@ -559,7 +567,6 @@ namespace FzzyTools.UI.Components
             // Beacon 2
             if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0" && settings["b2Splits"])
             {
-
                 // Death warp
                 if (settings["b2Warp"])
                 {
@@ -597,11 +604,11 @@ namespace FzzyTools.UI.Components
             // Beacon 3
             if (fzzy.values["lastLevel"].Current == "sp_beacon" && settings["b3Splits"])
             {
-
                 // Module retrieve
                 if (settings["b3Module1"])
                 {
-                    if (DistanceSquared(-10670, 9523) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    if (DistanceSquared(-10670, 9523) < 25000 && fzzy.values["inCutscene"].Old == 0 &&
+                        fzzy.values["inCutscene"].Current == 1)
                     {
                         DoSingleSplit("b3Module1", 1900);
                     }
@@ -610,7 +617,8 @@ namespace FzzyTools.UI.Components
                 // Module 2
                 if (settings["b3Module2"])
                 {
-                    if (DistanceSquared(3797, -1905) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    if (DistanceSquared(3797, -1905) < 25000 && fzzy.values["inCutscene"].Old == 0 &&
+                        fzzy.values["inCutscene"].Current == 1)
                     {
                         DoSingleSplit("b3Module2", 1850);
                     }
@@ -619,7 +627,8 @@ namespace FzzyTools.UI.Components
                 // Secure beacon objective
                 if (settings["b3SecureBeacon"])
                 {
-                    if (fzzy.values["b3SecureBeaconObjective"].Current != fzzy.values["b3SecureBeaconObjective"].Old && DistanceSquared(-3007, -1177) < 1000 * 1000)
+                    if (fzzy.values["b3SecureBeaconObjective"].Current != fzzy.values["b3SecureBeaconObjective"].Old &&
+                        DistanceSquared(-3007, -1177) < 1000 * 1000)
                     {
                         DoSingleSplit("b3SecureBeacon");
                     }
@@ -629,7 +638,8 @@ namespace FzzyTools.UI.Components
             // TBF Elevator
             if (fzzy.values["lastLevel"].Current == "sp_tday" && settings["tbfSplits"])
             {
-                if (DistanceSquared(-7867, 2758) < Math.Pow(600, 2) && fzzy.values["tbfElevator"].Current - 8 == fzzy.values["tbfElevator"].Old)
+                if (DistanceSquared(-7867, 2758) < Math.Pow(600, 2) &&
+                    fzzy.values["tbfElevator"].Current - 8 == fzzy.values["tbfElevator"].Old)
                 {
                     DoSingleSplit("tbfElevator");
                 }
@@ -638,9 +648,9 @@ namespace FzzyTools.UI.Components
             // The Ark
             if (fzzy.values["lastLevel"].Current == "sp_s2s" && settings["arkSplits"])
             {
-
                 // Elevator
-                if (settings["arkElevator"] && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastLoadingTimestamp > 5000)
+                if (settings["arkElevator"] &&
+                    DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastLoadingTimestamp > 5000)
                 {
                     if (fzzy.values["arkElevator"].Old > 0 && fzzy.values["arkElevator"].Current == 0)
                     {
@@ -664,11 +674,11 @@ namespace FzzyTools.UI.Components
             // The Fold Weapon
             if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && settings["foldSplits"])
             {
-
                 // Datacore
                 if (settings["foldDataCore"])
                 {
-                    if (DistanceSquared(5252, -5776) < 25000 && fzzy.values["inCutscene"].Old == 0 && fzzy.values["inCutscene"].Current == 1)
+                    if (DistanceSquared(5252, -5776) < 25000 && fzzy.values["inCutscene"].Old == 0 &&
+                        fzzy.values["inCutscene"].Current == 1)
                     {
                         splitTimer = 7950;
                     }
@@ -677,7 +687,7 @@ namespace FzzyTools.UI.Components
                 // Escape land
                 if (settings["foldEscape"])
                 {
-                    if (DistanceSquared(535, 6549) < 25000 && fzzy.values["inCutscene"].Current == 1)
+                    if (DistanceSquared(535, 6549) < 25000 && fzzy.values["inCutscene"].Current == 0 && fzzy.values["inCutscene"].Old != 0)
                     {
                         DoSingleSplit("escape");
                     }
@@ -689,17 +699,19 @@ namespace FzzyTools.UI.Components
         {
             var last = fzzy.values["lastCommand"].Current;
             var nonull = new byte[last.Length];
-            for (int i = 0; i < last.Length; i++)
+            for (var i = 0; i < last.Length; i++)
             {
                 nonull[i] = last[i];
                 if (last[i] == 0) nonull[i] = 0x20;
             }
+
             var commandHistory = Encoding.UTF8.GetString(nonull);
             if (settings["flagSplit"] && fzzy.values["flag"].Current == 1 && fzzy.values["flag"].Old == 0) return true;
             if (fzzy.wasLoading && !fzzy.isLoading && commandHistory.Contains("#INTROSCREEN_HINT_PC"))
             {
                 return true;
             }
+
             return false;
         }
 
@@ -707,15 +719,13 @@ namespace FzzyTools.UI.Components
         private float DistanceSquared(float x, float y, float z)
         {
             var dis = Math.Pow(x - X, 2) + Math.Pow(y - Y, 2) + Math.Pow(z - Z, 2);
-            return (float)dis;
+            return (float) dis;
         }
 
         private float DistanceSquared(float x, float y)
         {
             var dis = Math.Pow(x - X, 2) + Math.Pow(y - Y, 2);
-            return (float)dis;
+            return (float) dis;
         }
-
-
     }
 }
