@@ -1,16 +1,12 @@
-﻿using LiveSplit.Model;
-using LiveSplit.UI.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
+using FzzyTools.UI.Components;
+using LiveSplit.Model;
+using LiveSplit.UI.Components;
 
 [assembly: ComponentFactory(typeof(FzzyComponentFactory))]
 
-namespace LiveSplit.UI.Components
+namespace FzzyTools.UI.Components
 {
     class FzzyComponentFactory : IComponentFactory
     {
