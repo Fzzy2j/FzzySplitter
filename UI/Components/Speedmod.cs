@@ -13,52 +13,52 @@ namespace FzzyTools.UI.Components
 {
     class Speedmod
     {
+
         private FzzyComponent fzzy;
 
-        private bool allowGauntletLoad = false;
+        private long _previousTickCount;
+
+        private bool _allowGauntletLoad = false;
 
         public Speedmod(FzzyComponent fzzy)
         {
             this.fzzy = fzzy;
         }
 
-        private string delayedLoadSave;
-        private float delayedLoadMillis;
+        private string _delayedLoadSave;
+        private float _delayedLoadMillis;
 
         private void Load(string save, long delay = 0)
         {
             if (delay == 0)
             {
                 Log.Info("Load into " + save);
-                FzzyComponent.RunGameCommand("load " + save +
-                                             "; set_loading_progress_detente #INTROSCREEN_HINT_PC #INTROSCREEN_HINT_CONSOLE");
+                fzzy.RunGameCommand("load " + save + "; set_loading_progress_detente #INTROSCREEN_HINT_PC #INTROSCREEN_HINT_CONSOLE");
+                levelLoaded = 1f;
             }
             else
             {
-                if (delayedLoadMillis > 0) return;
-                delayedLoadSave = save;
-                delayedLoadMillis = delay;
+                if (_delayedLoadMillis > 0) return;
+                _delayedLoadSave = save;
+                _delayedLoadMillis = delay;
             }
         }
-        
-        private string lastNonLoadLevel = "";
-        private bool levelLoadedFromMenu = false;
 
-        private long previousTimestamp;
+        private float levelLoaded = 0;
 
+        private long _previousTimestamp;
         public void Tick()
         {
-            var timeElapsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - previousTimestamp;
-            if (delayedLoadMillis > 0)
+            var timeElapsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _previousTimestamp;
+            if (_delayedLoadMillis > 0)
             {
-                delayedLoadMillis -= timeElapsed;
-                if (delayedLoadMillis <= 0)
+                _delayedLoadMillis -= timeElapsed;
+                if (_delayedLoadMillis <= 0)
                 {
-                    Load(delayedLoadSave);
+                    Load(_delayedLoadSave);
                 }
             }
-
-            previousTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            _previousTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (!fzzy.Settings.SpeedmodEnabled)
             {
                 if (IsSpeedmodEnabled())
@@ -72,7 +72,6 @@ namespace FzzyTools.UI.Components
                 {
                     EnableSpeedmod();
                 }
-
                 if (!fzzy.isLoading)
                 {
                     fzzy.values["airAcceleration"].Current = 10000f;
@@ -82,13 +81,28 @@ namespace FzzyTools.UI.Components
                     fzzy.values["slideBoostCooldown"].Current = 0f;
                 }
 
-                if (fzzy.values["inLoadingScreen"].Current && !fzzy.values["inLoadingScreen"].Old)
+                /*if (fzzy.values["inLoadingScreen"].Current && !fzzy.values["inLoadingScreen"].Old)
                 {
                     levelLoadedFromMenu = lastNonLoadLevel == "";
-                }
-                if (!fzzy.values["inLoadingScreen"].Current) lastNonLoadLevel = fzzy.values["currentLevel"].Current;
+                }*/
+                //if (!fzzy.values["inLoadingScreen"].Current) lastNonLoadLevel = fzzy.values["currentLevel"].Current;
 
-                if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old && levelLoadedFromMenu)
+                var last = fzzy.values["lastCommand"].Current;
+                var nonull = new byte[last.Length];
+                for (int i = 0; i < last.Length; i++)
+                {
+                    nonull[i] = last[i];
+                    if (last[i] == 0) nonull[i] = 0x20;
+                }
+                var commandHistory = Encoding.UTF8.GetString(nonull);
+                if (!fzzy.isLoading)
+                {
+                    if (levelLoaded > 0) levelLoaded -= timeElapsed / 1000f;
+                } else
+                {
+                    if (levelLoaded > 0) levelLoaded = 1f;
+                }
+                if (fzzy.isLoading && commandHistory.Contains("#INTROSCREEN_HINT_PC") && levelLoaded <= 0)
                 {
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_training")) Load("speedmod1");
                     if (fzzy.values["currentLevel"].Current.StartsWith("sp_crashsite")) Load("speedmod2");
@@ -104,19 +118,18 @@ namespace FzzyTools.UI.Components
 
                 if (fzzy.values["clFrames"].Current <= 0)
                 {
-                    allowGauntletLoad = false;
+                    _allowGauntletLoad = false;
                 }
-
                 if (fzzy.values["lastLevel"].Current == "sp_training" && !fzzy.isLoading)
                 {
-                    if (DistanceSquared(880, 6770, 466) < 1000 * 1000) allowGauntletLoad = true;
+                    if (DistanceSquared(880, 6770, 466) < 1000 * 1000) _allowGauntletLoad = true;
 
                     float projection = 0.866049f * fzzy.values["x"].Current + 0.499959f * fzzy.values["y"].Current;
 
-                    if ((Math.Abs(projection + 3888.9) < 10 || Math.Abs(projection - 6622) < 10) && allowGauntletLoad)
+                    if ((Math.Abs(projection + 3888.9) < 10 || Math.Abs(projection - 6622) < 10) && _allowGauntletLoad)
                     {
                         Load("speedmod2");
-                        allowGauntletLoad = false;
+                        _allowGauntletLoad = false;
                     }
                 }
 
@@ -142,7 +155,6 @@ namespace FzzyTools.UI.Components
                     {
                         fzzy.values["sp_unlocks_level_4"].Current = 5;
                     }
-
                     if (!fzzy.isLoading)
                     {
                         if (fzzy.values["sp_unlocks_level_4"].Current == 7)
@@ -161,8 +173,7 @@ namespace FzzyTools.UI.Components
 
                 if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && !fzzy.isLoading)
                 {
-                    if (DistanceSquared(8644, 1097, -2621) < 7000 * 7000 && fzzy.values["inCutscene"].Current == 1 &&
-                        fzzy.values["rodeo"].Current == fzzy.values["rodeo"].Old)
+                    if (DistanceSquared(8644, 1097, -2621) < 7000 * 7000 && fzzy.values["inCutscene"].Current == 1 && fzzy.values["rodeo"].Current == fzzy.values["rodeo"].Old)
                     {
                         Load("speedmod7");
                     }
@@ -170,23 +181,20 @@ namespace FzzyTools.UI.Components
 
                 if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && !fzzy.isLoading)
                 {
-                    if (Math.Abs(fzzy.values["x"].Current - 1112.845) < 1 &&
-                        Math.Abs(fzzy.values["y"].Current + 2741) < 100 &&
-                        Math.Abs(fzzy.values["z"].Current + 859) < 1000)
+                    if (Math.Abs(fzzy.values["x"].Current - 1112.845) < 1 && Math.Abs(fzzy.values["y"].Current + 2741) < 100 && Math.Abs(fzzy.values["z"].Current + 859) < 1000)
                     {
                         Load("speedmod7");
                     }
                 }
 
                 if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && !fzzy.isLoading &&
-                    fzzy.values["inCutscene"].Current == 1 && fzzy.values["inCutscene"].Old == 0 &&
-                    DistanceSquared(-1108, 6017, -10596) < 1000 * 1000)
+                   fzzy.values["inCutscene"].Current == 1 && fzzy.values["inCutscene"].Old == 0 &&
+                   DistanceSquared(-1108, 6017, -10596) < 1000 * 1000)
                 {
                     Load("speedmod8");
                 }
 
-                if (fzzy.values["lastLevel"].Old == "sp_beacon_spoke0" &&
-                    fzzy.values["lastLevel"].Current == "sp_beacon")
+                if (fzzy.values["lastLevel"].Old == "sp_beacon_spoke0" && fzzy.values["lastLevel"].Current == "sp_beacon")
                 {
                     Load("speedmod9");
                 }
@@ -222,7 +230,6 @@ namespace FzzyTools.UI.Components
                     {
                         fzzy.values["sp_unlocks_level_8"].Current = 25;
                     }
-
                     if (!fzzy.isLoading && fzzy.values["sp_unlocks_level_8"].Current == 511)
                     {
                         Load("speedmod10", 500);
@@ -243,6 +250,8 @@ namespace FzzyTools.UI.Components
                     Load("speedmod12");
                 }
             }
+
+            _previousTickCount = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
         private void MoveHelmet(float newX, float newY, float newZ, string module, int base_, params int[] offsets)
@@ -264,15 +273,14 @@ namespace FzzyTools.UI.Components
 
         private float DistanceSquared(float x, float y, float z)
         {
-            var dis = Math.Pow(x - fzzy.values["x"].Current, 2) + Math.Pow(y - fzzy.values["y"].Current, 2) +
-                      Math.Pow(z - fzzy.values["z"].Current, 2);
-            return (float) dis;
+            var dis = Math.Pow(x - fzzy.values["x"].Current, 2) + Math.Pow(y - fzzy.values["y"].Current, 2) + Math.Pow(z - fzzy.values["z"].Current, 2);
+            return (float)dis;
         }
 
         private float DistanceSquared(float x, float y)
         {
             var dis = Math.Pow(x - fzzy.values["x"].Current, 2) + Math.Pow(y - fzzy.values["y"].Current, 2);
-            return (float) dis;
+            return (float)dis;
         }
 
         private void Write(DeepPointer pointer, byte[] b)
@@ -296,23 +304,18 @@ namespace FzzyTools.UI.Components
             }
         }
 
-        private static string speedmodSavesInstaller =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                "Respawn\\Titanfall2\\profile\\savegames\\installspeedmodsaves.exe");
-
+        private static string speedmodSavesInstaller = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Respawn\\Titanfall2\\profile\\savegames\\installspeedmodsaves.exe");
         public static void InstallSpeedmod(FzzySettings settings)
         {
             if (FzzySettings.AreSpeedmodSavesInstalled()) return;
             if (downloadInProgress) return;
             using (WebClient webClient = new WebClient())
             {
-                webClient.DownloadFileAsync(new Uri(FzzyComponent.SPEEDMOD_SAVES_INSTALLER_LINK),
-                    speedmodSavesInstaller);
+                webClient.DownloadFileAsync(new Uri(FzzyComponent.SPEEDMOD_SAVES_INSTALLER_LINK), speedmodSavesInstaller);
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(SpeedmodSavesDownloadCompleted);
                 downloadInProgress = true;
             }
         }
-
         private static bool downloadInProgress = false;
 
         private static void SpeedmodSavesDownloadCompleted(object sender, AsyncCompletedEventArgs e)
@@ -347,39 +350,29 @@ namespace FzzyTools.UI.Components
 
         private void MakeAlliesInvincible()
         {
-            var code = new byte[]
-            {
-                0x83, 0xBB, 0x10, 0x01, 0x00, 0x00, 0x03, 0x74, 0x02, 0x89, 0x3B, 0x48, 0x8B, 0x5C, 0x24, 0x30, 0x48,
-                0x83, 0xC4, 0x20, 0x5F, 0xC3
-            };
+            var code = new byte[] { 0x83, 0xBB, 0x10, 0x01, 0x00, 0x00, 0x03, 0x74, 0x02, 0x89, 0x3B, 0x48, 0x8B, 0x5C, 0x24, 0x30, 0x48, 0x83, 0xC4, 0x20, 0x5F, 0xC3 };
             Write(new DeepPointer("server.dll", 0x43373A), code);
-            var jmp = new byte[] {0x74, 0x1E};
+            var jmp = new byte[] { 0x74, 0x1E };
             Write(new DeepPointer("server.dll", 0x433725), jmp);
         }
 
         private void MakeAlliesKillable()
         {
-            var code = new byte[]
-            {
-                0x89, 0x3B, 0x48, 0x8B, 0x5C, 0x24, 0x30, 0x48, 0x83, 0xC4, 0x20, 0x5F, 0xC3, 0xCC, 0xCC, 0xCC, 0xCC,
-                0xCC, 0xCC, 0xCC, 0xCC, 0xCC
-            };
+            var code = new byte[] { 0x89, 0x3B, 0x48, 0x8B, 0x5C, 0x24, 0x30, 0x48, 0x83, 0xC4, 0x20, 0x5F, 0xC3, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC };
             Write(new DeepPointer("server.dll", 0x43373A), code);
-            var jmp = new byte[] {0x74, 0x15};
+            var jmp = new byte[] { 0x74, 0x15 };
             Write(new DeepPointer("server.dll", 0x433725), jmp);
         }
 
         public bool IsSpeedmodEnabled()
         {
-            var speedmodCode =
-                new DeepPointer("server.dll", 0x43373A, new int[] { }).Deref<byte>(FzzyComponent.process);
+            var speedmodCode = new DeepPointer("server.dll", 0x43373A, new int[] { }).Deref<byte>(FzzyComponent.process);
             return speedmodCode == 0x83;
         }
 
         private void RemoveWallFriction()
         {
-            byte[] code = new byte[]
-            {
+            byte[] code = new byte[] {
                 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
                 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
                 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
@@ -391,8 +384,7 @@ namespace FzzyTools.UI.Components
 
         private void RestoreWallFriction()
         {
-            byte[] code = new byte[]
-            {
+            byte[] code = new byte[] {
                 0xF3, 0x0F, 0x11, 0x81, 0x8C, 0x00, 0x00, 0x00, // movss [rcx+8C],xmm0
                 0xF3, 0x0F, 0x59, 0x89, 0x90, 0x00, 0x00, 0x00, // mulss xmm1,[rcx+90]
                 0xF3, 0x0F, 0x11, 0x89, 0x90, 0x00, 0x00, 0x00, // movss [rcx+90],xmm1
@@ -401,5 +393,6 @@ namespace FzzyTools.UI.Components
             Write(new DeepPointer("client.dll", 0x20D6E5), code);
             Write(new DeepPointer("server.dll", 0x185D36), code);
         }
+
     }
 }

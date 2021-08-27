@@ -10,13 +10,14 @@ namespace FzzyTools.UI.Components
 {
     class MemoryValue
     {
+
         public static IntPtr SigScan(string target)
         {
             var scantarget = new SigScanTarget(target);
             IntPtr scan = IntPtr.Zero;
             foreach (var page in FzzyComponent.process.MemoryPages(true).Reverse())
             {
-                var scanner = new SignatureScanner(FzzyComponent.process, page.BaseAddress, (int) page.RegionSize);
+                var scanner = new SignatureScanner(FzzyComponent.process, page.BaseAddress, (int)page.RegionSize);
                 var s = scanner.Scan(scantarget);
                 if (s != IntPtr.Zero)
                 {
@@ -24,7 +25,6 @@ namespace FzzyTools.UI.Components
                     break;
                 }
             }
-
             return scan;
         }
 
@@ -32,7 +32,7 @@ namespace FzzyTools.UI.Components
         private string type;
         private bool fromThisTick;
 
-        private bool firstTick = true;
+        private bool _firstTick = true;
 
         public MemoryValue(string type, DeepPointer pointer)
         {
@@ -51,22 +51,18 @@ namespace FzzyTools.UI.Components
             {
                 FzzyComponent.process.WriteValue(ptr, b);
             }
-
             if (value is float f)
             {
                 FzzyComponent.process.WriteValue(ptr, f);
             }
-
             if (value is int i)
             {
                 FzzyComponent.process.WriteValue(ptr, i);
             }
-
             if (value is byte[] by)
             {
                 FzzyComponent.process.WriteBytes(ptr, by);
             }
-
             if (value is string s)
             {
                 FzzyComponent.process.WriteBytes(ptr, Encoding.ASCII.GetBytes(s));
@@ -78,14 +74,16 @@ namespace FzzyTools.UI.Components
             if (!fromThisTick) NextTick();
         }
 
-        public dynamic Current
-        {
+        public dynamic Current {
             get
             {
                 if (!fromThisTick) NextTick();
                 return current;
+            } 
+            set
+            {
+                SetValue(value);
             }
-            set { SetValue(value); }
         }
 
         public dynamic Old
@@ -107,44 +105,44 @@ namespace FzzyTools.UI.Components
             switch (type)
             {
                 case "int":
-                    current = (int) 0;
-                    old = (int) 0;
+                    current = (int)0;
+                    old = (int)0;
                     break;
                 case "uint":
-                    current = (uint) 0;
-                    old = (uint) 0;
+                    current = (uint)0;
+                    old = (uint)0;
                     break;
                 case "long":
-                    current = (long) 0;
-                    old = (long) 0;
+                    current = (long)0;
+                    old = (long)0;
                     break;
                 case "ulong":
-                    current = (ulong) 0;
-                    old = (ulong) 0;
+                    current = (ulong)0;
+                    old = (ulong)0;
                     break;
                 case "float":
-                    current = (float) 0;
-                    old = (float) 0;
+                    current = (float)0;
+                    old = (float)0;
                     break;
                 case "double":
-                    current = (double) 0;
-                    old = (double) 0;
+                    current = (double)0;
+                    old = (double)0;
                     break;
                 case "byte":
-                    current = (byte) 0;
-                    old = (byte) 0;
+                    current = (byte)0;
+                    old = (byte)0;
                     break;
                 case "sbyte":
-                    current = (sbyte) 0;
-                    old = (sbyte) 0;
+                    current = (sbyte)0;
+                    old = (sbyte)0;
                     break;
                 case "short":
-                    current = (short) 0;
-                    old = (short) 0;
+                    current = (short)0;
+                    old = (short)0;
                     break;
                 case "ushort":
-                    current = (ushort) 0;
-                    old = (ushort) 0;
+                    current = (ushort)0;
+                    old = (ushort)0;
                     break;
                 case "bool":
                     current = false;
@@ -162,10 +160,9 @@ namespace FzzyTools.UI.Components
                     }
                     else if (type.StartsWith("byte"))
                     {
-                        current = (byte) 0;
-                        old = (byte) 0;
+                        current = (byte)0;
+                        old = (byte)0;
                     }
-
                     break;
             }
         }
@@ -225,12 +222,11 @@ namespace FzzyTools.UI.Components
                         var length = int.Parse(type.Substring("byte".Length));
                         current = pointer.DerefBytes(FzzyComponent.process, length);
                     }
-
                     break;
             }
-
-            if (firstTick) old = current;
-            firstTick = false;
+            if (_firstTick) old = current;
+            _firstTick = false;
         }
+
     }
 }

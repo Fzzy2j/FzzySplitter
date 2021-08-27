@@ -219,14 +219,4 @@
       <change>Quick stick lick trick</change>
     </changelog>
   </update>
-  <update version="1.7.9">
-    <files>
-      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
-    </files>
-    <changelog>
-      <change>Fixed escape split</change>
-      <change>Removed accidental broken speedmod changes</change>
-      <change>Separated helmet splits per level (thanks zweek :])</change>
-    </changelog>
-  </update>
 </updates>

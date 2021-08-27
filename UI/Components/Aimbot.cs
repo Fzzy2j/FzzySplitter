@@ -9,6 +9,7 @@ namespace FzzyTools.UI.Components
 {
     class Aimbot
     {
+
         private FzzyComponent fzzy;
 
         public Aimbot(FzzyComponent fzzy)
@@ -40,14 +41,10 @@ namespace FzzyTools.UI.Components
             {
                 var baseAdr = 0x01064698;
                 var offset = 0x8 * i;
-                var health =
-                    new DeepPointer("server.dll", baseAdr, new int[] {offset, 0x4D4}).Deref<int>(FzzyComponent.process);
+                var health = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x4D4 }).Deref<int>(FzzyComponent.process);
                 if (health == 0) continue;
-                var team =
-                    new DeepPointer("server.dll", baseAdr, new int[] {offset, 0x5E4}).Deref<int>(FzzyComponent.process);
-                var isAlive =
-                    new DeepPointer("server.dll", baseAdr, new int[] {offset, 0xEC})
-                        .Deref<int>(FzzyComponent.process) == 3;
+                var team = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x5E4 }).Deref<int>(FzzyComponent.process);
+                var isAlive = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0xEC }).Deref<int>(FzzyComponent.process) == 3;
                 if (!isAlive) continue;
 
                 float[] position = new float[3];
@@ -59,12 +56,9 @@ namespace FzzyTools.UI.Components
                 /*var x = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x490 }).Deref<float>(FzzyComponent.process);
                 var y = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x494 }).Deref<float>(FzzyComponent.process);
                 var z = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x498 }).Deref<float>(FzzyComponent.process);*/
-                var x = new DeepPointer("server.dll", baseAdr, new int[] {offset, 0x20C4}).Deref<float>(FzzyComponent
-                    .process);
-                var y = new DeepPointer("server.dll", baseAdr, new int[] {offset, 0x20C8}).Deref<float>(FzzyComponent
-                    .process);
-                var z = new DeepPointer("server.dll", baseAdr, new int[] {offset, 0x20CC}).Deref<float>(FzzyComponent
-                    .process);
+                var x = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x20C4 }).Deref<float>(FzzyComponent.process);
+                var y = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x20C8 }).Deref<float>(FzzyComponent.process);
+                var z = new DeepPointer("server.dll", baseAdr, new int[] { offset, 0x20CC }).Deref<float>(FzzyComponent.process);
 
                 position[0] = x;
                 position[1] = y;
@@ -78,7 +72,6 @@ namespace FzzyTools.UI.Components
                     closestDistance = distance;
                 }
             }
-
             targetOffset = closestOffset;
             return targetOffset != -1;
         }
@@ -101,32 +94,20 @@ namespace FzzyTools.UI.Components
             // offset 20C4 crit position?
 
             var baseAdr = 0x01064698;
-            var health =
-                new DeepPointer("server.dll", baseAdr, new int[] {targetOffset, 0x4D4}).Deref<int>(
-                    FzzyComponent.process);
+            var health = new DeepPointer("server.dll", baseAdr, new int[] { targetOffset, 0x4D4 }).Deref<int>(FzzyComponent.process);
             if (health == 0) return false;
-            var isAlive =
-                new DeepPointer("server.dll", baseAdr, new int[] {targetOffset, 0xEC})
-                    .Deref<int>(FzzyComponent.process) == 3;
+            var isAlive = new DeepPointer("server.dll", baseAdr, new int[] { targetOffset, 0xEC }).Deref<int>(FzzyComponent.process) == 3;
             if (!isAlive) ChooseTarget();
 
             float[] targetPos = new float[3];
-            targetPos[0] =
-                new DeepPointer("server.dll", baseAdr, new int[] {targetOffset, 0x20C4}).Deref<float>(FzzyComponent
-                    .process);
-            targetPos[1] =
-                new DeepPointer("server.dll", baseAdr, new int[] {targetOffset, 0x20C8}).Deref<float>(FzzyComponent
-                    .process);
-            targetPos[2] =
-                new DeepPointer("server.dll", baseAdr, new int[] {targetOffset, 0x20CC}).Deref<float>(FzzyComponent
-                    .process) - 7;
+            targetPos[0] = new DeepPointer("server.dll", baseAdr, new int[] { targetOffset, 0x20C4 }).Deref<float>(FzzyComponent.process);
+            targetPos[1] = new DeepPointer("server.dll", baseAdr, new int[] { targetOffset, 0x20C8 }).Deref<float>(FzzyComponent.process);
+            targetPos[2] = new DeepPointer("server.dll", baseAdr, new int[] { targetOffset, 0x20CC }).Deref<float>(FzzyComponent.process) - 7;
 
             if (targetPos[0] == 0) return false;
             LookAt(playerPos, targetPos, out var yaw, out var pitch);
-            fzzy.values["yaw"].Current = yaw - fzzy.values["viewThunkHorizontal"].Current -
-                                         fzzy.values["recoilHorizontal"].Current;
-            fzzy.values["pitch"].Current = pitch - fzzy.values["viewThunkVertical"].Current -
-                                           fzzy.values["recoilVertical"].Current;
+            fzzy.values["yaw"].Current = yaw - fzzy.values["viewThunkHorizontal"].Current - fzzy.values["recoilHorizontal"].Current;
+            fzzy.values["pitch"].Current = pitch - fzzy.values["viewThunkVertical"].Current - fzzy.values["recoilVertical"].Current;
 
             fzzy.values["viewThunkHorizontal"].EndTick();
             fzzy.values["viewThunkVertical"].EndTick();
@@ -142,11 +123,7 @@ namespace FzzyTools.UI.Components
         private float oldPitch;
 
         private Thread aimbotThread;
-
-        public bool AimbotRunning
-        {
-            get { return aimbotThread != null; }
-        }
+        public bool AimbotRunning { get { return aimbotThread != null; } }
 
         public void Tick()
         {
@@ -170,14 +147,11 @@ namespace FzzyTools.UI.Components
         {
             while (true)
             {
-                if (!Lock())
-                    if (!ChooseTarget())
-                        break;
+                if (!Lock()) if (!ChooseTarget()) break;
                 if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startMillis > padding / 2)
                 {
                     fzzy.board.Send(Keyboard.ScanCodeShort.KEY_M);
                 }
-
                 if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startMillis > padding)
                 {
                     fzzy.values["yaw"].Current = oldYaw;
@@ -185,29 +159,29 @@ namespace FzzyTools.UI.Components
                     break;
                 }
             }
-
             aimbotThread = null;
         }
 
         private float DistanceSquared(float[] v1, float[] v2)
         {
-            return (float) (Math.Pow(v1[0] - v2[0], 2) + Math.Pow(v1[1] - v2[1], 2) + Math.Pow(v1[2] - v2[2], 2));
+            return (float)(Math.Pow(v1[0] - v2[0], 2) + Math.Pow(v1[1] - v2[1], 2) + Math.Pow(v1[2] - v2[2], 2));
         }
 
         private void LookAt(float[] v1, float[] v2, out float yaw, out float pitch)
         {
+
             float dx = v2[0] - v1[0];
             float dy = v2[1] - v1[1];
             float dz = v2[2] - v1[2];
 
-            yaw = (float) Math.Atan2(dy, dx);
+            yaw = (float)Math.Atan2(dy, dx);
 
-            float dxy = (float) Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
+            float dxy = (float)Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
 
-            pitch = (float) -Math.Atan(dz / dxy);
+            pitch = (float)-Math.Atan(dz / dxy);
 
-            yaw = (float) (yaw * (180 / Math.PI));
-            pitch = (float) (pitch * (180 / Math.PI));
+            yaw = (float)(yaw * (180 / Math.PI));
+            pitch = (float)(pitch * (180 / Math.PI));
         }
     }
 }
