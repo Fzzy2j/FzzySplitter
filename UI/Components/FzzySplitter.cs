@@ -173,22 +173,22 @@ namespace FzzyTools.UI.Components
         {
             var deepClient = new DeepPointer("engine.dll", 0x1A1B04, new int[] { });
             deepClient.DerefOffsets(FzzyComponent.process, out IntPtr pointerClient);
-            FzzyComponent.process.WriteBytes(pointerClient, new byte[] {0x88, 0xA1});
+            FzzyComponent.process.WriteBytes(pointerClient, new byte[] { 0x88, 0xA1 });
 
             var deepServer = new DeepPointer("engine.dll", 0x1C8C02, new int[] { });
             deepServer.DerefOffsets(FzzyComponent.process, out IntPtr pointerServer);
-            FzzyComponent.process.WriteBytes(pointerServer, new byte[] {0xEB});
+            FzzyComponent.process.WriteBytes(pointerServer, new byte[] { 0xEB });
         }
 
         private void AddAltTabPause()
         {
             var deepClient = new DeepPointer("engine.dll", 0x1A1B04, new int[] { });
             deepClient.DerefOffsets(FzzyComponent.process, out IntPtr pointerClient);
-            FzzyComponent.process.WriteBytes(pointerClient, new byte[] {0x88, 0x81});
+            FzzyComponent.process.WriteBytes(pointerClient, new byte[] { 0x88, 0x81 });
 
             var deepServer = new DeepPointer("engine.dll", 0x1C8C02, new int[] { });
             deepServer.DerefOffsets(FzzyComponent.process, out IntPtr pointerServer);
-            FzzyComponent.process.WriteBytes(pointerServer, new byte[] {0x75});
+            FzzyComponent.process.WriteBytes(pointerServer, new byte[] { 0x75 });
         }
 
         private string lastNonLoadLevel = "";
@@ -208,6 +208,8 @@ namespace FzzyTools.UI.Components
             enc3IlPause = false;
         }
 
+
+
         private long splitTimerTimestamp;
         private long splitTimer;
 
@@ -221,37 +223,59 @@ namespace FzzyTools.UI.Components
             if (settings["flagSplit"] && fzzy.values["flag"].Old == 1 && fzzy.values["flag"].Current == 0)
                 fzzy.timer.Split();
 
-            if (settings["helmetSplit"] && (fzzy.values["menuText"].Current.StartsWith("Found ") ||
-                                            fzzy.values["menuText"].Current.StartsWith("尋獲 ")) &&
-                fzzy.values["menuText"].Current != fzzy.values["menuText"].Old)
+            bool helmetCollected(int level, int helmet, int helmetPos)
             {
-                // separates helmet splits into every level
-                if (fzzy.values["lastLevel"].Current == "sp_training" && settings["gauntletHelmetSplit"])
-                    fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_crashsite" && settings["btHelmetSplit"]) fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_sewers1" && settings["bnrHelmetSplit"]) fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_boomtown_start" && settings["ita1HelmetSplit"])
-                    fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_boomtown" && settings["ita2HelmetSplit"])
-                    fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && settings["ita3HelmetSplit"])
-                    fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" &&
-                    fzzy.values["sp_startpoint"].Current == 0 && settings["enc1HelmetSplit"]) fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_timeshift_spoke02" && settings["enc2HelmetSplit"])
-                    fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" &&
-                    fzzy.values["sp_startpoint"].Current == 7 && settings["enc3HelmetSplit"]) fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_beacon" && fzzy.values["sp_startpoint"].Current == 0 &&
-                    settings["b1HelmetSplit"]) fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0" && settings["b2HelmetSplit"])
-                    fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_beacon" && fzzy.values["sp_startpoint"].Current == 2 &&
-                    settings["b3HelmetSplit"]) fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_tday" && settings["tbfHelmetSplit"]) fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_s2s" && settings["arkHelmetSplit"]) fzzy.timer.Split();
-                if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && settings["foldHelmetSplit"])
-                    fzzy.timer.Split();
+                string levelName = "";
+                switch (level)
+                {
+                    case 1: levelName = "bt"; break;
+                    case 2: levelName = "bnr"; break;
+                    case 3: levelName = "ita1"; break;
+                    case 4: levelName = "ita2"; break;
+                    case 5: levelName = "ita3"; break;
+                    case 6: levelName = "enc1"; break;
+                    case 7: levelName = "enc2"; break;
+                    case 8: levelName = "b1"; break;
+                    case 9: levelName = "b2"; break;
+                    case 10: levelName = "tbf"; break;
+                    case 11: levelName = "ark"; break;
+                    case 12: levelName = "fold"; break;
+                };
+                // constructs level and helmet to check and uses bitwise XOR operator to check which bit changes
+                return (settings[levelName + "Helmet" + helmet.ToString()] && (fzzy.values["sp_unlocks_level_" + level.ToString()].Old ^ fzzy.values["sp_unlocks_level_" + level.ToString()].Current) == helmetPos);
+            }
+
+            void splitOnHelmet(int level, int helmetAmount)
+            {
+                // loops through every necessary bit that stores helmets and splits on the first bit that changed
+                int bit = (int)Math.Pow(2, helmetAmount - 1);
+                for (int i = 0; i < helmetAmount; i++)
+                {
+                    // check helmet bit location for a change and shift over to the right for the next loop
+                    if (helmetCollected(level, i + 1, bit)) fzzy.timer.Split();
+                    bit >>= 1;
+                }
+            }
+
+            for (int i = 0; i <= 12; i++)
+            {
+                if (settings["helmetSplit"] && fzzy.values["sp_unlocks_level_" + i].Current > fzzy.values["sp_unlocks_level_" + i].Old)
+                {
+                    // separates helmet splits into every unique helmet
+                    if (fzzy.values["lastLevel"].Current == "sp_training" && settings["gauntletHelmetSplit"]) fzzy.timer.Split();
+                    if (fzzy.values["lastLevel"].Current == "sp_crashsite" && settings["btHelmetSplit"]) splitOnHelmet(1, 2);
+                    if (fzzy.values["lastLevel"].Current == "sp_sewers1" && settings["bnrHelmetSplit"]) splitOnHelmet(2, 6);
+                    if (fzzy.values["lastLevel"].Current == "sp_boomtown_start" && settings["ita1HelmetSplit"]) splitOnHelmet(3, 4);
+                    if (fzzy.values["lastLevel"].Current == "sp_boomtown" && settings["ita2HelmetSplit"]) splitOnHelmet(4, 3);
+                    if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && settings["ita3HelmetSplit"]) splitOnHelmet(5, 3);
+                    if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && settings["enc1HelmetSplit"]) splitOnHelmet(6, 2);
+                    if (fzzy.values["lastLevel"].Current == "sp_timeshift_spoke02" && settings["enc2HelmetSplit"]) splitOnHelmet(7, 6);
+                    if (fzzy.values["lastLevel"].Current == "sp_beacon" && settings["b1HelmetSplit"]) splitOnHelmet(8, 9);
+                    if (fzzy.values["lastLevel"].Current == "sp_beacon_spoke0" && settings["b2HelmetSplit"]) splitOnHelmet(9, 2);
+                    if (fzzy.values["lastLevel"].Current == "sp_tday" && settings["tbfHelmetSplit"]) splitOnHelmet(10, 3);
+                    if (fzzy.values["lastLevel"].Current == "sp_s2s" && settings["arkHelmetSplit"]) splitOnHelmet(11, 3);
+                    if (fzzy.values["lastLevel"].Current == "sp_skyway_v1" && settings["foldHelmetSplit"]) splitOnHelmet(12, 3);
+                }
             }
 
             if (fzzy.isLoading) lastLoadingTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -610,13 +634,13 @@ namespace FzzyTools.UI.Components
         private float DistanceSquared(float x, float y, float z)
         {
             var dis = Math.Pow(x - X, 2) + Math.Pow(y - Y, 2) + Math.Pow(z - Z, 2);
-            return (float) dis;
+            return (float)dis;
         }
 
         private float DistanceSquared(float x, float y)
         {
             var dis = Math.Pow(x - X, 2) + Math.Pow(y - Y, 2);
-            return (float) dis;
+            return (float)dis;
         }
     }
 }

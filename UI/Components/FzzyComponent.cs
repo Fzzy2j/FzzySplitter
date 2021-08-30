@@ -156,21 +156,79 @@ namespace FzzyTools.UI.Components
                 "miscSettings");
 
             aslSettings.AddSetting("helmetSplit", false, "Helmet splits", null);
+
+            // the ordering of these is a bit wack because the sp_unlocks_level_x convar order of bits storing helmets is a bit arbitrary
+            // "levelHelmetX" is the order of how they're stored in the bits, the setting name "Helmet X" is ordered after when you collect each helmet in the run
             aslSettings.AddSetting("gauntletHelmetSplit", true, "Gauntlet", "helmetSplit");
             aslSettings.AddSetting("btHelmetSplit", true, "BT-7274", "helmetSplit");
+                aslSettings.AddSetting("btHelmet1", true, "Helmet 1", "btHelmetSplit");
+                aslSettings.AddSetting("btHelmet2", true, "Helmet 2", "btHelmetSplit");
+
             aslSettings.AddSetting("bnrHelmetSplit", true, "Blood & Rust", "helmetSplit");
+                aslSettings.AddSetting("bnrHelmet2", true, "Helmet 1", "bnrHelmetSplit");
+                aslSettings.AddSetting("bnrHelmet1", true, "Helmet 2", "bnrHelmetSplit");
+                aslSettings.AddSetting("bnrHelmet6", true, "Helmet 3", "bnrHelmetSplit");
+                aslSettings.AddSetting("bnrHelmet5", true, "Helmet 4", "bnrHelmetSplit");
+                aslSettings.AddSetting("bnrHelmet4", true, "Helmet 5", "bnrHelmetSplit");
+                aslSettings.AddSetting("bnrHelmet3", true, "Helmet 6", "bnrHelmetSplit");
+
             aslSettings.AddSetting("ita1HelmetSplit", true, "Into the Abyss 1", "helmetSplit");
+                aslSettings.AddSetting("ita1Helmet2", true, "Helmet 1", "ita1HelmetSplit");
+                aslSettings.AddSetting("ita1Helmet1", true, "Helmet 2", "ita1HelmetSplit");
+                aslSettings.AddSetting("ita1Helmet3", true, "Helmet 3", "ita1HelmetSplit");
+                aslSettings.AddSetting("ita1Helmet4", true, "Helmet 4", "ita1HelmetSplit");
+
             aslSettings.AddSetting("ita2HelmetSplit", false, "Into the Abyss 2", "helmetSplit");
+                aslSettings.AddSetting("ita2Helmet1", false, "Helmet 1", "ita2HelmetSplit");
+                aslSettings.AddSetting("ita2Helmet2", false, "Helmet 2", "ita2HelmetSplit");
+                aslSettings.AddSetting("ita2Helmet3", false, "Helmet 3", "ita2HelmetSplit");
+
             aslSettings.AddSetting("ita3HelmetSplit", true, "Into the Abyss 3", "helmetSplit");
-            aslSettings.AddSetting("enc1HelmetSplit", false, "Effect & Cause 1", "helmetSplit");
+                aslSettings.AddSetting("ita3Helmet1", true, "Helmet 1", "ita3HelmetSplit");
+                aslSettings.AddSetting("ita3Helmet2", true, "Helmet 2", "ita3HelmetSplit");
+
+            aslSettings.AddSetting("enc1HelmetSplit", false, "Effect & Cause 1/3", "helmetSplit");
+                aslSettings.AddSetting("enc1Helmet2", false, "Helmet 1", "enc1HelmetSplit");
+                aslSettings.AddSetting("enc1Helmet1", false, "Helmet 2", "enc1HelmetSplit");
+
             aslSettings.AddSetting("enc2HelmetSplit", true, "Effect & Cause 2", "helmetSplit");
-            aslSettings.AddSetting("enc3HelmetSplit", false, "Effect & Cause 3", "helmetSplit");
-            aslSettings.AddSetting("b1HelmetSplit", true, "The Beacon 1", "helmetSplit");
+                aslSettings.AddSetting("enc2Helmet3", true, "Helmet 1", "enc2HelmetSplit");
+                aslSettings.AddSetting("enc2Helmet1", true, "Helmet 2", "enc2HelmetSplit");
+                aslSettings.AddSetting("enc2Helmet5", true, "Helmet 3", "enc2HelmetSplit");
+                aslSettings.AddSetting("enc2Helmet4", true, "Helmet 4", "enc2HelmetSplit");
+                aslSettings.AddSetting("enc2Helmet2", true, "Helmet 5", "enc2HelmetSplit");
+                aslSettings.AddSetting("enc2Helmet6", true, "Helmet 6", "enc2HelmetSplit");
+
+            aslSettings.AddSetting("b1HelmetSplit", true, "The Beacon 1/3", "helmetSplit");
+                aslSettings.AddSetting("b1Helmet6", true, "Helmet 1", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet4", true, "Helmet 2", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet5", true, "Helmet 3", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet3", true, "Helmet 4", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet9", true, "Helmet 5", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet8", true, "Helmet 6", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet2", true, "Helmet 7", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet1", true, "Helmet 8", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet7", true, "Helmet 9", "b1HelmetSplit");
+
             aslSettings.AddSetting("b2HelmetSplit", true, "The Beacon 2", "helmetSplit");
-            aslSettings.AddSetting("b3HelmetSplit", true, "The Beacon 3", "helmetSplit");
+                aslSettings.AddSetting("b2Helmet2", true, "Helmet 1", "b2HelmetSplit");
+                aslSettings.AddSetting("b2Helmet1", true, "Helmet 2", "b2HelmetSplit");
+
             aslSettings.AddSetting("tbfHelmetSplit", true, "Trial by Fire", "helmetSplit");
+                aslSettings.AddSetting("tbfHelmet3", true, "Helmet 1", "tbfHelmetSplit");
+                aslSettings.AddSetting("tbfHelmet2", true, "Helmet 2", "tbfHelmetSplit");
+                aslSettings.AddSetting("tbfHelmet1", true, "Helmet 3", "tbfHelmetSplit");
+
             aslSettings.AddSetting("arkHelmetSplit", true, "The Ark", "helmetSplit");
+                aslSettings.AddSetting("arkHelmet2", true, "Helmet 1", "arkHelmetSplit");
+                aslSettings.AddSetting("arkHelmet3", true, "Helmet 2", "arkHelmetSplit");
+                aslSettings.AddSetting("arkHelmet1", true, "Helmet 3", "arkHelmetSplit");
+
             aslSettings.AddSetting("foldHelmetSplit", true, "The Fold Weapon", "helmetSplit");
+                aslSettings.AddSetting("foldHelmet3", true, "Helmet 1", "foldHelmetSplit");
+                aslSettings.AddSetting("foldHelmet2", true, "Helmet 2", "foldHelmetSplit");
+                aslSettings.AddSetting("foldHelmet1", true, "Helmet 3", "foldHelmetSplit");
+
             Settings.InitASLSettings(aslSettings);
 
             values["radioSpeaking"] = new MemoryValue("int", new DeepPointer("client.dll", 0x2A98128));
