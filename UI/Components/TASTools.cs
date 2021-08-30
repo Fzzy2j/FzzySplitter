@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace FzzyTools.UI.Components
 {
-    class TASTools
+    public class TASTools
     {
         private FzzyComponent fzzy;
 
@@ -139,7 +139,8 @@ namespace FzzyTools.UI.Components
                 tasValues["yaw"].Current = yaw;
             }
 
-            if (fzzy.Settings.SpeedmodEnabled)
+            var settings = fzzy.Settings.aslsettings.Reader;
+            if (settings["speedmod"])
             {
                 if (tasValues["holdingZ"].Current &&
                     !tasValues["holdingW"].Current &&
@@ -212,7 +213,7 @@ namespace FzzyTools.UI.Components
                     PressMovement(Keyboard.ScanCodeShort.KEY_N);
                 }
 
-                if (allowKick && tasValues["approachingWall"].Current && !fzzy.Settings.SpeedmodEnabled)
+                if (allowKick && tasValues["approachingWall"].Current && !settings["speedmod"])
                 {
                     PressMovement(Keyboard.ScanCodeShort.KEY_N);
                 }

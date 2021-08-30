@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace FzzyTools.UI.Components
 {
-    class Aimbot
+    public class Aimbot
     {
         private FzzyComponent fzzy;
 
@@ -143,10 +143,7 @@ namespace FzzyTools.UI.Components
 
         private Thread aimbotThread;
 
-        public bool AimbotRunning
-        {
-            get { return aimbotThread != null; }
-        }
+        public bool AimbotRunning => aimbotThread != null;
 
         public void Tick()
         {

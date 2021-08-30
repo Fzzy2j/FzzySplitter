@@ -1,11 +1,8 @@
 ﻿using LiveSplit.ASL;
 using LiveSplit.ComponentUtil;
 using LiveSplit.Model;
-using LiveSplit.Options;
-using LiveSplit.UI.Components;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -24,34 +21,57 @@ namespace FzzyTools.UI.Components
         private bool bnrIlPause;
         private bool enc3IlPause;
 
-        private float X
-        {
-            get { return fzzy.values["x"].Current; }
-        }
+        private float X => fzzy.values["x"].Current;
 
-        private float Y
-        {
-            get { return fzzy.values["y"].Current; }
-        }
+        private float Y => fzzy.values["y"].Current;
 
-        private float Z
-        {
-            get { return fzzy.values["z"].Current; }
-        }
+        private float Z => fzzy.values["z"].Current;
 
         private bool resetMessageShown;
+
+        private int totalTickCount;
+        private long lastTickChangeTimestamp;
+
+        private void TimerTick()
+        {
+            if (!fzzy.state.IsGameTimeInitialized) fzzy.timer.InitializeGameTime();
+            if (fzzy.state.CurrentPhase == TimerPhase.NotRunning) totalTickCount = 0;
+
+            if (fzzy.values["tickCount"].Current != fzzy.values["tickCount"].Old)
+                lastTickChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            if (fzzy.state.CurrentPhase == TimerPhase.Running ||
+                fzzy.state.CurrentPhase == TimerPhase.Paused)
+            {
+                fzzy.state.IsGameTimePaused = true;
+                if (fzzy.values["tickCount"].Current < fzzy.values["tickCount"].Old) totalTickCount += fzzy.values["tickCount"].Old;
+                
+                if (!fzzy.isLoading && fzzy.values["paused"].Current > 0)
+                {
+                    var sinceLastChange = (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastTickChangeTimestamp) * fzzy.values["timescale"].Current;
+                    var simulatedTicks = (int) Math.Floor(sinceLastChange / 50f);
+                    totalTickCount += simulatedTicks;
+                    lastTickChangeTimestamp += simulatedTicks * 50;
+                }
+                
+                var runTicks = fzzy.values["tickCount"].Current + totalTickCount;
+                fzzy.state.SetGameTime(new TimeSpan(0, 0, 0, 0, 50 * runTicks));
+            }
+        }
 
         public void Tick()
         {
             if (fzzy.tasTools.tasValues["timescale"].Current != 1) return;
 
             var settings = fzzy.Settings.aslsettings.Reader;
+
+            if (settings["tickTimer"]) TimerTick();
+            
             Update(settings);
-            if (!fzzy.state.IsGameTimeInitialized) fzzy.timer.InitializeGameTime();
-            if (fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.Running ||
-                fzzy.state.CurrentPhase == LiveSplit.Model.TimerPhase.Paused)
+            if (fzzy.state.CurrentPhase == TimerPhase.Running ||
+                fzzy.state.CurrentPhase == TimerPhase.Paused)
             {
-                fzzy.state.IsGameTimePaused = IsLoading(settings);
+                if (!settings["tickTimer"]) fzzy.state.IsGameTimePaused = IsLoading(settings);
                 if (Reset(settings))
                 {
                     if (!resetMessageShown)
@@ -74,7 +94,7 @@ namespace FzzyTools.UI.Components
                 Split(settings);
             }
 
-            if (fzzy.state.CurrentPhase != LiveSplit.Model.TimerPhase.NotRunning) return;
+            if (fzzy.state.CurrentPhase != TimerPhase.NotRunning) return;
             if (finishedSplits.Count > 0)
             {
                 finishedSplits.Clear();
@@ -173,22 +193,22 @@ namespace FzzyTools.UI.Components
         {
             var deepClient = new DeepPointer("engine.dll", 0x1A1B04, new int[] { });
             deepClient.DerefOffsets(FzzyComponent.process, out IntPtr pointerClient);
-            FzzyComponent.process.WriteBytes(pointerClient, new byte[] { 0x88, 0xA1 });
+            FzzyComponent.process.WriteBytes(pointerClient, new byte[] {0x88, 0xA1});
 
             var deepServer = new DeepPointer("engine.dll", 0x1C8C02, new int[] { });
             deepServer.DerefOffsets(FzzyComponent.process, out IntPtr pointerServer);
-            FzzyComponent.process.WriteBytes(pointerServer, new byte[] { 0xEB });
+            FzzyComponent.process.WriteBytes(pointerServer, new byte[] {0xEB});
         }
 
         private void AddAltTabPause()
         {
             var deepClient = new DeepPointer("engine.dll", 0x1A1B04, new int[] { });
             deepClient.DerefOffsets(FzzyComponent.process, out IntPtr pointerClient);
-            FzzyComponent.process.WriteBytes(pointerClient, new byte[] { 0x88, 0x81 });
+            FzzyComponent.process.WriteBytes(pointerClient, new byte[] {0x88, 0x81});
 
             var deepServer = new DeepPointer("engine.dll", 0x1C8C02, new int[] { });
             deepServer.DerefOffsets(FzzyComponent.process, out IntPtr pointerServer);
-            FzzyComponent.process.WriteBytes(pointerServer, new byte[] { 0x75 });
+            FzzyComponent.process.WriteBytes(pointerServer, new byte[] {0x75});
         }
 
         private string lastNonLoadLevel = "";
@@ -207,8 +227,6 @@ namespace FzzyTools.UI.Components
             bnrIlPause = false;
             enc3IlPause = false;
         }
-
-
 
         private long splitTimerTimestamp;
         private long splitTimer;
@@ -242,7 +260,7 @@ namespace FzzyTools.UI.Components
                     case 12: levelName = "fold"; break;
                 };
                 // constructs level and helmet to check and uses bitwise XOR operator to check which bit changes
-                return (settings[levelName + "Helmet" + helmet.ToString()] && (fzzy.values["sp_unlocks_level_" + level.ToString()].Old ^ fzzy.values["sp_unlocks_level_" + level.ToString()].Current) == helmetPos);
+                return (settings[levelName + "Helmet" + helmet] && (fzzy.values["sp_unlocks_level_" + level].Old ^ fzzy.values["sp_unlocks_level_" + level].Current) == helmetPos);
             }
 
             void splitOnHelmet(int level, int helmetAmount)
@@ -602,7 +620,8 @@ namespace FzzyTools.UI.Components
                 // Escape land
                 if (settings["foldEscape"])
                 {
-                    if (DistanceSquared(535, 6549) < 25000 && fzzy.values["inCutscene"].Current == 0 && fzzy.values["inCutscene"].Old != 0)
+                    if (DistanceSquared(535, 6549) < 25000 && fzzy.values["inCutscene"].Current == 0 &&
+                        fzzy.values["inCutscene"].Old != 0)
                     {
                         DoSingleSplit("escape");
                     }
@@ -634,13 +653,13 @@ namespace FzzyTools.UI.Components
         private float DistanceSquared(float x, float y, float z)
         {
             var dis = Math.Pow(x - X, 2) + Math.Pow(y - Y, 2) + Math.Pow(z - Z, 2);
-            return (float)dis;
+            return (float) dis;
         }
 
         private float DistanceSquared(float x, float y)
         {
             var dis = Math.Pow(x - X, 2) + Math.Pow(y - Y, 2);
-            return (float)dis;
+            return (float) dis;
         }
     }
 }

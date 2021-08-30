@@ -52,10 +52,9 @@
             this.installMenuModButton = new System.Windows.Forms.Button();
             this.installMenuModProgress = new System.Windows.Forms.ProgressBar();
             this.autoLoadNCS = new System.Windows.Forms.CheckBox();
-            this.speedmod = new System.Windows.Forms.CheckBox();
             this.btSave = new System.Windows.Forms.CheckBox();
             this.uninstallMenuModButton = new System.Windows.Forms.Button();
-            this.settingsTree = new FzzyTreeView();
+            this.settingsTree = new FzzyTools.UI.Components.FzzyTreeView();
             this.treeContextMenu.SuspendLayout();
             this.treeContextMenu2.SuspendLayout();
             this.SuspendLayout();
@@ -235,17 +234,6 @@
             this.autoLoadNCS.Text = "Auto Load NCS";
             this.autoLoadNCS.UseVisualStyleBackColor = true;
             // 
-            // speedmod
-            // 
-            this.speedmod.AutoSize = true;
-            this.speedmod.Location = new System.Drawing.Point(128, 19);
-            this.speedmod.Name = "speedmod";
-            this.speedmod.Size = new System.Drawing.Size(77, 17);
-            this.speedmod.TabIndex = 21;
-            this.speedmod.Text = "Speedmod";
-            this.speedmod.UseVisualStyleBackColor = true;
-            this.speedmod.CheckedChanged += new System.EventHandler(this.speedmod_CheckedChanged);
-            // 
             // btSave
             // 
             this.btSave.AutoSize = true;
@@ -288,7 +276,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.uninstallMenuModButton);
             this.Controls.Add(this.btSave);
-            this.Controls.Add(this.speedmod);
             this.Controls.Add(this.autoLoadNCS);
             this.Controls.Add(this.installMenuModProgress);
             this.Controls.Add(this.installMenuModButton);
@@ -330,7 +317,6 @@
         private System.Windows.Forms.Button installMenuModButton;
         private System.Windows.Forms.ProgressBar installMenuModProgress;
         private System.Windows.Forms.CheckBox autoLoadNCS;
-        private System.Windows.Forms.CheckBox speedmod;
         private System.Windows.Forms.CheckBox btSave;
         private System.Windows.Forms.Button uninstallMenuModButton;
     }
