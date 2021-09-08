@@ -239,4 +239,14 @@
       <change>Helmet splits changed to be per helmet instead of per level</change>
     </changelog>
   </update>
+  <update version="1.8.1">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Fixed livesplit skipping splits when using uninitialized game time</change>
+      <change>Tick timer injects time properly when using 18 hour bypass</change>
+      <change>Fixed issue with tick simulation and greater than 1 timescales simulating more ticks then necessary</change>
+    </changelog>
+  </update>
 </updates>

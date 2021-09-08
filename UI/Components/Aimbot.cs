@@ -147,7 +147,7 @@ namespace FzzyTools.UI.Components
 
         public void Tick()
         {
-            if (fzzy.values["timescale"].Current >= 1 || aimbotThread != null) return;
+            //if (fzzy.values["timescale"].Current >= 1 || aimbotThread != null) return;
             if (fzzy.values["holdingM3"].Current && !fzzy.values["holdingM3"].Old)
             {
                 oldYaw = fzzy.values["yaw"].Current;
