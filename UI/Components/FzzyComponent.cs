@@ -156,6 +156,7 @@ namespace FzzyTools.UI.Components
             aslSettings.AddSetting("cheatsTimerLink", false, "Tie sv_cheats with if the timer is started or not",
                 "miscSettings");
             aslSettings.AddSetting("tickTimer", false, "Tick-based Timer", "miscSettings");
+            aslSettings.AddSetting("levelTimer", false, "Level-based Timer", "tickTimer");
 
             aslSettings.AddSetting("helmetSplit", false, "Helmet splits", null);
 
@@ -334,7 +335,7 @@ namespace FzzyTools.UI.Components
             values["sp_startpoint"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0C6DC));
             values["currentTime"] = new MemoryValue("float", new DeepPointer("client.dll", 0xC3DB28));
             values["paused"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7A6620));
-            values["tickCount"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x12A516D4));
+            values["tickCount"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x765A24));
 
             state.CurrentTimingMethod = TimingMethod.GameTime;
 

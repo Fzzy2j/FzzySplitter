@@ -249,4 +249,14 @@
       <change>Fixed issue with tick simulation and greater than 1 timescales simulating more ticks then necessary</change>
     </changelog>
   </update>
+  <update version="1.8.2">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Tick time value update to fix inconsistencies with high timescale</change>
+      <change>Delayed subsplits properly scale with timescale</change>
+      <change>Added level time</change>
+    </changelog>
+  </update>
 </updates>

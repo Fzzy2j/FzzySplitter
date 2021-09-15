@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using LiveSplit.Options;
+using LiveSplitCore;
+using TimeSpan = System.TimeSpan;
 
 namespace FzzyTools.UI.Components
 {
@@ -33,19 +35,31 @@ namespace FzzyTools.UI.Components
         private int totalTickCount;
         private long lastTickChangeTimestamp;
 
-        private void TimerTick()
+        private int CurrentTickCount => fzzy.values["tickCount"].Current - 22;
+        private int OldTickCount => fzzy.values["tickCount"].Old - 22;
+
+        private bool ignoreNextTickChange;
+
+        private void TimerTick(ASLSettingsReader settings)
         {
             if (fzzy.state.CurrentPhase == TimerPhase.NotRunning) totalTickCount = 0;
 
-            if (fzzy.values["tickCount"].Current != fzzy.values["tickCount"].Old)
-                lastTickChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (CurrentTickCount != OldTickCount) lastTickChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             if (fzzy.state.CurrentPhase == TimerPhase.Running ||
                 fzzy.state.CurrentPhase == TimerPhase.Paused)
             {
                 fzzy.state.IsGameTimePaused = true;
-                if (fzzy.values["tickCount"].Current < fzzy.values["tickCount"].Old)
-                    totalTickCount += fzzy.values["tickCount"].Old;
+                if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old)
+                {
+                    ignoreNextTickChange = true;
+                }
+
+                if (CurrentTickCount != OldTickCount)
+                {
+                    if (!ignoreNextTickChange && CurrentTickCount > OldTickCount) totalTickCount += CurrentTickCount - OldTickCount;
+                    if (ignoreNextTickChange) ignoreNextTickChange = false;
+                }
 
                 if (!fzzy.isLoading && fzzy.values["paused"].Current > 0)
                 {
@@ -55,8 +69,10 @@ namespace FzzyTools.UI.Components
                     lastTickChangeTimestamp += simulatedTicks * 50;
                 }
 
-                var runTicks = fzzy.values["tickCount"].Current + totalTickCount;
-                fzzy.state.SetGameTime(new TimeSpan(0, 0, 0, 0, 50 * runTicks));
+                if (settings["levelTimer"])
+                    fzzy.state.SetGameTime(new TimeSpan(0, 0, 0, 0, 50 * CurrentTickCount));
+                else
+                    fzzy.state.SetGameTime(new TimeSpan(0, 0, 0, 0, 50 * totalTickCount));
             }
         }
 
@@ -67,7 +83,7 @@ namespace FzzyTools.UI.Components
             var settings = fzzy.Settings.aslsettings.Reader;
 
             if (!fzzy.state.IsGameTimeInitialized) fzzy.timer.InitializeGameTime();
-            if (settings["tickTimer"]) TimerTick();
+            if (settings["tickTimer"]) TimerTick(settings);
 
             Update(settings);
             if (fzzy.state.CurrentPhase == TimerPhase.Running ||
@@ -346,7 +362,7 @@ namespace FzzyTools.UI.Components
             splitTimerTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (splitTimer > 0)
             {
-                var adjustment = splitTimer - timePassed;
+                var adjustment = splitTimer - (long)Math.Round(timePassed * fzzy.values["timescale"].Current);
                 if (adjustment <= 0)
                 {
                     splitTimer = 0;
