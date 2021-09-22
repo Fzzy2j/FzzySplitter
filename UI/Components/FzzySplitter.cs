@@ -379,7 +379,8 @@ namespace FzzyTools.UI.Components
                 btSaveDelay -= DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - previousTimestamp;
                 if (btSaveDelay <= 0)
                 {
-                    fzzy.board.Send(Keyboard.ScanCodeShort.F1);
+                    FzzyComponent.RunGameCommand("load fastany1");
+                    //fzzy.board.Send(Keyboard.ScanCodeShort.F1);
                     if (settings["tickTimer"])
                         totalTickCount += 4044;
                     else
@@ -624,7 +625,7 @@ namespace FzzyTools.UI.Components
                 if (settings["b3SecureBeacon"])
                 {
                     if (fzzy.values["b3SecureBeaconObjective"].Current != fzzy.values["b3SecureBeaconObjective"].Old &&
-                        DistanceSquared(-3007, -1177) < 1000 * 1000)
+                        DistanceSquared(-3098, -1254, 1853) < 1000 * 1000)
                     {
                         DoSingleSplit("b3SecureBeacon");
                     }
@@ -632,10 +633,14 @@ namespace FzzyTools.UI.Components
             }
 
             // TBF Elevator
-            if (fzzy.values["lastLevel"].Current == "sp_tday" && settings["tbfSplits"])
+            if (fzzy.values["lastLevel"].Current == "sp_tday")
             {
+                if (fzzy.values["pilotYoureWithMe"].Current > fzzy.values["pilotYoureWithMe"].Old && settings["tbfPilotWithMe"] && !fzzy.isLoading)
+                {
+                    DoSingleSplit("pilotYoureWithMe");
+                }
                 if (DistanceSquared(-7867, 2758) < Math.Pow(600, 2) &&
-                    fzzy.values["tbfElevator"].Current - 8 == fzzy.values["tbfElevator"].Old)
+                    fzzy.values["tbfElevator"].Current - 8 == fzzy.values["tbfElevator"].Old && settings["tbfElevator"])
                 {
                     DoSingleSplit("tbfElevator");
                 }

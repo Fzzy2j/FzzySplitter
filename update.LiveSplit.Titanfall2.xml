@@ -259,4 +259,13 @@
       <change>Added level time</change>
     </changelog>
   </update>
+  <update version="1.8.3">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Added "Pilot youre with me" subsplit on trial by fire</change>
+      <change>Fixed inconsistencies with beacon 3 secure beacon subsplit</change>
+    </changelog>
+  </update>
 </updates>

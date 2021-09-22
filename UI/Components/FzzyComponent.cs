@@ -138,7 +138,9 @@ namespace FzzyTools.UI.Components
             aslSettings.AddSetting("b3Module2", true, "Split on insert module", "b3Splits");
             aslSettings.AddSetting("b3SecureBeacon", true, "Split on secure beacon objective", "b3Splits");
 
-            aslSettings.AddSetting("tbfSplits", true, "Trial by Fire Elevator", "subSplits");
+            aslSettings.AddSetting("tbfSplits", true, "Trial by Fire", "subSplits");
+            aslSettings.AddSetting("tbfPilotWithMe", false, "Split on \"Pilot you're with me\" dialog", "tbfSplits");
+            aslSettings.AddSetting("tbfElevator", true, "Split on Elevator", "tbfSplits");
 
             aslSettings.AddSetting("arkSplits", true, "The Ark", "subSplits");
             aslSettings.AddSetting("arkElevator", true, "Split when the elevator starts going up", "arkSplits");
@@ -252,6 +254,7 @@ namespace FzzyTools.UI.Components
             values["arkElevator"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x1398B458));
             values["viper"] = new MemoryValue("int", new DeepPointer("client.dll", 0xC0916C));
             values["embarkCount"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E18D8));
+            values["pilotYoureWithMe"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x130D0D78));
 
             values["lurchMax"] = new MemoryValue("float", new DeepPointer("client.dll", 0x11B0308));
             values["slideStepVelocityReduction"] =
@@ -308,7 +311,7 @@ namespace FzzyTools.UI.Components
             values["clFrames"] = new MemoryValue("int",
                 new DeepPointer("materialsystem_dx11.dll", 0x1A9F4A8, 0x58C));
             values["b3SecureBeaconObjective"] =
-                new MemoryValue("int", new DeepPointer("engine.dll", 0x139AECEC));
+                new MemoryValue("int", new DeepPointer("engine.dll", 0x130D0888));
             values["airAcceleration"] =
                 new MemoryValue("float", new DeepPointer("engine.dll", 0x13084248, 0x2564));
             values["airSpeed"] = new MemoryValue("float",
