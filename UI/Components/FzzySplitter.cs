@@ -106,7 +106,9 @@ namespace FzzyTools.UI.Components
         private bool Reset(ASLSettingsReader settings)
         {
             if (fzzy.values["currentLevel"].Current.StartsWith("sp_training") &&
-                fzzy.values["inPressSpaceToContinue"].Current > 0 && fzzy.values["inPressSpaceToContinue"].Old <= 0)
+                fzzy.values["inPressSpaceToContinue"].Current > 0 &&
+                fzzy.values["inPressSpaceToContinue"].Old > 0 &&
+                fzzy.values["inPressSpaceToContinue"].Old2 <= 0)
             {
                 return true;
             }

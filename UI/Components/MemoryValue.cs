@@ -43,6 +43,7 @@ namespace FzzyTools.UI.Components
 
         private dynamic current;
         private dynamic old;
+        private dynamic old2;
 
         private void SetValue(dynamic value)
         {
@@ -94,6 +95,15 @@ namespace FzzyTools.UI.Components
             {
                 if (!fromThisTick) NextTick();
                 return old;
+            }
+        }
+
+        public dynamic Old2
+        {
+            get
+            {
+                if (!fromThisTick) NextTick();
+                return old2;
             }
         }
 
@@ -173,6 +183,7 @@ namespace FzzyTools.UI.Components
         private void NextTick()
         {
             fromThisTick = true;
+            old2 = old;
             old = current;
             switch (type)
             {
