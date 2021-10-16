@@ -200,15 +200,15 @@ namespace FzzyTools.UI.Components
                 aslSettings.AddSetting("enc2Helmet6", true, "Helmet 6", "enc2HelmetSplit");
 
             aslSettings.AddSetting("b1HelmetSplit", true, "The Beacon 1/3", "helmetSplit");
-                aslSettings.AddSetting("b1Helmet6", true, "Helmet 1", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet4", true, "Helmet 2", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet5", true, "Helmet 3", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet3", true, "Helmet 4", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet9", true, "Helmet 5", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet8", true, "Helmet 6", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet2", true, "Helmet 7", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet1", true, "Helmet 8", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet7", true, "Helmet 9", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet8", true, "Helmet 1", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet7", true, "Helmet 2", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet4", true, "Helmet 3", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet2", true, "Helmet 4", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet3", true, "Helmet 5", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet1", true, "Helmet 6", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet9", true, "Helmet 7", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet6", true, "Helmet 8", "b1HelmetSplit");
+                aslSettings.AddSetting("b1Helmet5", true, "Helmet 9", "b1HelmetSplit");
 
             aslSettings.AddSetting("b2HelmetSplit", true, "The Beacon 2", "helmetSplit");
                 aslSettings.AddSetting("b2Helmet2", true, "Helmet 1", "b2HelmetSplit");
