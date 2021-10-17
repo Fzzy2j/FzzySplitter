@@ -269,7 +269,7 @@ namespace FzzyTools.UI.Components
                     if (fzzy.values["lastLevel"].Current == "sp_sewers1" && settings["bnrHelmetSplit"]) splitOnHelmet(2, 6);
                     if (fzzy.values["lastLevel"].Current == "sp_boomtown_start" && settings["ita1HelmetSplit"]) splitOnHelmet(3, 4);
                     if (fzzy.values["lastLevel"].Current == "sp_boomtown" && settings["ita2HelmetSplit"]) splitOnHelmet(4, 3);
-                    if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && settings["ita3HelmetSplit"]) splitOnHelmet(5, 3);
+                    if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && settings["ita3HelmetSplit"]) splitOnHelmet(5, 2);
                     if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && settings["enc1HelmetSplit"]) splitOnHelmet(6, 2);
                     if (fzzy.values["lastLevel"].Current == "sp_timeshift_spoke02" && settings["enc2HelmetSplit"]) splitOnHelmet(7, 6);
                     if (fzzy.values["lastLevel"].Current == "sp_beacon" && settings["b1HelmetSplit"]) splitOnHelmet(8, 9);

@@ -192,11 +192,11 @@ namespace FzzyTools.UI.Components
                 aslSettings.AddSetting("enc1Helmet1", false, "Helmet 2", "enc1HelmetSplit");
 
             aslSettings.AddSetting("enc2HelmetSplit", true, "Effect & Cause 2", "helmetSplit");
-                aslSettings.AddSetting("enc2Helmet3", true, "Helmet 1", "enc2HelmetSplit");
-                aslSettings.AddSetting("enc2Helmet1", true, "Helmet 2", "enc2HelmetSplit");
-                aslSettings.AddSetting("enc2Helmet5", true, "Helmet 3", "enc2HelmetSplit");
+                aslSettings.AddSetting("enc2Helmet2", true, "Helmet 1", "enc2HelmetSplit");
+                aslSettings.AddSetting("enc2Helmet5", true, "Helmet 2", "enc2HelmetSplit");
+                aslSettings.AddSetting("enc2Helmet1", true, "Helmet 3", "enc2HelmetSplit");
                 aslSettings.AddSetting("enc2Helmet4", true, "Helmet 4", "enc2HelmetSplit");
-                aslSettings.AddSetting("enc2Helmet2", true, "Helmet 5", "enc2HelmetSplit");
+                aslSettings.AddSetting("enc2Helmet3", true, "Helmet 5", "enc2HelmetSplit");
                 aslSettings.AddSetting("enc2Helmet6", true, "Helmet 6", "enc2HelmetSplit");
 
             aslSettings.AddSetting("b1HelmetSplit", true, "The Beacon 1/3", "helmetSplit");
@@ -220,9 +220,9 @@ namespace FzzyTools.UI.Components
                 aslSettings.AddSetting("tbfHelmet1", true, "Helmet 3", "tbfHelmetSplit");
 
             aslSettings.AddSetting("arkHelmetSplit", true, "The Ark", "helmetSplit");
-                aslSettings.AddSetting("arkHelmet2", true, "Helmet 1", "arkHelmetSplit");
-                aslSettings.AddSetting("arkHelmet3", true, "Helmet 2", "arkHelmetSplit");
-                aslSettings.AddSetting("arkHelmet1", true, "Helmet 3", "arkHelmetSplit");
+                aslSettings.AddSetting("arkHelmet3", true, "Helmet 1", "arkHelmetSplit");
+                aslSettings.AddSetting("arkHelmet1", true, "Helmet 2", "arkHelmetSplit");
+                aslSettings.AddSetting("arkHelmet2", true, "Helmet 3", "arkHelmetSplit");
 
             aslSettings.AddSetting("foldHelmetSplit", true, "The Fold Weapon", "helmetSplit");
                 aslSettings.AddSetting("foldHelmet3", true, "Helmet 1", "foldHelmetSplit");
