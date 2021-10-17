@@ -229,4 +229,43 @@
       <change>Separated helmet splits per level (thanks zweek :])</change>
     </changelog>
   </update>
+  <update version="1.8">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Tick timer in misc. settings</change>
+      <change>Speedmod gives ammo at the beginning of every save</change>
+      <change>Helmet splits changed to be per helmet instead of per level</change>
+    </changelog>
+  </update>
+  <update version="1.8.1">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Fixed livesplit skipping splits when using uninitialized game time</change>
+      <change>Tick timer injects time properly when using 18 hour bypass</change>
+      <change>Fixed issue with tick simulation and greater than 1 timescales simulating more ticks then necessary</change>
+    </changelog>
+  </update>
+  <update version="1.8.2">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Tick time value update to fix inconsistencies with high timescale</change>
+      <change>Delayed subsplits properly scale with timescale</change>
+      <change>Added level time</change>
+    </changelog>
+  </update>
+  <update version="1.8.3">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Added "Pilot youre with me" subsplit on trial by fire</change>
+      <change>Fixed inconsistencies with beacon 3 secure beacon subsplit</change>
+    </changelog>
+  </update>
 </updates>

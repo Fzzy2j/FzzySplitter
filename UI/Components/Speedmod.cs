@@ -59,7 +59,7 @@ namespace FzzyTools.UI.Components
             }
 
             previousTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            if (!fzzy.Settings.SpeedmodEnabled)
+            if (!fzzy.Settings.aslsettings.Reader["speedmod"])
             {
                 if (IsSpeedmodEnabled())
                 {
@@ -87,6 +87,11 @@ namespace FzzyTools.UI.Components
                     levelLoadedFromMenu = lastNonLoadLevel == "";
                 }
                 if (!fzzy.values["inLoadingScreen"].Current) lastNonLoadLevel = fzzy.values["currentLevel"].Current;
+
+                if (!fzzy.isLoading && fzzy.wasLoading)
+                {
+                    FzzyComponent.RunGameCommand("givecurrentammo");
+                }
 
                 if (fzzy.values["currentLevel"].Current != fzzy.values["currentLevel"].Old && levelLoadedFromMenu)
                 {
@@ -308,7 +313,7 @@ namespace FzzyTools.UI.Components
             {
                 webClient.DownloadFileAsync(new Uri(FzzyComponent.SPEEDMOD_SAVES_INSTALLER_LINK),
                     speedmodSavesInstaller);
-                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(SpeedmodSavesDownloadCompleted);
+                webClient.DownloadFileCompleted += SpeedmodSavesDownloadCompleted;
                 downloadInProgress = true;
             }
         }

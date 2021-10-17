@@ -1,19 +1,15 @@
-﻿using FzzyTools.UI.Components;
-using LiveSplit.ComponentUtil;
-using LiveSplit.Model.Input;
+﻿using LiveSplit.ComponentUtil;
 using LiveSplit.Options;
-using LiveSplit.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace FzzyTools.UI.Components
 {
-    class TASTools
+    public class TASTools
     {
         private FzzyComponent fzzy;
 
@@ -61,10 +57,7 @@ namespace FzzyTools.UI.Components
                 new DeepPointer("client.dll", 0x00B188C0, new int[] {0xD8, 0x1A40}));
         }
 
-        public bool IsStarted
-        {
-            get { return tasThread != null; }
-        }
+        public bool IsStarted => tasThread != null;
 
         public void Start()
         {
@@ -78,6 +71,16 @@ namespace FzzyTools.UI.Components
             catch (Exception e)
             {
                 Log.Error(e);
+            }
+        }
+
+        public void SendXInputPacket(string s)
+        {
+            const int port = 13000;
+            using (var c = new UdpClient(port))
+            {
+                var sendBuffer = Encoding.ASCII.GetBytes(s);
+                c.Send(sendBuffer, sendBuffer.Length, "localhost", port);
             }
         }
 
@@ -139,7 +142,8 @@ namespace FzzyTools.UI.Components
                 tasValues["yaw"].Current = yaw;
             }
 
-            if (fzzy.Settings.SpeedmodEnabled)
+            var settings = fzzy.Settings.aslsettings.Reader;
+            if (settings["speedmod"])
             {
                 if (tasValues["holdingZ"].Current &&
                     !tasValues["holdingW"].Current &&
@@ -212,9 +216,10 @@ namespace FzzyTools.UI.Components
                     PressMovement(Keyboard.ScanCodeShort.KEY_N);
                 }
 
-                if (allowKick && tasValues["approachingWall"].Current && !fzzy.Settings.SpeedmodEnabled)
+                if (allowKick && tasValues["approachingWall"].Current && !settings["speedmod"])
                 {
                     PressMovement(Keyboard.ScanCodeShort.KEY_N);
+                    PressMovement(Keyboard.ScanCodeShort.SPACE);
                 }
             }
         }

@@ -18,7 +18,7 @@ using Syringe;
 
 namespace FzzyTools.UI.Components
 {
-    class FzzyComponent : LogicComponent
+    public class FzzyComponent : LogicComponent
     {
         [StructLayout(LayoutKind.Sequential, Pack = 8)]
         private struct ConsoleCommand
@@ -50,8 +50,8 @@ namespace FzzyTools.UI.Components
             syringe.CallExport("TitanfallInjection.dll", "FzzyConsoleCommand", consolecmd);
         }
 
-        public const string MENU_MOD_INSTALLER_LINK =
-            "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/Enhanced.Menu.exe";
+        public const string MENU_MOD_ZIP_LINK =
+            "https://github.com/taskinoz/Enhanced-Menu-Mod/releases/latest/download/Enhanced.Menu.Compiled.VPK.zip";
 
         public const string MENU_MOD_UNINSTALLER_LINK =
             "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/uninstallmenumod.exe";
@@ -68,7 +68,7 @@ namespace FzzyTools.UI.Components
         public const string INJECTION_DLL_LINK =
             "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/TitanfallInjection.dll";
 
-        public FzzySettings Settings { get; set; }
+        public FzzySettings Settings { get; }
 
         public Timer updateTimer;
 
@@ -138,7 +138,9 @@ namespace FzzyTools.UI.Components
             aslSettings.AddSetting("b3Module2", true, "Split on insert module", "b3Splits");
             aslSettings.AddSetting("b3SecureBeacon", true, "Split on secure beacon objective", "b3Splits");
 
-            aslSettings.AddSetting("tbfSplits", true, "Trial by Fire Elevator", "subSplits");
+            aslSettings.AddSetting("tbfSplits", true, "Trial by Fire", "subSplits");
+            aslSettings.AddSetting("tbfPilotWithMe", false, "Split on \"Pilot you're with me\" dialog", "tbfSplits");
+            aslSettings.AddSetting("tbfElevator", true, "Split on Elevator", "tbfSplits");
 
             aslSettings.AddSetting("arkSplits", true, "The Ark", "subSplits");
             aslSettings.AddSetting("arkElevator", true, "Split when the elevator starts going up", "arkSplits");
@@ -149,11 +151,14 @@ namespace FzzyTools.UI.Components
             aslSettings.AddSetting("foldEscape", true, "Split when escape starts", "foldSplits");
 
             aslSettings.AddSetting("miscSettings", false, "Misc. Settings", null);
+            aslSettings.AddSetting("speedmod", false, "Speedmod", "miscSettings");
             aslSettings.AddSetting("BnRpause", false, "Blood and Rust IL pause", "miscSettings");
             aslSettings.AddSetting("enc3pause", false, "Effect & Cause 3 IL pause", "miscSettings");
             aslSettings.AddSetting("loadReset", false, "Reset after load screens", "miscSettings");
             aslSettings.AddSetting("cheatsTimerLink", false, "Tie sv_cheats with if the timer is started or not",
                 "miscSettings");
+            aslSettings.AddSetting("tickTimer", false, "Tick-based Timer", "miscSettings");
+            aslSettings.AddSetting("levelTimer", false, "Level-based Timer", "tickTimer");
 
             aslSettings.AddSetting("helmetSplit", false, "Helmet splits", null);
 
@@ -249,6 +254,7 @@ namespace FzzyTools.UI.Components
             values["arkElevator"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x1398B458));
             values["viper"] = new MemoryValue("int", new DeepPointer("client.dll", 0xC0916C));
             values["embarkCount"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E18D8));
+            values["pilotYoureWithMe"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x130D0D78));
 
             values["lurchMax"] = new MemoryValue("float", new DeepPointer("client.dll", 0x11B0308));
             values["slideStepVelocityReduction"] =
@@ -301,18 +307,15 @@ namespace FzzyTools.UI.Components
                 new DeepPointer("client.dll", 0x02A9F080, 0xC0, 0x4C0, 0x568, 0x2A8, 0xC0, 0x10, 0x48));
             values["btSpeak2"] = new MemoryValue("int",
                 new DeepPointer("client.dll", 0x02A9F080, 0xC0, 0x3B8, 0x180, 0x520, 0xB8, 0x648, 0x10, 0xD8, 0x10, 0x4C));
-            values["onWall"] = new MemoryValue("int", new DeepPointer("server.dll", 0x1211270));
             values["inCutscene"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E1B58));
             values["clFrames"] = new MemoryValue("int",
                 new DeepPointer("materialsystem_dx11.dll", 0x1A9F4A8, 0x58C));
             values["b3SecureBeaconObjective"] =
-                new MemoryValue("int", new DeepPointer("engine.dll", 0x139AECEC));
+                new MemoryValue("int", new DeepPointer("engine.dll", 0x130D0888));
             values["airAcceleration"] =
                 new MemoryValue("float", new DeepPointer("engine.dll", 0x13084248, 0x2564));
             values["airSpeed"] = new MemoryValue("float",
                 new DeepPointer("engine.dll", 0x13084248, 0xEA8, 0x1008, 0x1038, 0x390, 0x48, 0x18, 0xA30, 0x10, 0x2218));
-            values["maxHealth"] = new MemoryValue("int",
-                new DeepPointer("engine.dll", 0x13084248, 0xA90, 0x18, 0xED8, 0x48, 0xA40, 0x10, 0xCB0, 0x4D0));
             values["currentHealth"] = new MemoryValue("int",
                 new DeepPointer("engine.dll", 0x13084248, 0xA90, 0x18, 0xED8, 0x48, 0xA40, 0x10, 0xCB0, 0x4D4));
             values["yaw"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00E69EA0, 0x1E94));
@@ -333,6 +336,9 @@ namespace FzzyTools.UI.Components
             values["timescale"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x1315A2C8));
             values["sv_cheats"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x12A50EEC));
             values["sp_startpoint"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0C6DC));
+            values["currentTime"] = new MemoryValue("float", new DeepPointer("client.dll", 0xC3DB28));
+            values["paused"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7A6620));
+            values["tickCount"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x765A24));
 
             state.CurrentTimingMethod = TimingMethod.GameTime;
 
@@ -397,13 +403,10 @@ namespace FzzyTools.UI.Components
 
                 return;
             }
-            else
+            if (process.HasExited || process.Modules.Count < 127)
             {
-                if (process.HasExited || process.Modules.Count < 127)
-                {
-                    process = null;
-                    return;
-                }
+                process = null;
+                return;
             }
 
             if (timer == null) timer = new TimerModel() {CurrentState = state};
@@ -437,7 +440,7 @@ namespace FzzyTools.UI.Components
             }
             //aimbot.Tick();
 
-            if (Settings.AutoLoadNcs && !Settings.SpeedmodEnabled) ncsAutoLoader.Tick();
+            if (Settings.AutoLoadNcs && !settings["speedmod"]) ncsAutoLoader.Tick();
 
             speedmod.Tick();
 

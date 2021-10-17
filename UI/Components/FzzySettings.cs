@@ -9,6 +9,7 @@ using System.Net;
 using System.Windows.Forms;
 using System.Xml;
 using LiveSplit.ASL;
+using LiveSplit.Options;
 using LiveSplit.UI;
 
 namespace FzzyTools.UI.Components
@@ -18,8 +19,6 @@ namespace FzzyTools.UI.Components
         //public CompositeHook Hook { get; set; }
         public bool TasToolsEnabled { get; set; }
         public bool AutoLoadNcs { get; set; }
-
-        public bool SpeedmodEnabled { get; set; }
 
         //public bool TASAimbot { get; set; }
         public bool AutoLoad18HourSave { get; set; }
@@ -35,7 +34,6 @@ namespace FzzyTools.UI.Components
 
             TasToolsEnabled = false;
             AutoLoadNcs = false;
-            SpeedmodEnabled = false;
             //TASAimbot = false;
             AutoLoad18HourSave = false;
 
@@ -50,7 +48,6 @@ namespace FzzyTools.UI.Components
             {
                 TasToolsEnabled = SettingsHelper.ParseBool(element["tasToolsEnabled"]);
                 AutoLoadNcs = SettingsHelper.ParseBool(element["autoLoadNCS"]);
-                SpeedmodEnabled = SettingsHelper.ParseBool(element["speedmod"]);
                 AutoLoad18HourSave = SettingsHelper.ParseBool(element["btSave"]);
                 //TASAimbot = SettingsHelper.ParseBool(element["tasAimbot"]);
 
@@ -65,7 +62,6 @@ namespace FzzyTools.UI.Components
             AppendSettingsToXml(document, node);
             SettingsHelper.CreateSetting(document, node, "tasToolsEnabled", TasToolsEnabled);
             SettingsHelper.CreateSetting(document, node, "autoLoadNCS", AutoLoadNcs);
-            SettingsHelper.CreateSetting(document, node, "speedmod", SpeedmodEnabled);
             SettingsHelper.CreateSetting(document, node, "btSave", AutoLoad18HourSave);
             //SettingsHelper.CreateSetting(document, node, "tasAimbot", TASAimbot);
 
@@ -256,14 +252,11 @@ namespace FzzyTools.UI.Components
         {
             tasTools.DataBindings.Clear();
             autoLoadNCS.DataBindings.Clear();
-            speedmod.DataBindings.Clear();
             btSave.DataBindings.Clear();
 
             tasTools.DataBindings.Add("Checked", this, "TASToolsEnabled", false,
                 DataSourceUpdateMode.OnPropertyChanged);
             autoLoadNCS.DataBindings.Add("Checked", this, "AutoLoadNCS", false, DataSourceUpdateMode.OnPropertyChanged);
-            speedmod.DataBindings.Add("Checked", this, "SpeedmodEnabled", false,
-                DataSourceUpdateMode.OnPropertyChanged);
             btSave.DataBindings.Add("Checked", this, "AutoLoad18HourSave", false,
                 DataSourceUpdateMode.OnPropertyChanged);
         }
@@ -379,8 +372,8 @@ namespace FzzyTools.UI.Components
                 installMenuModButton.Enabled = false;
                 uninstallMenuModButton.Enabled = false;
                 install = true;
-                menumod = Path.Combine(titanfallInstallDirectory, "vpk\\installmenumod.exe");
-                webClient.DownloadFileAsync(new Uri(FzzyComponent.MENU_MOD_INSTALLER_LINK), menumod);
+                menumod = Path.Combine(titanfallInstallDirectory, "vpk\\Enhanced.Menu.Compiled.VPK.zip");
+                webClient.DownloadFileAsync(new Uri(FzzyComponent.MENU_MOD_ZIP_LINK), menumod);
                 webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(MenuModDownloadCompleted);
                 webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(MenuModProgressChanged);
                 installMenuModProgress.Visible = true;
@@ -517,13 +510,17 @@ namespace FzzyTools.UI.Components
             installMenuModProgress.Visible = false;
             installMenuModButton.Enabled = true;
             uninstallMenuModButton.Enabled = true;
-            var startInfo = new ProcessStartInfo
+            var vpkDirectory = Directory.GetParent(menumod)?.FullName;
+            if (vpkDirectory == null) return;
+            System.IO.Compression.ZipFile.ExtractToDirectory(menumod, vpkDirectory);
+            foreach (var file in Directory.GetFiles(Path.Combine(vpkDirectory, "Enhanced Menu")))
             {
-                WorkingDirectory = Directory.GetParent(menumod).FullName,
-                FileName = menumod
-            };
-            Process.Start(startInfo);
-            string word = "uninstalled from";
+                var dest = Path.Combine(vpkDirectory, Path.GetFileName(file));
+                if (File.Exists(dest)) File.Delete(dest);
+                File.Move(file, dest);
+            }
+            Directory.Delete(Path.Combine(vpkDirectory, "Enhanced Menu"));
+            var word = "uninstalled from";
             if (install) word = "installed to";
             MessageBox.Show("Menu Mod " + word + ":\n" + Directory.GetParent(menumod).FullName);
         }
@@ -554,11 +551,6 @@ namespace FzzyTools.UI.Components
             {
                 File.AppendAllText(settingscfg, "\nbind \"F1\" \"load fastany1\"");
             }
-        }
-
-        private void speedmod_CheckedChanged(object sender, EventArgs e)
-        {
-            if (speedmod.Checked) Speedmod.InstallSpeedmod(this);
         }
     }
 

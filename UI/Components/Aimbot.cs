@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace FzzyTools.UI.Components
 {
-    class Aimbot
+    public class Aimbot
     {
         private FzzyComponent fzzy;
 
@@ -143,14 +143,11 @@ namespace FzzyTools.UI.Components
 
         private Thread aimbotThread;
 
-        public bool AimbotRunning
-        {
-            get { return aimbotThread != null; }
-        }
+        public bool AimbotRunning => aimbotThread != null;
 
         public void Tick()
         {
-            if (fzzy.values["timescale"].Current >= 1 || aimbotThread != null) return;
+            //if (fzzy.values["timescale"].Current >= 1 || aimbotThread != null) return;
             if (fzzy.values["holdingM3"].Current && !fzzy.values["holdingM3"].Old)
             {
                 oldYaw = fzzy.values["yaw"].Current;

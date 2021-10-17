@@ -8,7 +8,7 @@ using LiveSplit.UI.Components;
 
 namespace FzzyTools.UI.Components
 {
-    class MemoryValue
+    public class MemoryValue
     {
         public static IntPtr SigScan(string target)
         {
@@ -86,7 +86,7 @@ namespace FzzyTools.UI.Components
                 if (!fromThisTick) NextTick();
                 return current;
             }
-            set { SetValue(value); }
+            set => SetValue(value);
         }
 
         public dynamic Old
