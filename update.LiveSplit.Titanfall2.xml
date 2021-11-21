@@ -268,4 +268,15 @@
       <change>Fixed inconsistencies with beacon 3 secure beacon subsplit</change>
     </changelog>
   </update>
+  <update version="1.8.4">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Timer starts on first tick instead of inconsistent press space to continue</change>
+      <change>Zweek helmet fixes are in for real</change>
+      <change>TAS auto kick now also press L for crouch kicks</change>
+      <change>Added split on wave change for frontier defense</change>
+    </changelog>
+  </update>
 </updates>

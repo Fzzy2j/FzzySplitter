@@ -219,7 +219,7 @@ namespace FzzyTools.UI.Components
                 if (allowKick && tasValues["approachingWall"].Current && !settings["speedmod"])
                 {
                     PressMovement(Keyboard.ScanCodeShort.KEY_N);
-                    PressMovement(Keyboard.ScanCodeShort.SPACE);
+                    PressMovement(Keyboard.ScanCodeShort.KEY_L);
                 }
             }
         }

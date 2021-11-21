@@ -9,6 +9,7 @@ using System.Net;
 using System.Windows.Forms;
 using System.Xml;
 using LiveSplit.ASL;
+using LiveSplit.Model.Input;
 using LiveSplit.Options;
 using LiveSplit.UI;
 

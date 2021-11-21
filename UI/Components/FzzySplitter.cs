@@ -4,6 +4,7 @@ using LiveSplit.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using LiveSplit.Options;
@@ -44,7 +45,8 @@ namespace FzzyTools.UI.Components
         {
             if (fzzy.state.CurrentPhase == TimerPhase.NotRunning) totalTickCount = 0;
 
-            if (CurrentTickCount != OldTickCount) lastTickChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (CurrentTickCount != OldTickCount)
+                lastTickChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             if (fzzy.state.CurrentPhase == TimerPhase.Running ||
                 fzzy.state.CurrentPhase == TimerPhase.Paused)
@@ -57,7 +59,8 @@ namespace FzzyTools.UI.Components
 
                 if (CurrentTickCount != OldTickCount)
                 {
-                    if (!ignoreNextTickChange && CurrentTickCount > OldTickCount) totalTickCount += CurrentTickCount - OldTickCount;
+                    if (!ignoreNextTickChange && CurrentTickCount > OldTickCount)
+                        totalTickCount += CurrentTickCount - OldTickCount;
                     if (ignoreNextTickChange) ignoreNextTickChange = false;
                 }
 
@@ -78,12 +81,9 @@ namespace FzzyTools.UI.Components
 
         public void Tick()
         {
-            if (fzzy.tasTools.tasValues["timescale"].Current != 1) return;
-
             var settings = fzzy.Settings.aslsettings.Reader;
 
             if (!fzzy.state.IsGameTimeInitialized) fzzy.timer.InitializeGameTime();
-            if (settings["tickTimer"]) TimerTick(settings);
 
             Update(settings);
             if (fzzy.state.CurrentPhase == TimerPhase.Running ||
@@ -118,10 +118,12 @@ namespace FzzyTools.UI.Components
                 finishedSplits.Clear();
             }
 
-            if (Start(settings))
+            if (Start(settings) && fzzy.tasTools.tasValues["timescale"].Current >= 1)
             {
                 fzzy.timer.Start();
             }
+
+            if (settings["tickTimer"]) TimerTick(settings);
         }
 
         private List<string> finishedSplits = new List<string>();
@@ -144,13 +146,12 @@ namespace FzzyTools.UI.Components
         private bool Reset(ASLSettingsReader settings)
         {
             if (fzzy.values["currentLevel"].Current.StartsWith("sp_training") &&
-                fzzy.values["inPressSpaceToContinue"].Current > 0 && fzzy.values["inPressSpaceToContinue"].Old <= 0)
+                fzzy.values["tickCount"].Current == 23 && fzzy.values["tickCount"].Old != 23)
             {
                 return true;
             }
 
-            if (settings["loadReset"] && fzzy.values["inPressSpaceToContinue"].Current > 0 &&
-                fzzy.values["inPressSpaceToContinue"].Old <= 0)
+            if (settings["loadReset"] && fzzy.values["tickCount"].Current == 23 && fzzy.values["tickCount"].Old != 23)
             {
                 return true;
             }
@@ -232,12 +233,48 @@ namespace FzzyTools.UI.Components
         private string lastNonLoadLevel = "";
         private bool levelLoadedFromMenu = false;
 
+        private Action<string, string> SetTextComponent = (id, text) =>
+        {
+            var textSettings = FzzyComponent.s.Layout.Components.Where(x => x.GetType().Name == "TextComponent")
+                .Select(x => x.GetType().GetProperty("Settings").GetValue(x, null));
+            var textSetting =
+                textSettings.FirstOrDefault(x => (x.GetType().GetProperty("Text1").GetValue(x, null) as string) == id);
+            if (textSetting == null)
+            {
+                var textComponentAssembly = Assembly.LoadFrom("Components\\LiveSplit.Text.dll");
+                var textComponent =
+                    Activator.CreateInstance(textComponentAssembly.GetType("LiveSplit.UI.Components.TextComponent"),
+                        FzzyComponent.s);
+                FzzyComponent.s.Layout.LayoutComponents.Add(
+                    new LiveSplit.UI.Components.LayoutComponent("LiveSplit.Text.dll",
+                        textComponent as LiveSplit.UI.Components.IComponent));
+                textSetting = textComponent.GetType()
+                    .GetProperty("Settings", BindingFlags.Instance | BindingFlags.Public).GetValue(textComponent, null);
+                textSetting.GetType().GetProperty("Text1").SetValue(textSetting, id);
+            }
+
+            if (textSetting != null)
+                textSetting.GetType().GetProperty("Text2").SetValue(textSetting, text);
+        };
+
         private void Update(ASLSettingsReader settings)
         {
             fzzy.values["lastLevel"].Update();
             if (fzzy.values["inLoadingScreen"].Current && !fzzy.values["inLoadingScreen"].Old)
             {
                 levelLoadedFromMenu = lastNonLoadLevel == "";
+            }
+
+            if (fzzy.values["rightClickTimestamp"].Current != fzzy.values["rightClickTimestamp"].Old ||
+                fzzy.values["leftClickTimestamp"].Current != fzzy.values["leftClickTimestamp"].Old)
+            {
+                var diff = Math.Abs(fzzy.values["rightClickTimestamp"].Current -
+                                    fzzy.values["leftClickTimestamp"].Current);
+
+                if (diff < 100)
+                {
+                    //SetTextComponent("Variation", diff + "ms");
+                }
             }
 
             if (!fzzy.values["inLoadingScreen"].Current) lastNonLoadLevel = fzzy.values["currentLevel"].Current;
@@ -257,6 +294,9 @@ namespace FzzyTools.UI.Components
         private void Split(ASLSettingsReader settings)
         {
             if (settings["flagSplit"] && fzzy.values["flag"].Old == 1 && fzzy.values["flag"].Current == 0)
+                fzzy.timer.Split();
+
+            if (settings["frontierWaveSplit"] && fzzy.values["frontierDefenseWaveNumber"].Current - 1 == fzzy.values["frontierDefenseWaveNumber"].Old)
                 fzzy.timer.Split();
 
             bool helmetCollected(int level, int helmet, int helmetPos)
@@ -302,7 +342,6 @@ namespace FzzyTools.UI.Components
                         break;
                 }
 
-                ;
                 // constructs level and helmet to check and uses bitwise XOR operator to check which bit changes
                 return (settings[levelName + "Helmet" + helmet] && (fzzy.values["sp_unlocks_level_" + level].Old ^
                                                                     fzzy.values["sp_unlocks_level_" + level].Current) ==
@@ -338,7 +377,7 @@ namespace FzzyTools.UI.Components
                     if (fzzy.values["lastLevel"].Current == "sp_boomtown" && settings["ita2HelmetSplit"])
                         splitOnHelmet(4, 3);
                     if (fzzy.values["lastLevel"].Current == "sp_boomtown_end" && settings["ita3HelmetSplit"])
-                        splitOnHelmet(5, 3);
+                        splitOnHelmet(5, 2);
                     if (fzzy.values["lastLevel"].Current == "sp_hub_timeshift" && settings["enc1HelmetSplit"])
                         splitOnHelmet(6, 2);
                     if (fzzy.values["lastLevel"].Current == "sp_timeshift_spoke02" && settings["enc2HelmetSplit"])
@@ -362,7 +401,7 @@ namespace FzzyTools.UI.Components
             splitTimerTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (splitTimer > 0)
             {
-                var adjustment = splitTimer - (long)Math.Round(timePassed * fzzy.values["timescale"].Current);
+                var adjustment = splitTimer - (long) Math.Round(timePassed * fzzy.values["timescale"].Current);
                 if (adjustment <= 0)
                 {
                     splitTimer = 0;
@@ -635,10 +674,13 @@ namespace FzzyTools.UI.Components
             // TBF Elevator
             if (fzzy.values["lastLevel"].Current == "sp_tday")
             {
-                if (fzzy.values["pilotYoureWithMe"].Current > fzzy.values["pilotYoureWithMe"].Old && settings["tbfPilotWithMe"] && !fzzy.isLoading)
+                if (fzzy.values["pilotYoureWithMe"].Current > fzzy.values["pilotYoureWithMe"].Old
+                    && DistanceSquared(1548, -7332) < 5000 * 5000
+                    && settings["tbfPilotWithMe"] && !fzzy.isLoading)
                 {
                     DoSingleSplit("pilotYoureWithMe");
                 }
+
                 if (DistanceSquared(-7867, 2758) < Math.Pow(600, 2) &&
                     fzzy.values["tbfElevator"].Current - 8 == fzzy.values["tbfElevator"].Old && settings["tbfElevator"])
                 {
@@ -699,24 +741,15 @@ namespace FzzyTools.UI.Components
 
         private bool Start(ASLSettingsReader settings)
         {
-            var last = fzzy.values["lastCommand"].Current;
-            var nonull = new byte[last.Length];
-            for (var i = 0; i < last.Length; i++)
-            {
-                nonull[i] = last[i];
-                if (last[i] == 0) nonull[i] = 0x20;
-            }
-
-            var commandHistory = Encoding.UTF8.GetString(nonull);
             if (settings["flagSplit"] && fzzy.values["flag"].Current == 1 && fzzy.values["flag"].Old == 0) return true;
-            if (fzzy.wasLoading && !fzzy.isLoading && commandHistory.Contains("#INTROSCREEN_HINT_PC"))
+            if (fzzy.values["tickCount"].Current > fzzy.values["tickCount"].Old
+                && (fzzy.values["tickCount"].Old == 22 || fzzy.values["tickCount"].Old == 23))
             {
                 return true;
             }
 
             return false;
         }
-
 
         private float DistanceSquared(float x, float y, float z)
         {

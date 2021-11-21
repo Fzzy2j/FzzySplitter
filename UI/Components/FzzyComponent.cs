@@ -4,12 +4,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using LiveSplit.ASL;
 using LiveSplit.ComponentUtil;
 using LiveSplit.Model;
+using LiveSplit.Model.Input;
 using LiveSplit.Options;
 using LiveSplit.UI;
 using LiveSplit.UI.Components;
@@ -73,6 +76,7 @@ namespace FzzyTools.UI.Components
         public Timer updateTimer;
 
         public LiveSplitState state;
+        public static LiveSplitState s;
         public TimerModel timer;
 
         private NCSAutoLoader ncsAutoLoader;
@@ -97,9 +101,11 @@ namespace FzzyTools.UI.Components
         {
             Settings = new FzzySettings();
             this.state = state;
+            s = state;
             aslSettings = new ASLSettings();
             aslSettings.AddSetting("flagSplit", false,
                 "Start timer on flag pickup, split on flag capture, and pause when not holding flag", null);
+            aslSettings.AddSetting("frontierWaveSplit", false, "Split on wave change in frontier defense", null);
             aslSettings.AddSetting("levelChangeSplit", true, "Split on level change", null);
 
             aslSettings.AddSetting("endSplit", true, "Split at the end of escape (end of run)", null);
@@ -166,73 +172,73 @@ namespace FzzyTools.UI.Components
             // "levelHelmetX" is the order of how they're stored in the bits, the setting name "Helmet X" is ordered after when you collect each helmet in the run
             aslSettings.AddSetting("gauntletHelmetSplit", true, "Gauntlet", "helmetSplit");
             aslSettings.AddSetting("btHelmetSplit", true, "BT-7274", "helmetSplit");
-                aslSettings.AddSetting("btHelmet1", true, "Helmet 1", "btHelmetSplit");
-                aslSettings.AddSetting("btHelmet2", true, "Helmet 2", "btHelmetSplit");
+            aslSettings.AddSetting("btHelmet1", true, "Helmet 1", "btHelmetSplit");
+            aslSettings.AddSetting("btHelmet2", true, "Helmet 2", "btHelmetSplit");
 
             aslSettings.AddSetting("bnrHelmetSplit", true, "Blood & Rust", "helmetSplit");
-                aslSettings.AddSetting("bnrHelmet2", true, "Helmet 1", "bnrHelmetSplit");
-                aslSettings.AddSetting("bnrHelmet1", true, "Helmet 2", "bnrHelmetSplit");
-                aslSettings.AddSetting("bnrHelmet6", true, "Helmet 3", "bnrHelmetSplit");
-                aslSettings.AddSetting("bnrHelmet5", true, "Helmet 4", "bnrHelmetSplit");
-                aslSettings.AddSetting("bnrHelmet4", true, "Helmet 5", "bnrHelmetSplit");
-                aslSettings.AddSetting("bnrHelmet3", true, "Helmet 6", "bnrHelmetSplit");
+            aslSettings.AddSetting("bnrHelmet2", true, "Helmet 1", "bnrHelmetSplit");
+            aslSettings.AddSetting("bnrHelmet1", true, "Helmet 2", "bnrHelmetSplit");
+            aslSettings.AddSetting("bnrHelmet6", true, "Helmet 3", "bnrHelmetSplit");
+            aslSettings.AddSetting("bnrHelmet5", true, "Helmet 4", "bnrHelmetSplit");
+            aslSettings.AddSetting("bnrHelmet4", true, "Helmet 5", "bnrHelmetSplit");
+            aslSettings.AddSetting("bnrHelmet3", true, "Helmet 6", "bnrHelmetSplit");
 
             aslSettings.AddSetting("ita1HelmetSplit", true, "Into the Abyss 1", "helmetSplit");
-                aslSettings.AddSetting("ita1Helmet2", true, "Helmet 1", "ita1HelmetSplit");
-                aslSettings.AddSetting("ita1Helmet1", true, "Helmet 2", "ita1HelmetSplit");
-                aslSettings.AddSetting("ita1Helmet3", true, "Helmet 3", "ita1HelmetSplit");
-                aslSettings.AddSetting("ita1Helmet4", true, "Helmet 4", "ita1HelmetSplit");
+            aslSettings.AddSetting("ita1Helmet2", true, "Helmet 1", "ita1HelmetSplit");
+            aslSettings.AddSetting("ita1Helmet1", true, "Helmet 2", "ita1HelmetSplit");
+            aslSettings.AddSetting("ita1Helmet3", true, "Helmet 3", "ita1HelmetSplit");
+            aslSettings.AddSetting("ita1Helmet4", true, "Helmet 4", "ita1HelmetSplit");
 
             aslSettings.AddSetting("ita2HelmetSplit", false, "Into the Abyss 2", "helmetSplit");
-                aslSettings.AddSetting("ita2Helmet1", false, "Helmet 1", "ita2HelmetSplit");
-                aslSettings.AddSetting("ita2Helmet2", false, "Helmet 2", "ita2HelmetSplit");
-                aslSettings.AddSetting("ita2Helmet3", false, "Helmet 3", "ita2HelmetSplit");
+            aslSettings.AddSetting("ita2Helmet1", false, "Helmet 1", "ita2HelmetSplit");
+            aslSettings.AddSetting("ita2Helmet2", false, "Helmet 2", "ita2HelmetSplit");
+            aslSettings.AddSetting("ita2Helmet3", false, "Helmet 3", "ita2HelmetSplit");
 
             aslSettings.AddSetting("ita3HelmetSplit", true, "Into the Abyss 3", "helmetSplit");
-                aslSettings.AddSetting("ita3Helmet1", true, "Helmet 1", "ita3HelmetSplit");
-                aslSettings.AddSetting("ita3Helmet2", true, "Helmet 2", "ita3HelmetSplit");
+            aslSettings.AddSetting("ita3Helmet1", true, "Helmet 1", "ita3HelmetSplit");
+            aslSettings.AddSetting("ita3Helmet2", true, "Helmet 2", "ita3HelmetSplit");
 
             aslSettings.AddSetting("enc1HelmetSplit", false, "Effect & Cause 1/3", "helmetSplit");
-                aslSettings.AddSetting("enc1Helmet2", false, "Helmet 1", "enc1HelmetSplit");
-                aslSettings.AddSetting("enc1Helmet1", false, "Helmet 2", "enc1HelmetSplit");
+            aslSettings.AddSetting("enc1Helmet2", false, "Helmet 1", "enc1HelmetSplit");
+            aslSettings.AddSetting("enc1Helmet1", false, "Helmet 2", "enc1HelmetSplit");
 
             aslSettings.AddSetting("enc2HelmetSplit", true, "Effect & Cause 2", "helmetSplit");
-                aslSettings.AddSetting("enc2Helmet3", true, "Helmet 1", "enc2HelmetSplit");
-                aslSettings.AddSetting("enc2Helmet1", true, "Helmet 2", "enc2HelmetSplit");
-                aslSettings.AddSetting("enc2Helmet5", true, "Helmet 3", "enc2HelmetSplit");
-                aslSettings.AddSetting("enc2Helmet4", true, "Helmet 4", "enc2HelmetSplit");
-                aslSettings.AddSetting("enc2Helmet2", true, "Helmet 5", "enc2HelmetSplit");
-                aslSettings.AddSetting("enc2Helmet6", true, "Helmet 6", "enc2HelmetSplit");
+            aslSettings.AddSetting("enc2Helmet2", true, "Helmet 1", "enc2HelmetSplit");
+            aslSettings.AddSetting("enc2Helmet5", true, "Helmet 2", "enc2HelmetSplit");
+            aslSettings.AddSetting("enc2Helmet1", true, "Helmet 3", "enc2HelmetSplit");
+            aslSettings.AddSetting("enc2Helmet4", true, "Helmet 4", "enc2HelmetSplit");
+            aslSettings.AddSetting("enc2Helmet3", true, "Helmet 5", "enc2HelmetSplit");
+            aslSettings.AddSetting("enc2Helmet6", true, "Helmet 6", "enc2HelmetSplit");
 
             aslSettings.AddSetting("b1HelmetSplit", true, "The Beacon 1/3", "helmetSplit");
-                aslSettings.AddSetting("b1Helmet6", true, "Helmet 1", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet4", true, "Helmet 2", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet5", true, "Helmet 3", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet3", true, "Helmet 4", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet9", true, "Helmet 5", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet8", true, "Helmet 6", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet2", true, "Helmet 7", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet1", true, "Helmet 8", "b1HelmetSplit");
-                aslSettings.AddSetting("b1Helmet7", true, "Helmet 9", "b1HelmetSplit");
+            aslSettings.AddSetting("b1Helmet8", true, "Helmet 1", "b1HelmetSplit");
+            aslSettings.AddSetting("b1Helmet7", true, "Helmet 2", "b1HelmetSplit");
+            aslSettings.AddSetting("b1Helmet4", true, "Helmet 3", "b1HelmetSplit");
+            aslSettings.AddSetting("b1Helmet2", true, "Helmet 4", "b1HelmetSplit");
+            aslSettings.AddSetting("b1Helmet3", true, "Helmet 5", "b1HelmetSplit");
+            aslSettings.AddSetting("b1Helmet1", true, "Helmet 6", "b1HelmetSplit");
+            aslSettings.AddSetting("b1Helmet9", true, "Helmet 7", "b1HelmetSplit");
+            aslSettings.AddSetting("b1Helmet6", true, "Helmet 8", "b1HelmetSplit");
+            aslSettings.AddSetting("b1Helmet5", true, "Helmet 9", "b1HelmetSplit");
 
             aslSettings.AddSetting("b2HelmetSplit", true, "The Beacon 2", "helmetSplit");
-                aslSettings.AddSetting("b2Helmet2", true, "Helmet 1", "b2HelmetSplit");
-                aslSettings.AddSetting("b2Helmet1", true, "Helmet 2", "b2HelmetSplit");
+            aslSettings.AddSetting("b2Helmet2", true, "Helmet 1", "b2HelmetSplit");
+            aslSettings.AddSetting("b2Helmet1", true, "Helmet 2", "b2HelmetSplit");
 
             aslSettings.AddSetting("tbfHelmetSplit", true, "Trial by Fire", "helmetSplit");
-                aslSettings.AddSetting("tbfHelmet3", true, "Helmet 1", "tbfHelmetSplit");
-                aslSettings.AddSetting("tbfHelmet2", true, "Helmet 2", "tbfHelmetSplit");
-                aslSettings.AddSetting("tbfHelmet1", true, "Helmet 3", "tbfHelmetSplit");
+            aslSettings.AddSetting("tbfHelmet3", true, "Helmet 1", "tbfHelmetSplit");
+            aslSettings.AddSetting("tbfHelmet2", true, "Helmet 2", "tbfHelmetSplit");
+            aslSettings.AddSetting("tbfHelmet1", true, "Helmet 3", "tbfHelmetSplit");
 
             aslSettings.AddSetting("arkHelmetSplit", true, "The Ark", "helmetSplit");
-                aslSettings.AddSetting("arkHelmet2", true, "Helmet 1", "arkHelmetSplit");
-                aslSettings.AddSetting("arkHelmet3", true, "Helmet 2", "arkHelmetSplit");
-                aslSettings.AddSetting("arkHelmet1", true, "Helmet 3", "arkHelmetSplit");
+            aslSettings.AddSetting("arkHelmet3", true, "Helmet 1", "arkHelmetSplit");
+            aslSettings.AddSetting("arkHelmet1", true, "Helmet 2", "arkHelmetSplit");
+            aslSettings.AddSetting("arkHelmet2", true, "Helmet 3", "arkHelmetSplit");
 
             aslSettings.AddSetting("foldHelmetSplit", true, "The Fold Weapon", "helmetSplit");
-                aslSettings.AddSetting("foldHelmet3", true, "Helmet 1", "foldHelmetSplit");
-                aslSettings.AddSetting("foldHelmet2", true, "Helmet 2", "foldHelmetSplit");
-                aslSettings.AddSetting("foldHelmet1", true, "Helmet 3", "foldHelmetSplit");
+            aslSettings.AddSetting("foldHelmet3", true, "Helmet 1", "foldHelmetSplit");
+            aslSettings.AddSetting("foldHelmet2", true, "Helmet 2", "foldHelmetSplit");
+            aslSettings.AddSetting("foldHelmet1", true, "Helmet 3", "foldHelmetSplit");
 
             Settings.InitASLSettings(aslSettings);
 
@@ -272,10 +278,6 @@ namespace FzzyTools.UI.Components
             values["currentLevel"] =
                 new MemoryValue("string20", new DeepPointer("engine.dll", 0x12A53D55));
             values["inLoadingScreen"] = new MemoryValue("bool", new DeepPointer("client.dll", 0xB38C5C));
-            values["inPressSpaceToContinue"] =
-                new MemoryValue("int", new DeepPointer("client.dll", 0x290C0A8));
-            values["lastCommand"] =
-                new MemoryValue("byte1000", new DeepPointer("engine.dll", 0x130D9AF0));
 
             // helmet unlocks for each level
             values["sp_unlocks_level_0"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0A1BC)); // gauntlet
@@ -299,14 +301,16 @@ namespace FzzyTools.UI.Components
             values["b3Door"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9D18));
             values["tbfElevator"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7B9B28));
             values["gauntletDialogue"] = new MemoryValue("int",
-                new DeepPointer("client.dll", 0x02A9F500, 0x10, 0x50, 0xCF48, 0x20, 0x4C0, 0x568, 0x7E8, 0x900, 0x10, 0x4B90));
+                new DeepPointer("client.dll", 0x02A9F500, 0x10, 0x50, 0xCF48, 0x20, 0x4C0, 0x568, 0x7E8, 0x900, 0x10,
+                    0x4B90));
             values["arkDialogue"] = new MemoryValue("int", new DeepPointer("client.dll", 0x23E7C18));
             values["isB1"] = new MemoryValue("int", new DeepPointer("engine.dll", 0xF8DCC1C));
             values["rodeo"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E0FE4));
             values["btSpeak1"] = new MemoryValue("int",
                 new DeepPointer("client.dll", 0x02A9F080, 0xC0, 0x4C0, 0x568, 0x2A8, 0xC0, 0x10, 0x48));
             values["btSpeak2"] = new MemoryValue("int",
-                new DeepPointer("client.dll", 0x02A9F080, 0xC0, 0x3B8, 0x180, 0x520, 0xB8, 0x648, 0x10, 0xD8, 0x10, 0x4C));
+                new DeepPointer("client.dll", 0x02A9F080, 0xC0, 0x3B8, 0x180, 0x520, 0xB8, 0x648, 0x10, 0xD8, 0x10,
+                    0x4C));
             values["inCutscene"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x111E1B58));
             values["clFrames"] = new MemoryValue("int",
                 new DeepPointer("materialsystem_dx11.dll", 0x1A9F4A8, 0x58C));
@@ -315,7 +319,8 @@ namespace FzzyTools.UI.Components
             values["airAcceleration"] =
                 new MemoryValue("float", new DeepPointer("engine.dll", 0x13084248, 0x2564));
             values["airSpeed"] = new MemoryValue("float",
-                new DeepPointer("engine.dll", 0x13084248, 0xEA8, 0x1008, 0x1038, 0x390, 0x48, 0x18, 0xA30, 0x10, 0x2218));
+                new DeepPointer("engine.dll", 0x13084248, 0xEA8, 0x1008, 0x1038, 0x390, 0x48, 0x18, 0xA30, 0x10,
+                    0x2218));
             values["currentHealth"] = new MemoryValue("int",
                 new DeepPointer("engine.dll", 0x13084248, 0xA90, 0x18, 0xED8, 0x48, 0xA40, 0x10, 0xCB0, 0x4D4));
             values["yaw"] = new MemoryValue("float", new DeepPointer("client.dll", 0x00E69EA0, 0x1E94));
@@ -335,10 +340,15 @@ namespace FzzyTools.UI.Components
 
             values["timescale"] = new MemoryValue("float", new DeepPointer("engine.dll", 0x1315A2C8));
             values["sv_cheats"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x12A50EEC));
-            values["sp_startpoint"] = new MemoryValue("int", new DeepPointer("server.dll", 0xC0C6DC));
+            values["sp_startpoint"] = new MemoryValue("int", new DeepPointer("server .dll", 0xC0C6DC));
             values["currentTime"] = new MemoryValue("float", new DeepPointer("client.dll", 0xC3DB28));
             values["paused"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7A6620));
             values["tickCount"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x765A24));
+            values["onGround"] = new MemoryValue("bool", new DeepPointer("client.dll", 0x11EED78));
+            values["frontierDefenseWaveNumber"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7A7D28));
+
+            values["rightClickTimestamp"] = new MemoryValue("int", new DeepPointer("client.dll", 0x22BC5C0));
+            values["leftClickTimestamp"] = new MemoryValue("int", new DeepPointer("client.dll", 0x22BC5BC));
 
             state.CurrentTimingMethod = TimingMethod.GameTime;
 
@@ -403,6 +413,7 @@ namespace FzzyTools.UI.Components
 
                 return;
             }
+
             if (process.HasExited || process.Modules.Count < 127)
             {
                 process = null;
@@ -413,7 +424,7 @@ namespace FzzyTools.UI.Components
 
             wasLoading = isLoading;
             isLoading = values["clFrames"].Current <= 0 || values["inLoadingScreen"].Current ||
-                        values["inPressSpaceToContinue"].Current != 0;
+                        values["tickCount"].Current <= 23;
 
             var settings = Settings.aslsettings.Reader;
             if (settings["cheatsTimerLink"])
