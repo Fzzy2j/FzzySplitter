@@ -6,12 +6,14 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Windows.Forms;
 using System.Xml;
 using LiveSplit.ASL;
 using LiveSplit.Model.Input;
 using LiveSplit.Options;
 using LiveSplit.UI;
+using LiveSplit.Web;
 
 namespace FzzyTools.UI.Components
 {
@@ -371,44 +373,15 @@ namespace FzzyTools.UI.Components
             using (var webClient = new WebClient())
             {
                 installMenuModButton.Enabled = false;
-                uninstallMenuModButton.Enabled = false;
                 install = true;
-                menumod = Path.Combine(titanfallInstallDirectory, "vpk\\Enhanced.Menu.Compiled.VPK.zip");
+                menumod = Path.Combine(titanfallInstallDirectory, "menumod.zip");
                 webClient.DownloadFileAsync(new Uri(FzzyComponent.MENU_MOD_ZIP_LINK), menumod);
-                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(MenuModDownloadCompleted);
-                webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(MenuModProgressChanged);
+                webClient.DownloadFileCompleted += MenuModDownloadCompleted;
+                webClient.DownloadProgressChanged += MenuModProgressChanged;
                 installMenuModProgress.Visible = true;
             }
 
             InstallFastanySaves();
-        }
-
-        private void uninstallMenuModButton_Click(object sender, EventArgs e)
-        {
-            if (FzzyComponent.process != null)
-            {
-                MessageBox.Show("Please close Titanfall 2 to uninstall enhanced menu");
-                return;
-            }
-
-            var titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory(this);
-
-            if (string.IsNullOrEmpty(titanfallInstallDirectory))
-            {
-                MessageBox.Show("Couldn't find Titanfall 2 install location!");
-                return;
-            }
-
-            using (WebClient webClient = new WebClient())
-            {
-                installMenuModButton.Enabled = false;
-                menumod = Path.Combine(titanfallInstallDirectory, "vpk\\installmenumod.exe");
-                install = false;
-                webClient.DownloadFileAsync(new Uri(FzzyComponent.MENU_MOD_UNINSTALLER_LINK), menumod);
-                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(MenuModDownloadCompleted);
-                webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(MenuModProgressChanged);
-                installMenuModProgress.Visible = true;
-            }
         }
 
         private static string fastanySavesInstaller =
@@ -510,20 +483,13 @@ namespace FzzyTools.UI.Components
         {
             installMenuModProgress.Visible = false;
             installMenuModButton.Enabled = true;
-            uninstallMenuModButton.Enabled = true;
-            var vpkDirectory = Directory.GetParent(menumod)?.FullName;
-            if (vpkDirectory == null) return;
-            System.IO.Compression.ZipFile.ExtractToDirectory(menumod, vpkDirectory);
-            foreach (var file in Directory.GetFiles(Path.Combine(vpkDirectory, "Enhanced Menu")))
-            {
-                var dest = Path.Combine(vpkDirectory, Path.GetFileName(file));
-                if (File.Exists(dest)) File.Delete(dest);
-                File.Move(file, dest);
-            }
-            Directory.Delete(Path.Combine(vpkDirectory, "Enhanced Menu"));
-            var word = "uninstalled from";
-            if (install) word = "installed to";
-            MessageBox.Show("Menu Mod " + word + ":\n" + Directory.GetParent(menumod).FullName);
+            var baseDirectory = Directory.GetParent(menumod)?.FullName;
+            if (baseDirectory == null) return;
+            File.Delete(Path.Combine(baseDirectory, "midimap.dll"));
+            File.Delete(Path.Combine(baseDirectory, "vpk\\englishclient_frontend.bsp.pak000_dir.vpk"));
+            File.Delete(Path.Combine(baseDirectory, "vpk\\client_frontend.bsp.pak000_228.vpk"));
+            System.IO.Compression.ZipFile.ExtractToDirectory(menumod, baseDirectory);
+            MessageBox.Show("Menu Mod installed to:\n" + Directory.GetParent(menumod).FullName);
         }
 
         private void btSave_CheckedChanged(object sender, EventArgs e)
@@ -575,6 +541,17 @@ namespace FzzyTools.UI.Components
             {
                 base.WndProc(ref m);
             }
+        }
+    }
+
+    class GithubReleaseResponse
+    {
+        public List<Asset> assets { get; set; }
+
+        public class Asset
+        {
+            public string browser_download_url { get; set; }
+            public string name { get; set; }
         }
     }
 }

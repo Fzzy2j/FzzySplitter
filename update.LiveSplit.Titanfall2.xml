@@ -279,4 +279,12 @@
       <change>Added split on wave change for frontier defense</change>
     </changelog>
   </update>
+  <update version="1.8.5">
+    <files>
+      <file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+    </files>
+    <changelog>
+      <change>Install menu mod button now installs zweeks speedrun menu mod</change>
+    </changelog>
+  </update>
 </updates>

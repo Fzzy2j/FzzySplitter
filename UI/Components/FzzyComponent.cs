@@ -54,10 +54,7 @@ namespace FzzyTools.UI.Components
         }
 
         public const string MENU_MOD_ZIP_LINK =
-            "https://github.com/taskinoz/Enhanced-Menu-Mod/releases/latest/download/Enhanced.Menu.Compiled.VPK.zip";
-
-        public const string MENU_MOD_UNINSTALLER_LINK =
-            "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/uninstallmenumod.exe";
+            "https://github.com/Fzzy2j/FzzySplitter/releases/latest/download/menumod.zip";
 
         public const string FASTANY_SAVES_INSTALLER_LINK =
             "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installsaves.exe";
@@ -349,6 +346,9 @@ namespace FzzyTools.UI.Components
 
             values["rightClickTimestamp"] = new MemoryValue("int", new DeepPointer("client.dll", 0x22BC5C0));
             values["leftClickTimestamp"] = new MemoryValue("int", new DeepPointer("client.dll", 0x22BC5BC));
+            values["lastSurfaceTouchNormalX"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB18910));
+            values["lastSurfaceTouchNormalY"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB18914));
+            values["lastSurfaceTouchNormalZ"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB18918));
 
             state.CurrentTimingMethod = TimingMethod.GameTime;
 

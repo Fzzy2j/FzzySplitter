@@ -53,7 +53,6 @@
             this.installMenuModProgress = new System.Windows.Forms.ProgressBar();
             this.autoLoadNCS = new System.Windows.Forms.CheckBox();
             this.btSave = new System.Windows.Forms.CheckBox();
-            this.uninstallMenuModButton = new System.Windows.Forms.Button();
             this.settingsTree = new FzzyTools.UI.Components.FzzyTreeView();
             this.treeContextMenu.SuspendLayout();
             this.treeContextMenu2.SuspendLayout();
@@ -62,7 +61,7 @@
             // tasTools
             // 
             this.tasTools.AutoSize = true;
-            this.tasTools.Location = new System.Drawing.Point(10, 19);
+            this.tasTools.Location = new System.Drawing.Point(343, 43);
             this.tasTools.Name = "tasTools";
             this.tasTools.Size = new System.Drawing.Size(112, 17);
             this.tasTools.TabIndex = 1;
@@ -227,7 +226,7 @@
             // autoLoadNCS
             // 
             this.autoLoadNCS.AutoSize = true;
-            this.autoLoadNCS.Location = new System.Drawing.Point(10, 43);
+            this.autoLoadNCS.Location = new System.Drawing.Point(10, 14);
             this.autoLoadNCS.Name = "autoLoadNCS";
             this.autoLoadNCS.Size = new System.Drawing.Size(100, 17);
             this.autoLoadNCS.TabIndex = 20;
@@ -237,23 +236,13 @@
             // btSave
             // 
             this.btSave.AutoSize = true;
-            this.btSave.Location = new System.Drawing.Point(112, 43);
+            this.btSave.Location = new System.Drawing.Point(10, 43);
             this.btSave.Name = "btSave";
             this.btSave.Size = new System.Drawing.Size(144, 17);
             this.btSave.TabIndex = 22;
             this.btSave.Text = "Auto Load 18 Hour Save";
             this.btSave.UseVisualStyleBackColor = true;
             this.btSave.CheckedChanged += new System.EventHandler(this.btSave_CheckedChanged);
-            // 
-            // uninstallMenuModButton
-            // 
-            this.uninstallMenuModButton.Location = new System.Drawing.Point(334, 40);
-            this.uninstallMenuModButton.Name = "uninstallMenuModButton";
-            this.uninstallMenuModButton.Size = new System.Drawing.Size(121, 23);
-            this.uninstallMenuModButton.TabIndex = 23;
-            this.uninstallMenuModButton.Text = "Uninstall Menu Mod";
-            this.uninstallMenuModButton.UseVisualStyleBackColor = true;
-            this.uninstallMenuModButton.Click += new System.EventHandler(this.uninstallMenuModButton_Click);
             // 
             // settingsTree
             // 
@@ -274,7 +263,6 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.uninstallMenuModButton);
             this.Controls.Add(this.btSave);
             this.Controls.Add(this.autoLoadNCS);
             this.Controls.Add(this.installMenuModProgress);
@@ -318,6 +306,5 @@
         private System.Windows.Forms.ProgressBar installMenuModProgress;
         private System.Windows.Forms.CheckBox autoLoadNCS;
         private System.Windows.Forms.CheckBox btSave;
-        private System.Windows.Forms.Button uninstallMenuModButton;
     }
 }
