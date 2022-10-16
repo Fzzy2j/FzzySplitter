@@ -265,18 +265,6 @@ namespace FzzyTools.UI.Components
                 levelLoadedFromMenu = lastNonLoadLevel == "";
             }
 
-            if (fzzy.values["rightClickTimestamp"].Current != fzzy.values["rightClickTimestamp"].Old ||
-                fzzy.values["leftClickTimestamp"].Current != fzzy.values["leftClickTimestamp"].Old)
-            {
-                var diff = Math.Abs(fzzy.values["rightClickTimestamp"].Current -
-                                    fzzy.values["leftClickTimestamp"].Current);
-
-                if (diff < 100)
-                {
-                    SetTextComponent("Variation", diff + "ms");
-                }
-            }
-
             if (!fzzy.values["inLoadingScreen"].Current) lastNonLoadLevel = fzzy.values["currentLevel"].Current;
             if (!fzzy.isLoading) return;
             bnrIlPause = false;
