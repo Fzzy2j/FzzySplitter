@@ -15,7 +15,7 @@ namespace FzzyTools.UI.Components
         private long btSpeak1Timestamp;
         private long btSpeak2Timestamp;
 
-        private Keyboard.ScanCodeShort queuedKey = Keyboard.ScanCodeShort.F1;
+        private string queuedCommand = "load fastany1";
         private long queuedKeyDelay = 0;
 
         private long previousTimestamp;
@@ -39,7 +39,7 @@ namespace FzzyTools.UI.Components
                 queuedKeyDelay -= DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - previousTimestamp;
                 if (queuedKeyDelay <= 0)
                 {
-                    fzzy.board.Send(queuedKey);
+                    FzzyComponent.RunGameCommand(queuedCommand);
                 }
             }
 
@@ -55,7 +55,7 @@ namespace FzzyTools.UI.Components
                 fzzy.values["dialogue"].Current > fzzy.values["dialogue"].Old &&
                 DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - gauntletTimestamp < 500)
             {
-                fzzy.board.Send(Keyboard.ScanCodeShort.F1);
+                FzzyComponent.RunGameCommand("load fastany1");
 
                 Log.Info("Load into BT");
             }
@@ -65,7 +65,7 @@ namespace FzzyTools.UI.Components
                 fzzy.values["rodeo"].Current == -1 &&
                 DistanceSquared(-5472, -6726, 3202) < 4000 * 4000)
             {
-                QueueKeypress(Keyboard.ScanCodeShort.F2, 5300);
+                QueueCommand("load fastany2", 5300);
 
                 Log.Info("Delayed load into ITA1");
             }
@@ -74,7 +74,7 @@ namespace FzzyTools.UI.Components
                 fzzy.values["inCutscene"].Current == 1 && fzzy.values["inCutscene"].Old == 0 &&
                 DistanceSquared(-1108, 6017, -10596) < 1000 * 1000)
             {
-                QueueKeypress(Keyboard.ScanCodeShort.F3, 6700);
+                QueueCommand("load fastany3", 6700);
                 Log.Info("Delayed load into B1");
             }
 
@@ -94,7 +94,7 @@ namespace FzzyTools.UI.Components
                 fzzy.values["x"].Current > 11700 &&
                 fzzy.values["isB1"].Current == 0)
             {
-                fzzy.board.Send(Keyboard.ScanCodeShort.F4);
+                FzzyComponent.RunGameCommand("load fastany4");
                 Log.Info("Load into B2");
             }
 
@@ -106,7 +106,7 @@ namespace FzzyTools.UI.Components
                     fzzy.values["clFrames"].Current <= 0 && fzzy.values["clFrames"].Old > 0 &&
                     fzzy.values["y"].Current < -500)
                 {
-                    fzzy.board.Send(Keyboard.ScanCodeShort.F5);
+                    FzzyComponent.RunGameCommand("load fastany5");
                     Log.Info("Load into B3");
                     allowB3Load = false;
                 }
@@ -123,7 +123,7 @@ namespace FzzyTools.UI.Components
                 fzzy.values["x"].Current < 11700 &&
                 fzzy.values["isB1"].Current != 0)
             {
-                fzzy.board.Send(Keyboard.ScanCodeShort.F6);
+                FzzyComponent.RunGameCommand("load fastany6");
                 Log.Info("Load into TBF");
             }
 
@@ -131,7 +131,7 @@ namespace FzzyTools.UI.Components
                 fzzy.values["clFrames"].Current <= 0 && fzzy.values["clFrames"].Old > 0 &&
                 DistanceSquared(4903, 13589, 2518) < 4000 * 4000)
             {
-                fzzy.board.Send(Keyboard.ScanCodeShort.F7);
+                FzzyComponent.RunGameCommand("load fastany7");
                 Log.Info("Load into Ark");
             }
 
@@ -146,7 +146,7 @@ namespace FzzyTools.UI.Components
                 DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - arkTimestamp < 500 &&
                 DistanceSquared(-2635, 7157, 7444) < 5000 * 5000)
             {
-                fzzy.board.Send(Keyboard.ScanCodeShort.F8);
+                FzzyComponent.RunGameCommand("load fastany8");
                 Log.Info("Load into Fold Weapon");
             }
 
@@ -155,15 +155,15 @@ namespace FzzyTools.UI.Components
                 fzzy.values["x"].Current != fzzy.values["x"].Old &&
                 DistanceSquared(7271, 13878, 5642) < 25)
             {
-                fzzy.board.Send(Keyboard.ScanCodeShort.F9);
+                FzzyComponent.RunGameCommand("load fastany9");
                 Log.Info("Load into Escape");
             }
         }
 
-        public void QueueKeypress(Keyboard.ScanCodeShort key, int delay)
+        public void QueueCommand(string command, int delay)
         {
             if (queuedKeyDelay > 0 || fzzy.isLoading) return;
-            queuedKey = key;
+            queuedCommand = command;
             queuedKeyDelay = delay;
         }
 

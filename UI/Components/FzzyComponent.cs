@@ -53,14 +53,8 @@ namespace FzzyTools.UI.Components
             syringe.CallExport("TitanfallInjection.dll", "FzzyConsoleCommand", consolecmd);
         }
 
-        public const string MENU_MOD_ZIP_LINK =
-            "https://github.com/Fzzy2j/FzzySplitter/releases/latest/download/menumod.zip";
-
         public const string FASTANY_SAVES_INSTALLER_LINK =
             "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installsaves.exe";
-
-        public const string SPEEDMOD_SAVES_INSTALLER_LINK =
-            "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/installspeedmodsaves.exe";
 
         public const string FASTANY1_SAVE_LINK =
             "https://github.com/Fzzy2j/FzzySplitter/releases/download/v1.0/fastany1.sav";
@@ -77,14 +71,9 @@ namespace FzzyTools.UI.Components
         public TimerModel timer;
 
         private NCSAutoLoader ncsAutoLoader;
-        private Speedmod speedmod;
 
         private FzzySplitter splitter;
 
-        public TASTools tasTools;
-        public Aimbot aimbot;
-
-        public readonly Keyboard board = new Keyboard();
         public static Process process;
 
         public Dictionary<string, MemoryValue> values = new Dictionary<string, MemoryValue>();
@@ -154,7 +143,6 @@ namespace FzzyTools.UI.Components
             aslSettings.AddSetting("foldEscape", true, "Split when escape starts", "foldSplits");
 
             aslSettings.AddSetting("miscSettings", false, "Misc. Settings", null);
-            aslSettings.AddSetting("speedmod", false, "Speedmod", "miscSettings");
             aslSettings.AddSetting("BnRpause", false, "Blood and Rust IL pause", "miscSettings");
             aslSettings.AddSetting("enc3pause", false, "Effect & Cause 3 IL pause", "miscSettings");
             aslSettings.AddSetting("loadReset", false, "Reset after load screens", "miscSettings");
@@ -345,6 +333,7 @@ namespace FzzyTools.UI.Components
             values["frontierDefenseWaveNumber"] = new MemoryValue("int", new DeepPointer("engine.dll", 0x7A7D28));
 
             values["rightClickTimestamp"] = new MemoryValue("int", new DeepPointer("client.dll", 0x22BC5C0));
+            values["enterTimestamp"] = new MemoryValue("int", new DeepPointer("client.dll", 0x22BC510));
             values["leftClickTimestamp"] = new MemoryValue("int", new DeepPointer("client.dll", 0x22BC5BC));
             values["lastSurfaceTouchNormalX"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB18910));
             values["lastSurfaceTouchNormalY"] = new MemoryValue("float", new DeepPointer("client.dll", 0xB18914));
@@ -362,10 +351,10 @@ namespace FzzyTools.UI.Components
             }
 
             ncsAutoLoader = new NCSAutoLoader(this);
-            speedmod = new Speedmod(this);
+            //speedmod = new Speedmod(this);
 
-            tasTools = new TASTools(this);
-            aimbot = new Aimbot(this);
+            //tasTools = new TASTools(this);
+            //aimbot = new Aimbot(this);
             splitter = new FzzySplitter(this);
 
             updateTimer = new Timer {Interval = 15};
@@ -440,20 +429,9 @@ namespace FzzyTools.UI.Components
                 }
             }
 
-            if (Settings.TasToolsEnabled && !tasTools.IsStarted)
-            {
-                tasTools.Start();
-            }
-
-            if (!Settings.TasToolsEnabled && tasTools.IsStarted)
-            {
-                tasTools.Stop();
-            }
             //aimbot.Tick();
 
-            if (Settings.AutoLoadNcs && !settings["speedmod"]) ncsAutoLoader.Tick();
-
-            speedmod.Tick();
+            if (Settings.AutoLoadNcs) ncsAutoLoader.Tick();
 
             splitter.Tick();
 
@@ -518,8 +496,8 @@ namespace FzzyTools.UI.Components
         public override void Dispose()
         {
             updateTimer.Dispose();
-            tasTools.Stop();
-            speedmod.DisableSpeedmod();
+            //tasTools.Stop();
+            //speedmod.DisableSpeedmod();
         }
 
         public override string ComponentName => "FzzyTools";

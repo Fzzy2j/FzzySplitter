@@ -253,12 +253,9 @@ namespace FzzyTools.UI.Components
 
         private void FzzySettings_Load(object sender, EventArgs e)
         {
-            tasTools.DataBindings.Clear();
             autoLoadNCS.DataBindings.Clear();
             btSave.DataBindings.Clear();
 
-            tasTools.DataBindings.Add("Checked", this, "TASToolsEnabled", false,
-                DataSourceUpdateMode.OnPropertyChanged);
             autoLoadNCS.DataBindings.Add("Checked", this, "AutoLoadNCS", false, DataSourceUpdateMode.OnPropertyChanged);
             btSave.DataBindings.Add("Checked", this, "AutoLoad18HourSave", false,
                 DataSourceUpdateMode.OnPropertyChanged);
@@ -343,47 +340,6 @@ namespace FzzyTools.UI.Components
             UpdateNodeCheckedState(s => s.DefaultValue, this.settingsTree.SelectedNode);
         }
 
-        private string menumod = Path.Combine(Path.GetTempPath(), "menumod.exe");
-
-        private void installMenuModButton_Click(object sender, EventArgs e)
-        {
-            if (FzzyComponent.process != null)
-            {
-                MessageBox.Show("Please close Titanfall 2 to install enhanced menu");
-                return;
-            }
-
-            var titanfallInstallDirectory = FzzyComponent.GetTitanfallInstallDirectory(this);
-
-            if (string.IsNullOrEmpty(titanfallInstallDirectory))
-            {
-                MessageBox.Show("Couldn't find Titanfall 2 install location!");
-                return;
-            }
-
-            var settingscfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                "Respawn\\Titanfall2\\local\\settings.cfg");
-            var settingscontent = File.ReadAllText(settingscfg);
-            for (var i = 1; i <= 9; i++)
-            {
-                if (settingscontent.Contains("\"load fastany" + i + "\"")) continue;
-                File.AppendAllText(settingscfg, "\nbind \"F" + i + "\" \"load fastany" + i + "\"");
-            }
-
-            using (var webClient = new WebClient())
-            {
-                installMenuModButton.Enabled = false;
-                install = true;
-                menumod = Path.Combine(titanfallInstallDirectory, "menumod.zip");
-                webClient.DownloadFileAsync(new Uri(FzzyComponent.MENU_MOD_ZIP_LINK), menumod);
-                webClient.DownloadFileCompleted += MenuModDownloadCompleted;
-                webClient.DownloadProgressChanged += MenuModProgressChanged;
-                installMenuModProgress.Visible = true;
-            }
-
-            InstallFastanySaves();
-        }
-
         private static string fastanySavesInstaller =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 "Respawn\\Titanfall2\\profile\\savegames\\installsaves.exe");
@@ -406,26 +362,6 @@ namespace FzzyTools.UI.Components
                 "fastany4SATCHEL",
                 "fasthelms2",
                 "fasthelms5",
-            };
-            return AreSavesInstalled(saves);
-        }
-
-        public static bool AreSpeedmodSavesInstalled()
-        {
-            var saves = new string[]
-            {
-                "speedmod1",
-                "speedmod2",
-                "speedmod3",
-                "speedmod4",
-                "speedmod5",
-                "speedmod6",
-                "speedmod7",
-                "speedmod8",
-                "speedmod9",
-                "speedmod10",
-                "speedmod11",
-                "speedmod12"
             };
             return AreSavesInstalled(saves);
         }
@@ -472,26 +408,6 @@ namespace FzzyTools.UI.Components
             Process.Start(startInfo);
         }
 
-        private void MenuModProgressChanged(object sender, DownloadProgressChangedEventArgs e)
-        {
-            installMenuModProgress.Value = e.ProgressPercentage;
-        }
-
-        private bool install = true;
-
-        private void MenuModDownloadCompleted(object sender, AsyncCompletedEventArgs e)
-        {
-            installMenuModProgress.Visible = false;
-            installMenuModButton.Enabled = true;
-            var baseDirectory = Directory.GetParent(menumod)?.FullName;
-            if (baseDirectory == null) return;
-            File.Delete(Path.Combine(baseDirectory, "midimap.dll"));
-            File.Delete(Path.Combine(baseDirectory, "vpk\\englishclient_frontend.bsp.pak000_dir.vpk"));
-            File.Delete(Path.Combine(baseDirectory, "vpk\\client_frontend.bsp.pak000_228.vpk"));
-            System.IO.Compression.ZipFile.ExtractToDirectory(menumod, baseDirectory);
-            MessageBox.Show("Menu Mod installed to:\n" + Directory.GetParent(menumod).FullName);
-        }
-
         private void btSave_CheckedChanged(object sender, EventArgs e)
         {
             if (!btSave.Checked) return;
@@ -518,6 +434,17 @@ namespace FzzyTools.UI.Components
             {
                 File.AppendAllText(settingscfg, "\nbind \"F1\" \"load fastany1\"");
             }
+        }
+
+        private void autoLoadNCS_CheckedChanged(object sender, EventArgs e)
+        {
+            InstallFastanySaves();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            InstallFastanySaves();
+            Process.Start("https://github.com/zweek/TF2SR-Menu-Mod/releases/latest");
         }
     }
 

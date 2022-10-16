@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.tasTools = new System.Windows.Forms.CheckBox();
             this.treeContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.cmiExpandTree = new System.Windows.Forms.ToolStripMenuItem();
             this.cmiCollapseTree = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,24 +48,13 @@
             this.cmiCollapseTreeToSelection2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.resetSettingToDefaultToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.installMenuModButton = new System.Windows.Forms.Button();
-            this.installMenuModProgress = new System.Windows.Forms.ProgressBar();
             this.autoLoadNCS = new System.Windows.Forms.CheckBox();
             this.btSave = new System.Windows.Forms.CheckBox();
             this.settingsTree = new FzzyTools.UI.Components.FzzyTreeView();
+            this.button1 = new System.Windows.Forms.Button();
             this.treeContextMenu.SuspendLayout();
             this.treeContextMenu2.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // tasTools
-            // 
-            this.tasTools.AutoSize = true;
-            this.tasTools.Location = new System.Drawing.Point(343, 43);
-            this.tasTools.Name = "tasTools";
-            this.tasTools.Size = new System.Drawing.Size(112, 17);
-            this.tasTools.TabIndex = 1;
-            this.tasTools.Text = "Enable TAS Tools";
-            this.tasTools.UseVisualStyleBackColor = true;
             // 
             // treeContextMenu
             // 
@@ -205,24 +193,6 @@
             this.resetSettingToDefaultToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
             this.resetSettingToDefaultToolStripMenuItem.Text = "Reset Setting to Default";
             // 
-            // installMenuModButton
-            // 
-            this.installMenuModButton.Location = new System.Drawing.Point(334, 10);
-            this.installMenuModButton.Name = "installMenuModButton";
-            this.installMenuModButton.Size = new System.Drawing.Size(121, 23);
-            this.installMenuModButton.TabIndex = 18;
-            this.installMenuModButton.Text = "Install Menu Mod";
-            this.installMenuModButton.UseVisualStyleBackColor = true;
-            this.installMenuModButton.Click += new System.EventHandler(this.installMenuModButton_Click);
-            // 
-            // installMenuModProgress
-            // 
-            this.installMenuModProgress.Location = new System.Drawing.Point(211, 10);
-            this.installMenuModProgress.Name = "installMenuModProgress";
-            this.installMenuModProgress.Size = new System.Drawing.Size(117, 23);
-            this.installMenuModProgress.TabIndex = 19;
-            this.installMenuModProgress.Visible = false;
-            // 
             // autoLoadNCS
             // 
             this.autoLoadNCS.AutoSize = true;
@@ -232,6 +202,7 @@
             this.autoLoadNCS.TabIndex = 20;
             this.autoLoadNCS.Text = "Auto Load NCS";
             this.autoLoadNCS.UseVisualStyleBackColor = true;
+            this.autoLoadNCS.CheckedChanged += new System.EventHandler(this.autoLoadNCS_CheckedChanged);
             // 
             // btSave
             // 
@@ -259,16 +230,25 @@
             this.settingsTree.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.settingsTree_AfterCheck);
             this.settingsTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.settingsTree_NodeMouseClick);
             // 
+            // button1
+            // 
+            this.button1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button1.Location = new System.Drawing.Point(306, 10);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(133, 53);
+            this.button1.TabIndex = 23;
+            this.button1.Text = "download speedrun menu mod :)";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // FzzySettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btSave);
             this.Controls.Add(this.autoLoadNCS);
-            this.Controls.Add(this.installMenuModProgress);
-            this.Controls.Add(this.installMenuModButton);
             this.Controls.Add(this.settingsTree);
-            this.Controls.Add(this.tasTools);
             this.Name = "FzzySettings";
             this.Padding = new System.Windows.Forms.Padding(7);
             this.Size = new System.Drawing.Size(465, 490);
@@ -281,7 +261,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.CheckBox tasTools;
         private System.Windows.Forms.ContextMenuStrip treeContextMenu;
         private System.Windows.Forms.ToolStripMenuItem cmiExpandTree;
         private System.Windows.Forms.ToolStripMenuItem cmiCollapseTree;
@@ -302,9 +281,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem resetSettingToDefaultToolStripMenuItem;
         private FzzyTreeView settingsTree;
-        private System.Windows.Forms.Button installMenuModButton;
-        private System.Windows.Forms.ProgressBar installMenuModProgress;
         private System.Windows.Forms.CheckBox autoLoadNCS;
         private System.Windows.Forms.CheckBox btSave;
+        private System.Windows.Forms.Button button1;
     }
 }

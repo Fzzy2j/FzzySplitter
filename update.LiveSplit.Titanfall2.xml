@@ -287,4 +287,13 @@
       <change>Install menu mod button now installs zweeks speedrun menu mod</change>
     </changelog>
   </update>
+	<update version="1.9">
+		<files>
+			<file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+		</files>
+		<changelog>
+			<change>Cleaned up a ton of unneeded stuff</change>
+			<change>SRMM button opens github instead of jank auto install</change>
+		</changelog>
+	</update>
 </updates>

@@ -118,7 +118,7 @@ namespace FzzyTools.UI.Components
                 finishedSplits.Clear();
             }
 
-            if (Start(settings) && fzzy.tasTools.tasValues["timescale"].Current >= 1)
+            if (Start(settings))
             {
                 fzzy.timer.Start();
             }
@@ -273,7 +273,7 @@ namespace FzzyTools.UI.Components
 
                 if (diff < 100)
                 {
-                    //SetTextComponent("Variation", diff + "ms");
+                    SetTextComponent("Variation", diff + "ms");
                 }
             }
 
