@@ -399,10 +399,14 @@ namespace FzzyTools.UI.Components
 
                 process = Process.GetProcessesByName("Titanfall2").OrderByDescending(x => x.StartTime)
                     .FirstOrDefault(x => !x.HasExited);
+                if (process == null)
+                {
+                    process = Process.GetProcessesByName("RoninLauncher").OrderByDescending(x => x.StartTime)
+                        .FirstOrDefault(x => !x.HasExited);
+                }
 
                 return;
             }
-
             if (process.HasExited || process.Modules.Count < 127)
             {
                 process = null;
@@ -434,7 +438,6 @@ namespace FzzyTools.UI.Components
             if (Settings.AutoLoadNcs) ncsAutoLoader.Tick();
 
             splitter.Tick();
-
             foreach (MemoryValue value in values.Values)
             {
                 value.EndTick();

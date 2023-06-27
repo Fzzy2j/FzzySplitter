@@ -64,13 +64,6 @@ namespace FzzyTools.UI.Components
                     if (ignoreNextTickChange) ignoreNextTickChange = false;
                 }
 
-                if (!fzzy.isLoading && fzzy.values["paused"].Current > 0)
-                {
-                    var sinceLastChange = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastTickChangeTimestamp;
-                    var simulatedTicks = (int) Math.Floor(sinceLastChange / 50f);
-                    totalTickCount += simulatedTicks;
-                    lastTickChangeTimestamp += simulatedTicks * 50;
-                }
 
                 if (settings["levelTimer"])
                     fzzy.state.SetGameTime(new TimeSpan(0, 0, 0, 0, 50 * CurrentTickCount));
@@ -112,6 +105,8 @@ namespace FzzyTools.UI.Components
                 Split(settings);
             }
 
+            if (settings["tickTimer"]) TimerTick(settings);
+
             if (fzzy.state.CurrentPhase != TimerPhase.NotRunning) return;
             if (finishedSplits.Count > 0)
             {
@@ -122,8 +117,6 @@ namespace FzzyTools.UI.Components
             {
                 fzzy.timer.Start();
             }
-
-            if (settings["tickTimer"]) TimerTick(settings);
         }
 
         private List<string> finishedSplits = new List<string>();
