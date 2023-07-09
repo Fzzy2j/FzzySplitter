@@ -443,8 +443,7 @@ namespace FzzyTools.UI.Components
 
         private void button1_Click(object sender, EventArgs e)
         {
-            InstallFastanySaves();
-            Process.Start("https://github.com/zweek/TF2SR-Menu-Mod/releases/latest");
+            Process.Start("https://github.com/TF2SR/Ronin/releases/latest");
         }
     }
 

@@ -312,4 +312,12 @@
 			<change>fixed tick timer</change>
 		</changelog>
 	</update>
+	<update version="1.9.2">
+		<files>
+			<file path="Components/LiveSplit.Titanfall.dll" status="changed"/>
+		</files>
+		<changelog>
+			<change>changed srmm link button to be a ronin link button</change>
+		</changelog>
+	</update>
 </updates>
