@@ -443,7 +443,7 @@ namespace FzzyTools.UI.Components
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/TF2SR/Ronin/releases/latest");
+            Process.Start("https://github.com/TF2SR/Ronin/blob/main/README.md");
         }
     }
 
