@@ -283,6 +283,11 @@ namespace Syringe
                 // iterate modules in target process to find our newly injected module
                 // this is hack-y but re-getting the process refreshes the modules and it didnt work without it and i dont care
                 _process = Process.GetProcessesByName("Titanfall2").OrderByDescending(x => x.StartTime).FirstOrDefault(x => !x.HasExited);
+                if (_process == null)
+                {
+                    _process = Process.GetProcessesByName("RoninLauncher").OrderByDescending(x => x.StartTime)
+                        .FirstOrDefault(x => !x.HasExited);
+                }
                 ProcessModule modFound = null;
                 foreach(ProcessModule mod in _process.Modules)
                 {
